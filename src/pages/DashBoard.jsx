@@ -29,13 +29,11 @@ export const loader = (queryClient) => async () => {
 
 const DashBoard = () => {
   const navigate = useNavigate();
-  const { items, isLoading } = useLoaderData();
+  // const { items, isLoading } = useLoaderData();
   const [activeItem, setActiveItem] = useState("Overview");
-  const [item, setItem] = useState(items);
+  const [item, setItem] = useState([]);
   const fetchData = async () => {
-    // hack
     const response = await customFetch(url);
-    // const response = {data: {}}
     if (response.data.status !== "error") {
       setItem(response.data);
     } else {
@@ -46,9 +44,9 @@ const DashBoard = () => {
     fetchData();
   }, []);
 
-  useEffect(() => {
-    setItem(items);
-  }, [items]);
+  // useEffect(() => {
+  //   setItem(items);
+  // }, [items]);
 
   const handleItemClick = (item) => {
     setActiveItem(item);
@@ -134,33 +132,29 @@ const DashBoard = () => {
       <div className="flex justify-center items-center mb-16">
         <div className="flex gap-4 justify-center items-center px-4 py-1 rounded-full bg-slate-300">
           <h3
-            className={`${
-              activeItem === "Overview" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Overview" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Overview")}
           >
             Overview
           </h3>
           <h3
-            className={`${
-              activeItem === "Sample" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Sample" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Sample")}
           >
             Sample
           </h3>
           <h3
-            className={`${
-              activeItem === "Incident" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Incident" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Incident")}
           >
             Incident
           </h3>
           <h3
-            className={`${
-              activeItem === "Activity" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Activity" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Activity")}
           >
             Activity

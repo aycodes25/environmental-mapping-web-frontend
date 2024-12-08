@@ -43,7 +43,7 @@ const adminRoutes = [
   {
     index: true,
     element: <DashBoard />,
-    loader: dashboardLoader(queryClient),
+    // loader: dashboardLoader(queryClient),
     errorElement: <ErrorElement />,
   },
   {

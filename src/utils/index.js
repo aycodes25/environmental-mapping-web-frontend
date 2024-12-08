@@ -7,20 +7,30 @@ const appURL = import.meta.env.VITE_APP_URL;
 const evMappingUrl = `${baseURL}/api`;
 
 export const getPasswordToken = () => {
-  const reduxToken = store.getState().userState?.accessToken;
-  if (reduxToken !== undefined) {
-    return reduxToken;
+  try {
+    console.log("entered")
+    const reduxToken = store.getState().userState?.accessToken;
+    if (reduxToken !== undefined && reduxToken !== "") {
+      return reduxToken;
+    }
+    const localStorageToken = localStorage.getItem('accessToken');
+    return localStorageToken;
+  } catch (err) {
+    console.error(err)
   }
-  const localStorageToken = localStorage.getItem('accessToken');
-  return localStorageToken;
 };
 
 export const customFetch = axios.create({
   baseURL: evMappingUrl,
   headers: {
-    Authorization: `Bearer ${getPasswordToken()}`,
     'Access-Control-Allow-Origin': `${appURL}`,
   },
+});
+
+customFetch.interceptors.request.use((config) => {
+  // Dynamically set the Authorization header before each request
+  config.headers.Authorization = `Bearer ${getPasswordToken()}`;
+  return config;
 });
 
 export function formatDate(dateString) {

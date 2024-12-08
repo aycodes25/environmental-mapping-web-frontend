@@ -1,4 +1,4 @@
-import { useLayoutEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import logo from '../assets/logo.png';
 import { Link, useNavigate } from 'react-router-dom';
 import { FaEye, FaEyeSlash } from 'react-icons/fa';
@@ -45,12 +45,12 @@ const Login = () => {
     navigate(rerouteUrl)
   }
 
-  useLayoutEffect(() => {
-    if (localUser?.role) {
-      dispatch(
-        loginUser({ data: { user: localUser, accessToken: localAccessToken } })
-      );
-    }
+  useEffect(() => {
+    // if (localUser?.role) {
+    //   dispatch(
+    //     loginUser({ data: { user: localUser, accessToken: localAccessToken } })
+    //   );
+    // }
     if (currentUser?.role) {
       reRouteByRole(currentUser.role)
     }
