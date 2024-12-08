@@ -13,8 +13,7 @@
 
 ## Introduction
 
-Briefly describe your project, what it does, and its key features.
-
+EMP WEB-FRONTEND
 ## Prerequisites
 
 Before you begin, ensure you have met the following requirements:
@@ -32,7 +31,7 @@ Follow these steps to set up and run the project:
 Open your terminal and run the following command:
 
 ```bash
-git clone https://github.com/OrionLabsTest/environmental-mapping-web-frontend-001.git
+git clone https://github.com/Theoriontechsolutions/empfrontend-01
 ```
 
 ### Step 2: Navigate to the Project Directory
@@ -40,7 +39,7 @@ git clone https://github.com/OrionLabsTest/environmental-mapping-web-frontend-00
 Change to the project directory:
 
 ```bash
-cd environmental-mapping-web-frontend-001
+cd empfrontend-01
 ```
 
 ### Step 3: Install Dependencies
@@ -53,9 +52,32 @@ npm install
 
 This command will read the `package.json` file and install the dependencies listed under `dependencies` and `devDependencies`.
 
-## Configuration
 
-If your project requires configuration, describe the steps needed here.
+Make sure to replace the values with your actual configuration.
+
+## Running the Project
+
+### Development Server
+
+To run the project in development mode, start the app like this:
+
+```bash
+npm run dev
+```
+
+This command will start the development server and reload the server whenever you make changes to the source code.
+
+Please ensure you are connected to the internet to properly load some
+ui frameworks else the app won't work appropriately, this is pending 
+setting the configurations right.
+
+### Loading models
+
+To test uploading models, there is an example model in the root folder
+`empfrontend-01` named model.glb, you can load this to start viewing 
+models.
+
+### Production Server
 
 ### Environment Variables
 
@@ -66,56 +88,11 @@ VITE_BACKEND_BASE_URL=http://devapi.oriontestingserver1.com
 VITE_APP_URL=http://dev.oriontestingserver1.com
 ```
 
-Make sure to replace the values with your actual configuration.
-
-## Running the Project
-
-### Development Server
-
-To run the project in development mode, use the following command:
-
-```bash
-npm run dev
-```
-
-This command will start the development server and reload the server whenever you make changes to the source code.
-
-### Production Server
-
 To run the project in production mode, use the following command:
 
 ```bash
 npm run build
 npm run start
-```
-
-This command will start the server in production mode, typically without automatic reloading and with optimizations enabled.
-
-## Troubleshooting
-
-List common issues and how to resolve them.
-
-### Common Issue 1: Port Already in Use
-
-If you get an error that the port is already in use, you can change the port number in your `.env` file or specify a different port when starting the server:
-
-```bash
-PORT=3001 npm start
-```
-
-### Common Issue 2: Module Not Found
-
-If you encounter a "module not found" error, ensure all dependencies are installed correctly by running:
-
-```bash
-npm install
-```
-
-If the problem persists, try removing the `node_modules` directory and reinstalling:
-
-```bash
-rm -rf node_modules
-npm install
 ```
 
 ## Contributing
