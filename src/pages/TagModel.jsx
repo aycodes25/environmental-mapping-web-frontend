@@ -20,6 +20,7 @@ import {
   MenuItem,
   Select,
   Typography,
+  FormControl
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
 import AddSample from './AddSample';
@@ -225,7 +226,6 @@ const TagModel = () => {
     }
   };
 
-  console.log(newTaggedInfoName)
   return (
     <>
       <div className='ReviewerDashBoardWraper h-screen'>
@@ -316,40 +316,50 @@ const TagModel = () => {
                         value={formData.locations}
                       />
                       <div className='form-control'>
-                        <InputLabel
-                          className='label w-full'
-                          id='type-select'
-                          title="can't find sample click the + icon to add it">
-                          Type
-                        </InputLabel>
-                        {/* TO-DO: this material ui select is broken
-                         it freezes the page on some occasions */}
-                        <Select
-                          className='input input-bordered h-10 w-full border shadow-none'
-                          labelId='type-select'
-                          id='type'
-                          value={formData?.type}
+                        {/* ditching this for now because it is buggy */}
+                        {/* <FormControl fullWidth>
+                          <InputLabel id="demo-simple-select-label">
+                            Type
+                          </InputLabel>
+                          <Select
+                            labelId="demo-simple-select-label"
+                            id="demo-simple-select"
+                            onChange={handleInputChange}
+                            label="Type"
+                            value={formData.type}
+                            name="type"
+                            required
+                          >
+                            {[
+                              { value: "safety", label: "Safety" },
+                              { value: "incident", label: "Incident" },
+                              { value: "sampling", label: "Sampling" }
+                            ].map((item, index) => (
+                              <MenuItem key={index} value={item.value}>
+                                {item.label}
+                              </MenuItem>
+                            ))}
+                          </Select>
+                        </FormControl> */}
+
+                        <select
                           onChange={handleInputChange}
-                          autoWidth
-                          name='type'
+                          name="type"
+                          value={formData.type}
                           required
-                          label='Type'>
-                          <MenuItem
-                            className='w-full'
-                            value={"safety"}>
-                            safety
-                          </MenuItem>
-                          <MenuItem
-                            className='w-full'
-                            value={"incident"}>
-                            incident
-                          </MenuItem>
-                          <MenuItem
-                            className='w-full'
-                            value={"sampling"}>
-                            sampling
-                          </MenuItem>
-                        </Select>
+                          className="w-full p-2 border rounded"
+                        >
+                          <option value="" disabled>Select Type</option>
+                          {[
+                            { value: "safety", label: "Safety" },
+                            { value: "incident", label: "Incident" },
+                            { value: "sampling", label: "Sampling" }
+                          ].map((item) => (
+                            <option key={item.value} value={item.value}>
+                              {item.label}
+                            </option>
+                          ))}
+                        </select>
                       </div>
 
                       {formData?.type === "sampling" && <div className='form-control'>
@@ -477,8 +487,8 @@ const TagModel = () => {
             </div>
           </div>
           {/* All information wrapper end */}
-        </div>
-      </div>
+        </div >
+      </div >
     </>
   );
 };
