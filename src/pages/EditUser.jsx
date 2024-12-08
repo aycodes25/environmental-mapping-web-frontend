@@ -18,16 +18,16 @@ const singleUserQuery = (id) => {
 // eslint-disable-next-line react-refresh/only-export-components
 export const singleUserLoader =
   (queryClient) =>
-  async ({ params }) => {
-    const response = await queryClient.ensureQueryData(
-      singleUserQuery(params.id)
-    );
-    const user = response.data?.data;
-    if (response?.data.status === "error") {
-      toast.error(response?.data.message);
-    }
-    return { user };
-  };
+    async ({ params }) => {
+      const response = await queryClient.ensureQueryData(
+        singleUserQuery(params.id)
+      );
+      const user = response.data?.data;
+      if (response?.data.status === "error") {
+        toast.error(response?.data.message);
+      }
+      return { user };
+    };
 
 const EditUser = () => {
   const { user } = useLoaderData();
@@ -168,25 +168,22 @@ const EditUser = () => {
             </select>
           </div>
           <div className='mt-2 mb-4 w-full form-control'>
-          <p>Location</p>
-          <FormControl fullWidth className='border-0 shadow-none'>
-            <Select
-              className="w-full h-11 border shadow-none input input-bordered"
-              labelId="demo-simple-select-label"
-              id="demo-simple-select-label"
+            <p>Location</p>
+            <select
+              name="location"
+              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
               value={formData?.location?._id}
               onChange={handleChange}
-              autoWidth
-              name="location"
+              required
             >
               {Array.isArray(locations) &&
                 locations.map((items, index) => (
-                  <MenuItem className="w-full" key={index} value={items.value}>
+                  <option key={index} value={items.value}>
                     {items.label}
-                  </MenuItem>
+                  </option>
                 ))}
-            </Select>
-            </FormControl>
+            </select>
+
           </div>
           <div
             className={`flex flex-col items-center gap-y-2 w-full rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4`}

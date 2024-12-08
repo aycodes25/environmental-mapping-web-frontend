@@ -5,7 +5,7 @@ import RemoveIcon from '@mui/icons-material/Remove';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
 import { memoize } from 'proxy-memoize';
-import { customFetch } from '../utils';
+import { customFetch, getRealFileUrl } from '../utils';
 import { toast } from 'react-toastify';
 import { Button, Card } from '@mui/material';
 import ReactPaginate from 'react-paginate';
@@ -220,9 +220,9 @@ const AllModels = () => {
                     : 'block bg-cover h-60 rounded-md w-full'
                     }`}
                   style={{
-                    backgroundImage: `url(${coverPicture ??
+                    backgroundImage: `url("${getRealFileUrl(coverPicture || "") ??
                       'https://res.cloudinary.com/diqqf3eq2/image/upload/v1595959131/person-3_rxtqvi.jpg'
-                      })`,
+                      }")`,
                   }}>
                   {deleteModel && (
                     <div className='checkbox'>
@@ -251,7 +251,7 @@ const AllModels = () => {
                       tabIndex={0}
                       className='menu dropdown-content z-20 w-full rounded-box bg-base-100 p-2 shadow'>
                       <li className='btn'>
-                        {/* // hack */ }
+                        {/* // hack */}
                         {/* <Link to={`/view-model/${_id}`}>View Model</Link> */}
                         <Link to={`/view-model/${_id}`}>View Model</Link>
                       </li>

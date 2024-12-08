@@ -115,8 +115,8 @@ export function getRandomArbitrary(min, max) {
   return Math.random() * (max - min) + min;
 }
 
-export function getRealFileUrl(url, includeApiBase = false) {
-  if (includeApiBase && url.toLowerCase().includes("api") || url.toLowerCase().includes("file")) {
+export function getRealFileUrl(url) {
+  if (!url.toLowerCase().includes("api") && url.toLowerCase().includes("file")) {
     return `${baseURL}/api/${url}`
   }
   if (url.toLowerCase().includes("api") && url.toLowerCase().includes("file")) {

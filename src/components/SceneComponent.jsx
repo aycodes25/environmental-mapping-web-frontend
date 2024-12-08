@@ -118,7 +118,7 @@ export function SceneComponent({
   const destructureTaggedInfo = (modelInterationData) => {
     if (modelInterationData) {
       const newTaggedinfo = JSON.parse(modelInterationData);
-      return [newTaggedinfo?.meshName, newTaggedinfo?.meshPosition];
+      return [newTaggedinfo?.meshName, newTaggedinfo?.tagPosition];
     } else {
       return [];
     }
@@ -156,7 +156,7 @@ export function SceneComponent({
 
   // hack
   // useEffect(() => {
-  //   const [meshName, meshPosition] = destructureTaggedInfo(modelInteractionData);
+  //   const [meshName, tagPosition] = destructureTaggedInfo(modelInteractionData);
   //   if (
   //     meshName &&
   //     destructureTaggedInfo(modelInterationActiveData?.taggedInfo)[0]
@@ -165,7 +165,7 @@ export function SceneComponent({
   //   } else {
   //     setNewTaggedInfoName(meshName);
   //   }
-  //   setNewTaggedInfoPosition(meshPosition);
+  //   setNewTaggedInfoPosition(tagPosition);
   //   setNewTaggedInfo(modelInteractionData);
   // }, [modelInteractionData, modelInterationActiveData]);
 
@@ -186,15 +186,12 @@ export function SceneComponent({
 
     // hack
     sunAngleCamera.rotation = new Vector3(-Math.PI / 2, 0, 0);
-    // scene.enableDepthRenderer();
 
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
     light.intensity = controls.contrast;
 
-    // scene.enablePhysics(new Vector3(0, -9.81, 0), new CannonJSPlugin());
-
     // this also saves the loaded file in indexedDb
-    loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension, true), scene)
+    loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene)
 
     let is2DView;
 
@@ -311,17 +308,6 @@ export function SceneComponent({
       BabylonControls(scene);
     });
 
-    scene.onBeforeRenderObservable.addOnce(() => {
-      if (Array.isArray(tags)) {
-        tags.map((tag) => {
-          // eslint-disable-next-line no-unused-vars
-          // addAnchor(items, scene, (info, position) => {
-          //   dispatch(dispatchSelectedMesh(info));
-          // });
-        });
-      }
-    });
-
     let boundaryRadius;
     let boundaryCenter;
     // scene.onReadyObservable.addOnce(() => {
@@ -331,9 +317,9 @@ export function SceneComponent({
     //   const centroid = Vector3.Zero();
     //   let maxExtent = 0;
     //   loadedMeshes.forEach((mesh) => {
-    //     const meshPosition = mesh.getAbsolutePosition();
-    //     centroid.addInPlace(meshPosition);
-    //     const distance = Vector3.Distance(meshPosition, centroid);
+    //     const tagPosition = mesh.getAbsolutePosition();
+    //     centroid.addInPlace(tagPosition);
+    //     const distance = Vector3.Distance(tagPosition, centroid);
     //     if (distance > maxExtent) {
     //       maxExtent = distance;
     //     }
@@ -475,7 +461,7 @@ export const SpinnerOverlay = () => {
 /** purpose: is to display positions that contains tags  */
 export function addAnchor(meshTaggedInfo, scene, onClick) {
   const position = JSON.parse(
-    JSON.parse(meshTaggedInfo.taggedInfo).meshPosition
+    JSON.parse(meshTaggedInfo.taggedInfo).tagPosition
   );
   const name = JSON.parse(meshTaggedInfo.taggedInfo).name;
   const styles = {
@@ -590,22 +576,24 @@ export const onSceneReady = (scene, dispatch) => {
           updateSpotLight(pickResult, scene);
         }
 
-        dispatch(
-          dispatchSelectedMesh(
-            JSON.stringify({
-              tagPosition: extractPositionCoordinates(currTagPos || pointCoordinates),
-              meshName: pickResult.pickedMesh?.name || "no name",
-              cameraPosition: extractPositionCoordinates(currCameraPosition),
-              cameraDirection: extractPositionCoordinates(currCameraDirection),
-              cameraRotation: extractPositionCoordinates(currentCameraRotation)
-            })
-          )
-        );
-
-        const activeCamera = scene.activeCamera;
-        if (activeCamera && activeCamera.name === "camera0" && jetBox) {
-          jetBox.position = pointCoordinates;
+        if (pickResult.pickedMesh) {
+          dispatch(
+            dispatchSelectedMesh(
+              JSON.stringify({
+                tagPosition: extractPositionCoordinates(currTagPos || pointCoordinates),
+                meshName: pickResult.pickedMesh?.name || "no name",
+                cameraPosition: extractPositionCoordinates(currCameraPosition),
+                cameraDirection: extractPositionCoordinates(currCameraDirection),
+                cameraRotation: extractPositionCoordinates(currentCameraRotation)
+              })
+            )
+          );
         }
+
+        // const activeCamera = scene.activeCamera;
+        // if (activeCamera && activeCamera.name === "camera0" && jetBox) {
+        //   jetBox.position = pointCoordinates;
+        // }
       }
     }
   })
@@ -812,6 +800,7 @@ function createDiscAtPosition(name, position, scene, isTag = false) {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
   disc.material = material;
+  applyMeshOptimizations(disc)
   disc.position = new Vector3(position.x, position.y - 1.5, position.z);
   disc.rotation.x = Math.PI / 2;
   return disc
@@ -923,7 +912,7 @@ function applyOcclusionAlgo(mesh) {
 function loadSceneFromGlb(url, scene) {
   const urlSplit = url.split("/")
   let fileName = urlSplit.pop()
-  // deleteFromDb(url).then(console.log)
+  // deleteFromDb(url).then(console.log) // just in case to force refetch
   // return
   checkUrlInIndexedDb(url)
     .then(result => {
@@ -970,9 +959,9 @@ function centerCameras(scene) {
   const centroid = Vector3.Zero();
   let maxExtent = 0;
   loadedMeshes.forEach((mesh) => {
-    const meshPosition = mesh.getAbsolutePosition();
-    centroid.addInPlace(meshPosition);
-    const distance = Vector3.Distance(meshPosition, centroid);
+    const tagPosition = mesh.getAbsolutePosition();
+    centroid.addInPlace(tagPosition);
+    const distance = Vector3.Distance(tagPosition, centroid);
     if (distance > maxExtent) {
       maxExtent = distance;
     }

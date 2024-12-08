@@ -7,7 +7,7 @@ import AddIcon from '@mui/icons-material/Add';
 import { IoSearchSharp } from 'react-icons/io5';
 import { useLoaderData } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
-import { customFetch } from '../utils';
+import { customFetch, getRealFileUrl } from '../utils';
 import { toast } from 'react-toastify';
 import { useQueryClient } from '@tanstack/react-query';
 import { Button } from '@mui/material';
@@ -142,10 +142,9 @@ const AllUsers = () => {
                   key={_id}>
                   <div className='flex gap-2 justify-center items-center'>
                     <img
-                      src={`${
-                        imageUrl ??
+                      src={`${getRealFileUrl(imageUrl || "") ??
                         'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
-                      }`}
+                        }`}
                       alt=''
                       className='h-[50px] w-[50px] rounded-xl'
                     />
@@ -160,10 +159,9 @@ const AllUsers = () => {
                         className='btn btn-sm'
                         onClick={() =>
                           navigate(
-                            `/${
-                              ['admin', 'superAdmin'].includes(authUser.role)
-                                ? 'admin'
-                                : authUser.role
+                            `/${['admin', 'superAdmin'].includes(authUser.role)
+                              ? 'admin'
+                              : authUser.role
                             }/edit-user/${_id}`
                           )
                         }>
@@ -174,10 +172,9 @@ const AllUsers = () => {
                       className='btn btn-sm'
                       onClick={() =>
                         navigate(
-                          `/${
-                            ['admin', 'superAdmin'].includes(authUser.role)
-                              ? 'admin'
-                              : authUser.role
+                          `/${['admin', 'superAdmin'].includes(authUser.role)
+                            ? 'admin'
+                            : authUser.role
                           }/single-user/${_id}`
                         )
                       }>

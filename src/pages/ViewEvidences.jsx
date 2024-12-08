@@ -2,7 +2,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLoaderData } from 'react-router-dom';
 import ReactPaginate from 'react-paginate';
-import { formatDate, formatTime } from '../utils';
+import { formatDate, formatTime, getRealFileUrl } from '../utils';
 
 
 const ViewEvidences = () => {
@@ -81,7 +81,7 @@ const ViewEvidences = () => {
                 key={i}>
                 {tag?.evidence ? <div className='flex w-[40%] items-center justify-center rounded-r-lg'>
                   <img
-                    src={tag.evidence}
+                    src={getRealFileUrl(tag.evidence)}
                     alt='No Evidence'
                     className='h-full w-[40%] min-w-[215px] rounded-r-lg object-cover'
                   />

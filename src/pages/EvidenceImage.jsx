@@ -1,6 +1,7 @@
 import React from 'react';
 import { MdOutlineCancel } from 'react-icons/md';
 import { SectionTitle } from '../components';
+import { getRealFileUrl } from '../utils';
 
 // eslint-disable-next-line react/prop-types
 const EvidenceImage = ({ showModal, setShowModal, images, name }) => {
@@ -18,7 +19,7 @@ const EvidenceImage = ({ showModal, setShowModal, images, name }) => {
             <div className='rounded-lg justify-center flex items-center'>
               {images ? (
                 <img
-                  src={images}
+                  src={getRealFileUrl(images)}
                   alt='Something wrong with Evidence attached'
                   className='w-full h-[85%] object-cover rounded-lg'
                 />

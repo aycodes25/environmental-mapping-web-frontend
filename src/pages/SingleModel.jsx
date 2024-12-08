@@ -118,25 +118,22 @@ const SingleModel = () => {
   const destructureTaggedInfo = (modelInterationData) => {
     if (modelInterationData) {
       const newTaggedinfo = JSON.parse(modelInterationData);
-      return [newTaggedinfo?.meshName, newTaggedinfo?.meshPosition];
+      return [newTaggedinfo?.meshName, newTaggedinfo?.tagPosition];
     } else {
       return [];
     }
   };
 
   useEffect(() => {
-    const [meshName, meshPosition] = destructureTaggedInfo(modelInterationData);
+    const [meshName, tagPosition] = destructureTaggedInfo(modelInterationData);
     if (
       meshName &&
       destructureTaggedInfo(modelInterationActiveData?.taggedInfo)[0]
     ) {
       // hack
       // setNewTaggedInfoName(modelInterationActiveData.objectName);
-    } else {
-      // hack
-      // setNewTaggedInfoName(meshName);
     }
-    setNewTaggedInfoPosition(meshPosition);
+    setNewTaggedInfoPosition(tagPosition);
     setNewTaggedInfo(modelInterationData);
   }, [modelInterationData, modelInterationActiveData]);
 

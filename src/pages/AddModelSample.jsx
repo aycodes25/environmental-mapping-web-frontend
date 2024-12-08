@@ -75,10 +75,10 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
   }, [model_data]);
 
   const adjustTagPosition = (taggedInfo) => {
-    const { meshName, meshPosition } = JSON.parse(taggedInfo);
-    const meshPositionData = JSON.parse(meshPosition);
-    // const newMeshPosition = JSON.stringify({...meshPositionData, _z:meshPositionData._z + getRandomArbitrary(0.0001, 0.1) });
-    const newMeshPosition = JSON.stringify(meshPositionData);
+    const { meshName, tagPosition } = JSON.parse(taggedInfo);
+    const tagPositionData = JSON.parse(tagPosition);
+    // const newMeshPosition = JSON.stringify({...tagPositionData, _z:tagPositionData._z + getRandomArbitrary(0.0001, 0.1) });
+    const newMeshPosition = JSON.stringify(tagPositionData);
     const tnewTaggedInfoPosition = JSON.stringify({
       meshName,
       newMeshPosition,
@@ -129,10 +129,9 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
       toast.error("A Type is required")
     }
 
-    if (formData.type === "sample" && !formData.presence)
-      {
-        toast.error("A Result is required")
-      }
+    if (formData.type === "sample" && !formData.presence) {
+      toast.error("A Result is required")
+    }
     setIsSubmitting(true);
     try {
       const formDataForUpload = new FormData();
@@ -163,7 +162,7 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
         fullname: currentUser?.fullname,
         incident: "",
         evidence: "",
-        type:'',
+        type: '',
         action: "",
         locations: "",
         presence: "",
@@ -236,12 +235,12 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
                       />
                     </div>
                     <div className="sm:w-[400px] min-h-[60px] w-full">
-                    <div className='form-control'>
+                      <div className='form-control'>
                         <InputLabel
                           className='w-full label'
                           id='demo-simple-select-label'
                           title="can't find sample click the + icon to add it">
-                          Type 
+                          Type
                         </InputLabel>
                         <Select
                           className='w-full h-11 border shadow-none'
@@ -253,21 +252,21 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
                           required
                           name='type'
                           label='Type'>
-                              <MenuItem
-                                className='w-full'
-                                value={"safety"}>
-                                Safety
-                              </MenuItem>
-                              <MenuItem
-                                className='w-full'
-                                value={"incident"}>
-                                Incident
-                              </MenuItem>
-                              <MenuItem
-                                className='w-full'
-                                value={"sampling"}>
-                                Sampling
-                              </MenuItem>
+                          <MenuItem
+                            className='w-full'
+                            value={"safety"}>
+                            Safety
+                          </MenuItem>
+                          <MenuItem
+                            className='w-full'
+                            value={"incident"}>
+                            Incident
+                          </MenuItem>
+                          <MenuItem
+                            className='w-full'
+                            value={"sampling"}>
+                            Sampling
+                          </MenuItem>
                         </Select>
                       </div>
                     </div>

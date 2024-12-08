@@ -54,7 +54,7 @@ const TagModel = () => {
   const [mobile, setMobile] = useState(false);
   const [addSample, setAddSample] = useState(false);
   const [addIncident, setAddIncident] = useState(false);
-  const [newTaggedInfoName, setNewTaggedInfoName] = useState();
+  const [newTaggedInfoName, setNewTaggedInfoName] = useState("");
   const [newTaggedInfoPosition, setNewTaggedInfoPosition] = useState();
   const [newTaggedInfo, setNewTaggedInfo] = useState();
   const [customData, setCustomData] = useState(false);
@@ -118,14 +118,14 @@ const TagModel = () => {
   const destructureTaggedInfo = (modelInterationData) => {
     if (modelInterationData) {
       const newTaggedinfo = JSON.parse(modelInterationData);
-      return [newTaggedinfo?.meshName, newTaggedinfo?.meshPosition];
+      return [newTaggedinfo?.meshName, newTaggedinfo?.tagPosition];
     } else {
       return [];
     }
   };
 
   useEffect(() => {
-    const [meshName, meshPosition] = destructureTaggedInfo(modelInterationData);
+    const [meshName, tagPosition] = destructureTaggedInfo(modelInterationData);
     if (
       meshName &&
       destructureTaggedInfo(modelInterationActiveData?.taggedInfo)[0]
@@ -134,7 +134,7 @@ const TagModel = () => {
     } else {
       setNewTaggedInfoName(meshName);
     }
-    setNewTaggedInfoPosition(meshPosition);
+    setNewTaggedInfoPosition(tagPosition);
     setNewTaggedInfo(modelInterationData);
   }, [modelInterationData, modelInterationActiveData]);
   // eslint-disable-next-line no-unused-vars
@@ -176,7 +176,7 @@ const TagModel = () => {
       const formDataForUpload = new FormData();
       formDataForUpload.append('fullname', formData.fullname);
       formDataForUpload.append('incident', formData.incident);
-      formDataForUpload.append('objectName', formData.objectName);
+      formDataForUpload.append('objectName', newTaggedInfoName);
       formDataForUpload.append('type', formData.type);
       formDataForUpload.append('evidence', formData.evidence);
       formDataForUpload.append('action', formData.action);
@@ -224,6 +224,8 @@ const TagModel = () => {
       setIsSubmitting(false);
     }
   };
+
+  console.log(newTaggedInfoName)
   return (
     <>
       <div className='ReviewerDashBoardWraper h-screen'>
@@ -348,31 +350,6 @@ const TagModel = () => {
                             sampling
                           </MenuItem>
                         </Select>
-
-                        {/* <select
-                          className='input input-bordered h-10 w-full border shadow-none'
-                          id='demo-simple-select-label'
-                          value={formData?.type}
-                          onChange={handleInputChange}
-                          name='type'
-                          required
-                          label='Type'>
-                          <option
-                            className='w-full'
-                            value={"safety"}>
-                            Safety
-                          </option>
-                          <option
-                            className='w-full'
-                            value={"incident"}>
-                            Incident
-                          </option>
-                          <option
-                            className='w-full'
-                            value={"sampling"}>
-                            Sampling
-                          </option>
-                        </select> */}
                       </div>
 
                       {formData?.type === "sampling" && <div className='form-control'>
@@ -502,9 +479,6 @@ const TagModel = () => {
           {/* All information wrapper end */}
         </div>
       </div>
-      {/* // hack - not needed as the above form already handles both */}
-      {/* <AddSample showModal={addSample} setShowModal={setAddSample} />
-      <AddIncident showModal={addIncident} setShowModal={setAddIncident} /> */}
     </>
   );
 };
