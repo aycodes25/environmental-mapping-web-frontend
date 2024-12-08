@@ -801,7 +801,7 @@ function createDiscAtPosition(name, position, scene, isTag = false) {
   }
   disc.material = material;
   applyMeshOptimizations(disc)
-  disc.position = new Vector3(position.x, position.y - 1.5, position.z);
+  disc.position = new Vector3(position.x, position.y - 1.6, position.z);
   disc.rotation.x = Math.PI / 2;
   return disc
 }

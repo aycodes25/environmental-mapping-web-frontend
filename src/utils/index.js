@@ -8,7 +8,6 @@ const evMappingUrl = `${baseURL}/api`;
 
 export const getPasswordToken = () => {
   try {
-    console.log("entered")
     const reduxToken = store.getState().userState?.accessToken;
     if (reduxToken !== undefined && reduxToken !== "") {
       return reduxToken;

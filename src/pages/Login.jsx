@@ -46,11 +46,6 @@ const Login = () => {
   }
 
   useEffect(() => {
-    // if (localUser?.role) {
-    //   dispatch(
-    //     loginUser({ data: { user: localUser, accessToken: localAccessToken } })
-    //   );
-    // }
     if (currentUser?.role) {
       reRouteByRole(currentUser.role)
     }

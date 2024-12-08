@@ -29,7 +29,6 @@ export const loader = (queryClient) => async () => {
 
 const DashBoard = () => {
   const navigate = useNavigate();
-  // const { items, isLoading } = useLoaderData();
   const [activeItem, setActiveItem] = useState("Overview");
   const [item, setItem] = useState([]);
   const fetchData = async () => {
@@ -43,10 +42,6 @@ const DashBoard = () => {
   useEffect(() => {
     fetchData();
   }, []);
-
-  // useEffect(() => {
-  //   setItem(items);
-  // }, [items]);
 
   const handleItemClick = (item) => {
     setActiveItem(item);
