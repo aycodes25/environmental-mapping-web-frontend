@@ -52,6 +52,12 @@ let currSpotlight = null
 let currCameraPosition = null
 let currCameraDirection = null
 let currentCameraRotation = null
+let saveCameraPositionAndDirection = {
+  position: null,
+  direction: null,
+  rotation: null,
+  inSunView: false
+}
 
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
@@ -66,17 +72,17 @@ const cameraControls = {
 };
 
 function updateCameraSettings(scene, controls) {
-  scene.getCameraByName("camera0").angularSensibilityX =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').speed = controls.cameraSpeed;
-  scene.getCameraByName("camera0").angularSensibilityY =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').panningSensibility = controls.panSensitivity;
-  scene.getCameraByName("camera0").wheelPrecision = controls.zoomSensitivity;
-  // scene.getCameraByName('camera0').inertia = controls.zoomInertia;
-  scene.getCameraByName("camera0").pinchPrecision = controls.zoomSensitivity;
-  scene.getCameraByName("camera0").pinchDeltaPercentage =
-    controls.zoomSensitivity;
+  // scene.getCameraByName("camera0").angularSensibilityX =
+  //   controls.angularSensibility;
+  // // scene.getCameraByName('camera0').speed = controls.cameraSpeed;
+  // scene.getCameraByName("camera0").angularSensibilityY =
+  //   controls.angularSensibility;
+  // // scene.getCameraByName('camera0').panningSensibility = controls.panSensitivity;
+  // scene.getCameraByName("camera0").wheelPrecision = controls.zoomSensitivity;
+  // // scene.getCameraByName('camera0').inertia = controls.zoomInertia;
+  // scene.getCameraByName("camera0").pinchPrecision = controls.zoomSensitivity;
+  // scene.getCameraByName("camera0").pinchDeltaPercentage =
+  //   controls.zoomSensitivity;
 
   // scene.getCameraByName("camera1").angularSensibilityX =
   //   controls.angularSensibility;
@@ -175,17 +181,26 @@ export function SceneComponent({
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 
-    const sunAngleCamera = new ArcRotateCamera(
-      "camera0",
-      Math.PI / 2,
-      Math.PI / 2,
-      100,
-      new Vector3(0, 100, 0),
-      scene
-    );
+    // const sunAngleCamera = new ArcRotateCamera(
+    //   "camera0",
+    //   Math.PI / 2,
+    //   Math.PI / 2,
+    //   100,
+    //   new Vector3(0, 100, 0),
+    //   scene
+    // );
+
+
+    // const sunAngleCamera = new FreeCamera(
+    //   "camera0",
+    //   new Vector3(0, 100, 0),
+    //   scene
+    // );
+
+    // sunAngleCamera.attachControl(canvas, true)
 
     // hack
-    sunAngleCamera.rotation = new Vector3(-Math.PI / 2, 0, 0);
+    // sunAngleCamera.rotation = new Vector3(-Math.PI / 2, 0, 0);
 
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
     light.intensity = controls.contrast;
@@ -196,11 +211,27 @@ export function SceneComponent({
     let is2DView;
 
     const heatmapButton = document.getElementById("heatmapButton");
-    heatmapButton.addEventListener("click", () => {
-      scene.activeCamera =
-        scene.activeCamera !== sunAngleCamera
-          ? sunAngleCamera
-          : scene.getCameraByName("camera1");
+    heatmapButton.addEventListener("click", (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      console.log("entered")
+      let camera1 = scene.getCameraByName("camera1")
+      if (saveCameraPositionAndDirection.inSunView) {
+        saveCameraPositionAndDirection.inSunView = false
+        camera1.position = saveCameraPositionAndDirection.position.clone()
+        camera1.direction = saveCameraPositionAndDirection.direction.clone()
+        camera1.rotation = saveCameraPositionAndDirection.rotation.clone()
+      } else {
+        saveCameraPositionAndDirection.inSunView = true
+        saveCameraPositionAndDirection.position = camera1.position.clone()
+        saveCameraPositionAndDirection.direction = camera1.getForwardRay().direction.clone()
+        saveCameraPositionAndDirection.rotation = new Vector3(
+          camera1.rotation.x,
+          camera1.rotation.y,
+          camera1.rotation.z,
+        )
+        centerCameras(scene, true)
+      }
     });
 
     const screenshotButton = document.getElementById("screenshotButton");
@@ -259,13 +290,13 @@ export function SceneComponent({
     dynamicTexture.addControl(ellipse_jetBox);
     ellipse_jetBox.linkWithMesh(jetBox);
 
-    scene.onBeforeRenderObservable.add(() => {
-      if (scene.activeCamera === sunAngleCamera) {
-        ellipse_jetBox.isVisible = true;
-      } else {
-        ellipse_jetBox.isVisible = false;
-      }
-    });
+    // scene.onBeforeRenderObservable.add(() => {
+    //   if (scene.activeCamera === sunAngleCamera) {
+    //     ellipse_jetBox.isVisible = true;
+    //   } else {
+    //     ellipse_jetBox.isVisible = false;
+    //   }
+    // });
     const angle = 1 * (2 * Math.PI);
     const radius = 4;
 
@@ -289,18 +320,19 @@ export function SceneComponent({
     });
 
     scene.activeCamera = scene.getCameraByName("camera1");
-    document.addEventListener("keydown", (event) => {
-      // Check if the "=" key is pressed to flip between camera 0 and 1
-      if (event.key === "=") {
-        const selectedCamera =
-          scene.activeCamera === scene.getCameraByName("camera1")
-            ? scene.getCameraByName("camera0")
-            : scene.getCameraByName("camera1");
-        if (selectedCamera) {
-          scene.activeCamera = selectedCamera;
-        }
-      }
-    });
+    // allow this in one place
+    // document.addEventListener("keydown", (event) => {
+    //   // Check if the "=" key is pressed to flip between camera 0 and 1
+    //   if (event.key === "=") {
+    //     const selectedCamera =
+    //       scene.activeCamera === scene.getCameraByName("camera1")
+    //         ? scene.getCameraByName("camera0")
+    //         : scene.getCameraByName("camera1");
+    //     if (selectedCamera) {
+    //       scene.activeCamera = selectedCamera;
+    //     }
+    //   }
+    // });
 
     scene.beginAnimation(jetBox, 0, 100, true);
 
@@ -952,7 +984,7 @@ function importGLFileInScene(glFile, scene) {
   });
 }
 
-function centerCameras(scene) {
+function centerCameras(scene, setSunAngleCamera = false) {
   const loadedMeshes = scene.meshes;
 
   // Calculate the bounding box
@@ -968,9 +1000,14 @@ function centerCameras(scene) {
   });
   centroid.scaleInPlace(1 / loadedMeshes.length);
 
-  // scene.getCameraByName("camera0").setTarget(centroid.clone())
-  // scene.getCameraByName("camera0").radius = 10
-  scene.getCameraByName("camera1").position = centroid.clone()
+  if (setSunAngleCamera) {
+    let camera = scene.getCameraByName("camera1")
+    camera.position = centroid.clone()
+    camera.rotation.x = Math.PI / 2;
+    camera.position.y = 150
+  } else {
+    scene.getCameraByName("camera1").position = centroid.clone()
+  }
 }
 
 export function resetCameraLocation(desc) {
