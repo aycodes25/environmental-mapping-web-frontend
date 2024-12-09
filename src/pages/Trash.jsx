@@ -4,7 +4,7 @@ import { useLoaderData } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { memoize } from 'proxy-memoize';
 import { toast } from 'react-toastify';
-import { customFetch } from '../utils';
+import { customFetch, getRealFileUrl } from '../utils';
 import { Button, Card } from '@mui/material';
 import ReactPaginate from 'react-paginate';
 import { useQueryClient } from '@tanstack/react-query';
@@ -130,7 +130,7 @@ const Trash = () => {
                     : 'block bg-cover h-60 rounded-md w-full'
                     }`}
                   style={{
-                    backgroundImage: `url(${coverPicture ??
+                    backgroundImage: `url(${getRealFileUrl(coverPicture) ??
                       'https://res.cloudinary.com/diqqf3eq2/image/upload/v1595959131/person-3_rxtqvi.jpg'
                       })`,
                   }}>

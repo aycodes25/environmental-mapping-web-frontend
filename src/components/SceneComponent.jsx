@@ -210,8 +210,7 @@ export function SceneComponent({
 
     let is2DView;
 
-    const heatmapButton = document.getElementById("heatmapButton");
-    heatmapButton.addEventListener("click", (e) => {
+    const handleHeatMapClick = (e) => {
       e.preventDefault()
       e.stopPropagation()
       console.log("entered")
@@ -232,7 +231,11 @@ export function SceneComponent({
         )
         centerCameras(scene, true)
       }
-    });
+    }
+
+    const heatmapButton = document.getElementById("heatmapButton");
+    heatmapButton.removeEventListener("click", handleHeatMapClick);
+    heatmapButton.addEventListener("click", handleHeatMapClick);
 
     const screenshotButton = document.getElementById("screenshotButton");
     screenshotButton.addEventListener("click", () => {
@@ -415,15 +418,10 @@ export function SceneComponent({
       toast.success("model is ready!");
     };
 
-    if (scene.isReady()) {
-      tags.map((tag) => {
-        let tagInfo = JSON.parse(tag.taggedInfo)
-        drawTag(scene, tagInfo.tagPosition)
-      });
-      handleSceneReady();
-    } else {
-      scene.onReadyObservable.addOnce(handleSceneReady);
-    }
+
+    scene.onReadyObservable.addOnce(() => {
+      handleSceneReady()
+    });
 
     scene.onReadyObservable.addOnce(() => {
       setIsLoading(false);
@@ -444,14 +442,14 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
-
-    return () => {
-      // engine.stopRenderLoop(renderLoop);
-      // scene.getEngine().dispose();
-      // scene.dispose();
-      // window.removeEventListener("resize", resize);
-    };
   }, []);
+
+  useEffect(() => {
+    tags.map((tag) => {
+      let tagInfo = JSON.parse(tag.taggedInfo)
+      drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+    });
+  }, [tags])
 
   return (
     <>
@@ -822,12 +820,27 @@ export function hideSpotLight() {
   }
 }
 
+function makeColorFromType(type) {
+  if (!type) {
+    return new BABYLON.Color3(1, 0, 0)
+  }
+  switch (type) {
+    case "sampling":
+      return new BABYLON.Color3(0, 0.5, 0.5)
+    case "incident":
+      return new BABYLON.Color3(0, 0, 0)
+    case "safety":
+      return new BABYLON.Color3(1, 0, 0)
+    default:
+      return new BABYLON.Color3(1, 0, 0)
+  }
+}
 
-function createDiscAtPosition(name, position, scene, isTag = false) {
-  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.5, tessellation: 64 }, scene);
+function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
+  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, tessellation: 64 }, scene);
   const material = new BABYLON.StandardMaterial(name, scene);
   if (isTag) {
-    material.diffuseColor = new BABYLON.Color3(1, 0, 0); // red color
+    material.diffuseColor = makeColorFromType(type); // red color
   } else {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
@@ -838,10 +851,10 @@ function createDiscAtPosition(name, position, scene, isTag = false) {
   return disc
 }
 
-export function drawTag(scene, position, name = `${Date.now()}`) {
+export function drawTag(scene, position, name = `${Date.now()}`, type) {
   if (!position) return
   if (!scene) return
-  createDiscAtPosition(name, position, scene, true)
+  createDiscAtPosition(name, position, scene, true, type)
 }
 
 export function replaceInstanceWithClone(instanceMesh) {

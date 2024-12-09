@@ -11,20 +11,18 @@ import { LocalizationProvider } from '@mui/x-date-pickers';
 import { AdapterDayjs } from '@mui/x-date-pickers/AdapterDayjs';
 
 ReactDOM.createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <StyledEngineProvider injectFirst>
-      <LocalizationProvider dateAdapter={AdapterDayjs}>
-        <Provider store={store}>
-          <ToastContainer
-            position='top-right'
-            autoClose={5000}
-            closeOnClick
-            pauseOnHover
-            theme='colored'
-          />
-          <App />
-        </Provider>
-      </LocalizationProvider>
-    </StyledEngineProvider>
-  </React.StrictMode>
+  <StyledEngineProvider injectFirst>
+    <LocalizationProvider dateAdapter={AdapterDayjs}>
+      <Provider store={store}>
+        <ToastContainer
+          position='top-right'
+          autoClose={5000}
+          closeOnClick
+          pauseOnHover
+          theme='colored'
+        />
+        <App />
+      </Provider>
+    </LocalizationProvider>
+  </StyledEngineProvider>
 );

@@ -197,7 +197,7 @@ const TagModel = () => {
         // drop tag visible
         let tagId = Date.now()
         let tagPosition = currTagPos
-        drawTag(scene, tagPosition, tagId)
+        drawTag(scene, tagPosition, tagId, formData.type)
       } else {
         toast.error(response.data?.message);
       }
