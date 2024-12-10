@@ -175,7 +175,7 @@ const TagModel = () => {
     }
 
     if (formData.type === "sampling" && !formData.sample || !formData.presence) {
-      toast.error("Please ensure you have set sample type and presence")
+      toast.error("Please ensure you have set sample type and result")
       return
     }
 
