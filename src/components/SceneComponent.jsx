@@ -305,7 +305,8 @@ export function SceneComponent({
   useEffect(() => {
     tags.map((tag) => {
       let tagInfo = JSON.parse(tag.taggedInfo)
-      drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+      let disc = drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+      addTagHoverEventHandler(disc, tag)
     });
   }, [tags])
 
@@ -444,9 +445,6 @@ export function addAnchor(meshTaggedInfo, scene, onClick) {
 export const onSceneReady = (scene, dispatch) => {
   // hack
   // setupVideoRecording(scene);
-  let selectedMesh = null;
-
-  const jetBox = scene.getMeshByName("jetBox");
 
   scene.onPointerObservable.add((pointerInfo) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
@@ -477,33 +475,33 @@ export const onSceneReady = (scene, dispatch) => {
   })
 
   // Show information pop-up when hovering over a mesh
-  scene.onPointerMove = function (evt, pickResult) {
-    if (pickResult && pickResult.pickedMesh) {
-      pickResult.pickedMesh.isPickable = true;
-      if (selectedMesh && selectedMesh !== pickResult.pickedMesh) {
-        hideTooltip();
-      } else {
-        showTooltip(evt.clientX, evt.clientY);
-      }
-    } else {
-      hideTooltip();
-    }
-  };
+  // scene.onPointerMove = function (evt, pickResult) {
+  //   if (pickResult && pickResult.pickedMesh) {
+  //     pickResult.pickedMesh.isPickable = true;
+  //     if (selectedMesh && selectedMesh !== pickResult.pickedMesh) {
+  //       hideTooltip();
+  //     } else {
+  //       showTooltip(evt.clientX, evt.clientY);
+  //     }
+  //   } else {
+  //     hideTooltip();
+  //   }
+  // };
 };
 
-export function showTooltip(clientX, clientY) {
-  var tooltip = document.getElementById("tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.id = "tooltip";
-    tooltip.style =
-      "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-    document.body.appendChild(tooltip);
-  }
-  tooltip.style.left = clientX + 10 + "px";
-  tooltip.style.top = clientY + 10 + "px";
-  tooltip.style.display = "block";
-}
+// export function showTooltip(clientX, clientY) {
+//   var tooltip = document.getElementById("tooltip");
+//   if (!tooltip) {
+//     tooltip = document.createElement("div");
+//     tooltip.id = "tooltip";
+//     tooltip.style =
+//       "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
+//     document.body.appendChild(tooltip);
+//   }
+//   tooltip.style.left = clientX + 10 + "px";
+//   tooltip.style.top = clientY + 10 + "px";
+//   tooltip.style.display = "block";
+// }
 
 export function createOrUpdateTooltip(objectName) {
   var tooltip = document.getElementById("tooltip");
@@ -517,11 +515,52 @@ export function createOrUpdateTooltip(objectName) {
   tooltip.textContent = objectName || "undefined";
 }
 
-export function hideTooltip() {
-  var tooltip = document.getElementById("tooltip");
-  if (tooltip) {
-    tooltip.style.display = "none";
+// export function hideTooltip() {
+//   var tooltip = document.getElementById("tooltip");
+//   if (tooltip) {
+//     tooltip.style.display = "none";
+//   }
+// }
+
+function addTagHoverEventHandler(tag, tagData) {
+  tag.actionManager = new ActionManager(window.scene);
+
+  // Show tooltip on hover
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, function (event) {
+      deleteToolTip()
+      const tooltip = document.createElement("div");
+      tooltip.id = "tooltip";
+      tooltip.style =
+        "position: fixed; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
+      tooltip.innerHTML = `<p> ${tagData.objectName || "unnamed object"
+        }<br/>
+        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : "safety"
+        }: <span class='text-xs'>${tagData?.type === "sampling" ? tagData.presence : tagData?.type === "incident" ? tagData?.incident : ""
+        }</span></span>
+        <br/><span class='text-xs'>Date: ${formatDate(
+          tagData.createdAt
+        )}</span><br/><span class='text-xs'>Time: ${formatTime(
+          tagData.createdAt
+        )}</span></p>`;
+      tooltip.style.display = "block";
+      tooltip.style.left = event.pointerX + 10 + "px";
+      tooltip.style.top = event.pointerY + 10 + "px";
+      document.body.appendChild(tooltip);
+    })
+  );
+
+  function deleteToolTip() {
+    var tooltip = document.getElementById("tooltip");
+    tooltip?.remove()
   }
+
+  // Hide tooltip when hover ends
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, function () {
+      deleteToolTip()
+    })
+  );
 }
 
 export const stopRecording = (videoRecorder) => {
@@ -661,7 +700,7 @@ function makeColorFromType(type) {
 }
 
 function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
-  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, tessellation: 64 }, scene);
+  const disc = BABYLON.MeshBuilder.CreateDisc(`${name || Date.now()}`, { radius: 0.25, tessellation: 64 }, scene);
   const material = new BABYLON.StandardMaterial(name, scene);
   if (isTag) {
     material.diffuseColor = makeColorFromType(type); // red color
@@ -669,7 +708,11 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
   disc.material = material;
-  applyMeshOptimizations(disc)
+
+  applyOpRecursivelyOnSubmeshes(disc, () => {
+    applyMeshOptimizations(disc)
+  })
+
   disc.position = new Vector3(position.x, position.y - 1.6, position.z);
   disc.rotation.x = Math.PI / 2;
   return disc
@@ -678,7 +721,7 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
 export function drawTag(scene, position, name = `${Date.now()}`, type) {
   if (!position) return
   if (!scene) return
-  createDiscAtPosition(name, position, scene, true, type)
+  return createDiscAtPosition(name, position, scene, true, type)
 }
 
 export function replaceInstanceWithClone(instanceMesh) {
@@ -740,6 +783,7 @@ function optimizeScene(scene) {
   // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
   // scene.freezeActiveMeshes()
   scene.autoClear = true
+  scene.skipPointerMovePicking = false
   // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
   // optimizer.start();
 }
