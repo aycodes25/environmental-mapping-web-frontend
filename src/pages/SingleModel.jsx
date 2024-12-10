@@ -27,7 +27,7 @@ import MenuIcon from '@mui/icons-material/Menu';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { toggleSetting } from '../redux/actions/settingActions';
 import { InputLabel, MenuItem, Select } from '@mui/material';
-import { drawTag } from '../components/SceneComponent';
+import TagModelForm from '../components/TagModelForm';
 
 const SingleModel = () => {
   const { model } = useLoaderData();
@@ -58,6 +58,7 @@ const SingleModel = () => {
   const [typeChoosed, setTypeChoosed] = useState('');
   const [incidentChoosed, setIncidentChoosed] = useState('');
   const [resultChoosed, setResultChoosed] = useState('');
+  const [activePane, setActivePane] = useState('view-tags');
   const navigate = useNavigate();
 
   async function fetchSamples() {
@@ -337,328 +338,342 @@ const SingleModel = () => {
         {/* All information wrapper start */}
         <div className={mobile ? 'alldataWrapperMobile' : 'alldataWrapper'}>
           <div className='dataWrapper'>
-            <div className='dataHistoryWrapper'>
-              {/* header */}
-              <div className='px-2 header'>
-                <h1 className='text-2xl font-medium'>Sample History</h1>
+            <div>
+              <div className='flex justify-between items-baseline px-2 py-2'>
+                <h3 className='cursor-pointer font-bold'
+                  onClick={() => setActivePane('view-tags')}
+                >
+                  view tags
+                </h3>
+                <h3 className='cursor-pointer font-bold'
+                  onClick={() => setActivePane('tag-model')}
+                >
+                  tag model
+                </h3>
                 <div className='menuWrapper'>
                   <div
-                    className='w-10 h-10 menu'
+                    className='menu h-10 w-10 cursor-pointer'
                     onClick={() => setMobile(!mobile)}>
-                    {' '}
-                    <MenuIcon className='cursor-pointer' />
+                    <MenuIcon />
                   </div>
                 </div>
               </div>
-              {/* header end */}
-              {/* input */}
-              <div className='h-14 AllModels'>
-                <div className='searchBarContainer'>
-                  <div className='searchIconWrapper'>
-                    <div
-                      className='img searchImg'
-                      onClick={() => {
-                        setSearchApplied(false);
-                        resetTagsData();
-                      }}>
-                      {searchApplied !== true ? (
-                        <img
-                          className='m-2 ml-3 w-[20px]'
-                          src='/img/search (2).png'
-                          alt='icon'
-                        />
-                      ) : (
-                        <CloseIcon />
-                      )}
-                    </div>
-                  </div>
-                  <input
-                    className='h-14 bg-[#585858]'
-                    type='text'
-                    name='search'
-                    value={newTaggedInfoName}
-                    placeholder='Search'
-                    onChange={(e) => {
-                      handleFilterTags(e.target.value);
-                      setNewTaggedInfoName(e.target.value);
-                      setSearchApplied(true);
-                    }}
-                  />
-                  {filterApplied ? (
-                    <div className='filter' onClick={ClearFilter}>
-                      <div className='clear'>clear</div>
-                    </div>
-                  ) : (
-                    <div className='filter' onClick={AddFilter}>
-                      <div className='img'>
-                        <img src='/img/Group 27014.png' alt='image' />
+              {activePane === "view-tags" && <div className='dataHistoryWrapper'>
+                {/* header */}
+                <div className='px-2 header'>
+                  <h1 className='text-2xl font-medium'>Sample History</h1>
+                </div>
+                {/* header end */}
+                {/* input */}
+                <div className='h-14 AllModels'>
+                  <div className='searchBarContainer'>
+                    <div className='searchIconWrapper'>
+                      <div
+                        className='img searchImg'
+                        onClick={() => {
+                          setSearchApplied(false);
+                          resetTagsData();
+                        }}>
+                        {searchApplied !== true ? (
+                          <img
+                            className='m-2 ml-3 w-[20px]'
+                            src='/img/search (2).png'
+                            alt='icon'
+                          />
+                        ) : (
+                          <CloseIcon />
+                        )}
                       </div>
                     </div>
-                  )}
+                    <input
+                      className='h-14 bg-[#585858]'
+                      type='text'
+                      name='search'
+                      value={newTaggedInfoName}
+                      placeholder='Search'
+                      onChange={(e) => {
+                        handleFilterTags(e.target.value);
+                        setNewTaggedInfoName(e.target.value);
+                        setSearchApplied(true);
+                      }}
+                    />
+                    {filterApplied ? (
+                      <div className='filter' onClick={ClearFilter}>
+                        <div className='clear'>clear</div>
+                      </div>
+                    ) : (
+                      <div className='filter' onClick={AddFilter}>
+                        <div className='img'>
+                          <img src='/img/Group 27014.png' alt='image' />
+                        </div>
+                      </div>
+                    )}
+                  </div>
                 </div>
-              </div>
-              {/* input end */}
+                {/* input end */}
 
-              {filterApplied && (
-                <div className='appliedFilterWrapper'>
-                  <div className='appliedFilterContainer'>
-                    <div className='fromWrapper'>
-                      <h3>From</h3>
-                      <div className='rounded-md wrapper'>
-                        <CalendarTodayOutlinedIcon
-                          fontSize='small'
-                          className='date'
-                        />
-                        <p className='truncate text-[4px]'>
-                          {formatDate(startDate)}
-                        </p>
+                {filterApplied && (
+                  <div className='appliedFilterWrapper'>
+                    <div className='appliedFilterContainer'>
+                      <div className='fromWrapper'>
+                        <h3>From</h3>
+                        <div className='rounded-md wrapper'>
+                          <CalendarTodayOutlinedIcon
+                            fontSize='small'
+                            className='date'
+                          />
+                          <p className='truncate text-[4px]'>
+                            {formatDate(startDate)}
+                          </p>
+                        </div>
+                        <div className='rounded-md wrapper'>
+                          <AccessTimeIcon className='time' fontSize='small' />
+                          <p className='truncate text-[4px]'>
+                            {startTime ?? '00:00'}
+                          </p>
+                        </div>
                       </div>
-                      <div className='rounded-md wrapper'>
-                        <AccessTimeIcon className='time' fontSize='small' />
-                        <p className='truncate text-[4px]'>
-                          {startTime ?? '00:00'}
-                        </p>
+                      <div className='toWrapper'>
+                        <h3>to</h3>
+                        <div className='rounded-md wrapper'>
+                          <CalendarTodayOutlinedIcon
+                            fontSize='small'
+                            className='date'
+                          />
+                          <p className='truncate text-[4px]'>
+                            {formatDate(endDate)}
+                          </p>
+                        </div>
+                        <div className='rounded-md wrapper'>
+                          <AccessTimeIcon className='time' fontSize='small' />
+                          <p className='truncate text-[4px]'>
+                            {endTime ?? '24:00'}
+                          </p>
+                        </div>
                       </div>
-                    </div>
-                    <div className='toWrapper'>
-                      <h3>to</h3>
-                      <div className='rounded-md wrapper'>
-                        <CalendarTodayOutlinedIcon
-                          fontSize='small'
-                          className='date'
-                        />
-                        <p className='truncate text-[4px]'>
-                          {formatDate(endDate)}
-                        </p>
-                      </div>
-                      <div className='rounded-md wrapper'>
-                        <AccessTimeIcon className='time' fontSize='small' />
-                        <p className='truncate text-[4px]'>
-                          {endTime ?? '24:00'}
-                        </p>
-                      </div>
-                    </div>
-                    {/* <div className="">
+                      {/* <div className="">
                       {sampleChoosed} : {resultChoosed}
                     </div> */}
-                  </div>
-                  <button
-                    className='cancelFilter'
-                    onClick={() => {
-                      setFilterApplied(false);
-                      resetTagsData();
-                    }}>
-                    <CancelOutlinedIcon fontSize='small' />
-                    <p>Cancel filter</p>
-                  </button>
-                </div>
-              )}
-
-              {/* all info container */}
-              {ReviewerState === 'allReviewer' && (
-                <div className='flex flex-col gap-4 justify-start items-center mx-auto w-full'>
-                  <div className='flex flex-col justify-start w-full'>
-                    {/* accordion start */}
-                    <AccordionWrapper data={tagsData} />
-                    {/* accordion end */}
-                  </div>
-                  <div
-                    className='w-full btnContainer'
-                    onClick={() => exportToCsv()}>
-                    <button className='w-full'>Export Data</button>
-                  </div>
-                  <div className='w-full btnContainer'>
+                    </div>
                     <button
-                      className='w-full'
-                      style={{ background: '#6e0101' }}
-                      onClick={promptDelete}>
-                      Delete All Samples
+                      className='cancelFilter'
+                      onClick={() => {
+                        setFilterApplied(false);
+                        resetTagsData();
+                      }}>
+                      <CancelOutlinedIcon fontSize='small' />
+                      <p>Cancel filter</p>
                     </button>
                   </div>
-                </div>
-              )}
-              {/* all info container end*/}
-              {/* filter card */}
-              {ReviewerState === 'filter' && (
-                <div className='w-full filterCard'>
-                  <div className='flex flex-row justify-center items-center my-auto w-full h-10 heading'>
-                    <p className=''>Static Period</p>
-                  </div>
-                  <div className='filterInputContainer max-w-[92%]'>
-                    <div className='fromWrapper'>
-                      <h3>From</h3>
-                      <div className='inputContainer'>
-                        <input
-                          className='text-sm'
-                          value={startDate}
-                          type='date'
-                          onChange={(e) => setStartDate(e.target.value)}
-                        />
-                        <input
-                          type='time'
-                          value={startTime}
-                          className='text-sm'
-                          onChange={(e) => setStartTime(e.target.value)}
-                        />
-                      </div>
-                    </div>
-                    <div className='fromWrapper'>
-                      <h3>To</h3>
-                      <div className='inputContainer'>
-                        <input
-                          type='date'
-                          value={endDate}
-                          color='white'
-                          className='text-sm'
-                          onChange={(e) => setEndDate(e.target.value)}
-                        />
-                        <input
-                          type='time'
-                          value={endTime}
-                          onChange={(e) => setEndTime(e.target.value)}
-                          className='text-sm'
-                        />
-                      </div>
-                    </div>
-                    <div className='fromWrapper'>
-                      <div className='w-full form-control'>
-                        <InputLabel
-                          className='w-full label'
-                          id='demo-simple-select-label'
-                        >
-                          Filter by Type
-                        </InputLabel>
-                        <Select
-                          className='w-full h-10 border shadow-none input input-bordered'
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select-label'
-                          value={typeChoosed}
-                          onChange={(e) => setTypeChoosed(e.target.value)}
-                          autoWidth
-                          name='type'
-                          label='Type'>
-                          <MenuItem
-                            className='w-full'
-                            value="safety">
-                            Safety
-                          </MenuItem>
-                          <MenuItem
-                            className='w-full'
-                            value="sampling">
-                            Sampling
-                          </MenuItem>
-                          <MenuItem
-                            className='w-full'
-                            value="incident">
-                            Incident
-                          </MenuItem>
-                        </Select>
-                      </div>
-                    </div>
-                    {typeChoosed === "incident" && <div className='fromWrapper'>
-                      <div className='w-full form-control'>
-                        <InputLabel
-                          className='w-full label'
-                          id='demo-simple-select-label'
-                        >
-                          Filter by Incident
-                        </InputLabel>
-                        <Select
-                          className='w-full h-10 border shadow-none input input-bordered'
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select-label'
-                          value={incidentChoosed}
-                          onChange={(e) => setIncidentChoosed(e.target.value)}
-                          autoWidth
-                          name='incident'
-                          label='Incident'>
-                          {Array.isArray(incidents) &&
-                            incidents.map((items, index) => (
-                              <MenuItem
-                                className='w-full'
-                                key={index}
-                                value={items.value}>
-                                {items.label}
-                              </MenuItem>
-                            ))}
-                        </Select>
-                      </div>
+                )}
 
-                    </div>}
-                    {typeChoosed === "sampling" && <div className='fromWrapper'>
-                      <div className='w-full form-control'>
-                        <InputLabel
-                          className='w-full label'
-                          id='demo-simple-select-label'
-                        >
-                          Filter by sample
-                        </InputLabel>
-                        <Select
-                          className='w-full h-10 border shadow-none input input-bordered'
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select-label'
-                          value={sampleChoosed}
-                          onChange={(e) => setSampleChoosed(e.target.value)}
-                          autoWidth
-                          name='sample'
-                          label='Sample'>
-                          {Array.isArray(samples) &&
-                            samples.map((items, index) => (
-                              <MenuItem
-                                className='w-full'
-                                key={index}
-                                value={items.value}>
-                                {items.label}
-                              </MenuItem>
-                            ))}
-                        </Select>
-                      </div>
-
-                    </div>}
-
-                    {typeChoosed === "sampling" && <div className='fromWrapper'>
-                      <div className='form-control'>
-                        <InputLabel
-                          className='w-full label'
-                          id='demo-simple-select-label'
-                        >
-                          Filter by results
-                        </InputLabel>
-                        <Select
-                          className='w-full h-10 border shadow-none input input-bordered'
-                          labelId='demo-simple-select-label'
-                          id='demo-simple-select-label'
-                          value={resultChoosed}
-                          onChange={(e) => setResultChoosed(e.target.value)}
-                          autoWidth
-                          name='results'
-                          label='results'>
-                          <MenuItem
-                            className='w-full'
-                            value={"positive"}>
-                            Positive
-                          </MenuItem>
-                          <MenuItem
-                            className='w-full'
-                            value={"negative"}>
-                            Negative
-                          </MenuItem>
-                        </Select>
-                      </div>
-                    </div>}
-                    <div className='controlBtn'>
-                      <button className='cancel' onClick={ClearFilter}>
-                        Cancel
-                      </button>
-                      <button className='apply' onClick={ApplyFilterButton}>
-                        Apply
+                {/* all info container */}
+                {ReviewerState === 'allReviewer' && (
+                  <div className='flex flex-col gap-4 justify-start items-center mx-auto w-full'>
+                    <div className='flex flex-col justify-start w-full'>
+                      {/* accordion start */}
+                      <AccordionWrapper data={tagsData} />
+                      {/* accordion end */}
+                    </div>
+                    <div
+                      className='w-full btnContainer'
+                      onClick={() => exportToCsv()}>
+                      <button className='w-full'>Export Data</button>
+                    </div>
+                    <div className='w-full btnContainer'>
+                      <button
+                        className='w-full'
+                        style={{ background: '#6e0101' }}
+                        onClick={promptDelete}>
+                        Delete All Samples
                       </button>
                     </div>
                   </div>
-                </div>
-              )}
+                )}
+                {/* all info container end*/}
+                {/* filter card */}
+                {ReviewerState === 'filter' && (
+                  <div className='w-full filterCard'>
+                    <div className='flex flex-row justify-center items-center my-auto w-full h-10 heading'>
+                      <p className=''>Static Period</p>
+                    </div>
+                    <div className='filterInputContainer max-w-[92%]'>
+                      <div className='fromWrapper'>
+                        <h3>From</h3>
+                        <div className='inputContainer'>
+                          <input
+                            className='text-sm'
+                            value={startDate}
+                            type='date'
+                            onChange={(e) => setStartDate(e.target.value)}
+                          />
+                          <input
+                            type='time'
+                            value={startTime}
+                            className='text-sm'
+                            onChange={(e) => setStartTime(e.target.value)}
+                          />
+                        </div>
+                      </div>
+                      <div className='fromWrapper'>
+                        <h3>To</h3>
+                        <div className='inputContainer'>
+                          <input
+                            type='date'
+                            value={endDate}
+                            color='white'
+                            className='text-sm'
+                            onChange={(e) => setEndDate(e.target.value)}
+                          />
+                          <input
+                            type='time'
+                            value={endTime}
+                            onChange={(e) => setEndTime(e.target.value)}
+                            className='text-sm'
+                          />
+                        </div>
+                      </div>
+                      <div className='fromWrapper'>
+                        <div className='w-full form-control'>
+                          <InputLabel
+                            className='w-full label'
+                            id='demo-simple-select-label'
+                          >
+                            Filter by Type
+                          </InputLabel>
+                          <Select
+                            className='w-full h-10 border shadow-none input input-bordered'
+                            labelId='demo-simple-select-label'
+                            id='demo-simple-select-label'
+                            value={typeChoosed}
+                            onChange={(e) => setTypeChoosed(e.target.value)}
+                            autoWidth
+                            name='type'
+                            label='Type'>
+                            <MenuItem
+                              className='w-full'
+                              value="safety">
+                              Safety
+                            </MenuItem>
+                            <MenuItem
+                              className='w-full'
+                              value="sampling">
+                              Sampling
+                            </MenuItem>
+                            <MenuItem
+                              className='w-full'
+                              value="incident">
+                              Incident
+                            </MenuItem>
+                          </Select>
+                        </div>
+                      </div>
+                      {typeChoosed === "incident" && <div className='fromWrapper'>
+                        <div className='w-full form-control'>
+                          <InputLabel
+                            className='w-full label'
+                            id='demo-simple-select-label'
+                          >
+                            Filter by Incident
+                          </InputLabel>
+                          <Select
+                            className='w-full h-10 border shadow-none input input-bordered'
+                            labelId='demo-simple-select-label'
+                            id='demo-simple-select-label'
+                            value={incidentChoosed}
+                            onChange={(e) => setIncidentChoosed(e.target.value)}
+                            autoWidth
+                            name='incident'
+                            label='Incident'>
+                            {Array.isArray(incidents) &&
+                              incidents.map((items, index) => (
+                                <MenuItem
+                                  className='w-full'
+                                  key={index}
+                                  value={items.value}>
+                                  {items.label}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                        </div>
 
-              {/* filter end */}
+                      </div>}
+                      {typeChoosed === "sampling" && <div className='fromWrapper'>
+                        <div className='w-full form-control'>
+                          <InputLabel
+                            className='w-full label'
+                            id='demo-simple-select-label'
+                          >
+                            Filter by sample
+                          </InputLabel>
+                          <Select
+                            className='w-full h-10 border shadow-none input input-bordered'
+                            labelId='demo-simple-select-label'
+                            id='demo-simple-select-label'
+                            value={sampleChoosed}
+                            onChange={(e) => setSampleChoosed(e.target.value)}
+                            autoWidth
+                            name='sample'
+                            label='Sample'>
+                            {Array.isArray(samples) &&
+                              samples.map((items, index) => (
+                                <MenuItem
+                                  className='w-full'
+                                  key={index}
+                                  value={items.value}>
+                                  {items.label}
+                                </MenuItem>
+                              ))}
+                          </Select>
+                        </div>
+
+                      </div>}
+
+                      {typeChoosed === "sampling" && <div className='fromWrapper'>
+                        <div className='form-control'>
+                          <InputLabel
+                            className='w-full label'
+                            id='demo-simple-select-label'
+                          >
+                            Filter by results
+                          </InputLabel>
+                          <Select
+                            className='w-full h-10 border shadow-none input input-bordered'
+                            labelId='demo-simple-select-label'
+                            id='demo-simple-select-label'
+                            value={resultChoosed}
+                            onChange={(e) => setResultChoosed(e.target.value)}
+                            autoWidth
+                            name='results'
+                            label='results'>
+                            <MenuItem
+                              className='w-full'
+                              value={"positive"}>
+                              Positive
+                            </MenuItem>
+                            <MenuItem
+                              className='w-full'
+                              value={"negative"}>
+                              Negative
+                            </MenuItem>
+                          </Select>
+                        </div>
+                      </div>}
+                      <div className='controlBtn'>
+                        <button className='cancel' onClick={ClearFilter}>
+                          Cancel
+                        </button>
+                        <button className='apply' onClick={ApplyFilterButton}>
+                          Apply
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* filter end */}
+              </div>}
+              {activePane === "tag-model" && <TagModelForm model={model} />}
             </div>
           </div>
         </div>

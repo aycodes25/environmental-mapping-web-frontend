@@ -130,9 +130,9 @@ const Trash = () => {
                     : 'block bg-cover h-60 rounded-md w-full'
                     }`}
                   style={{
-                    backgroundImage: `url(${getRealFileUrl(coverPicture) ??
+                    backgroundImage: `url("${getRealFileUrl(coverPicture) ??
                       'https://res.cloudinary.com/diqqf3eq2/image/upload/v1595959131/person-3_rxtqvi.jpg'
-                      })`,
+                      }")`,
                   }}>
                   {deleteModel && (
                     <div className='checkbox'>

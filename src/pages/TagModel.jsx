@@ -20,16 +20,12 @@ import {
   MenuItem,
   Select,
   Typography,
-  FormControl
 } from '@mui/material';
-import AddIcon from '@mui/icons-material/Add';
-import AddSample from './AddSample';
 import { useQueryClient } from '@tanstack/react-query';
 import { dispatchSelectedMeshTags } from '../redux/actions/meshActions';
 import { toggleSetting } from '../redux/actions/settingActions';
 import SettingsIcon from '@mui/icons-material/Settings';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
-import AddIncident from './AddIncident';
 import { drawTag } from '../components/SceneComponent';
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -172,6 +168,17 @@ const TagModel = () => {
       toast.error("A Type is required")
       return
     }
+
+    if (!newTaggedInfo) {
+      toast.error("Please ensure you have clicked an object to tag, aborting")
+      return
+    }
+
+    if (formData.type === "sampling" && !formData.sample || !formData.presence) {
+      toast.error("Please ensure you have set sample type and presence")
+      return
+    }
+
     setIsSubmitting(true);
     try {
       const formDataForUpload = new FormData();
@@ -316,32 +323,6 @@ const TagModel = () => {
                         value={formData.locations}
                       />
                       <div className='form-control'>
-                        {/* ditching this for now because it is buggy */}
-                        {/* <FormControl fullWidth>
-                          <InputLabel id="demo-simple-select-label">
-                            Type
-                          </InputLabel>
-                          <Select
-                            labelId="demo-simple-select-label"
-                            id="demo-simple-select"
-                            onChange={handleInputChange}
-                            label="Type"
-                            value={formData.type}
-                            name="type"
-                            required
-                          >
-                            {[
-                              { value: "safety", label: "Safety" },
-                              { value: "incident", label: "Incident" },
-                              { value: "sampling", label: "Sampling" }
-                            ].map((item, index) => (
-                              <MenuItem key={index} value={item.value}>
-                                {item.label}
-                              </MenuItem>
-                            ))}
-                          </Select>
-                        </FormControl> */}
-
                         <select
                           onChange={handleInputChange}
                           name="type"

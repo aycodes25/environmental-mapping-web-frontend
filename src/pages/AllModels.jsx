@@ -310,7 +310,7 @@ const AllModels = () => {
                       tabIndex={0}
                       className='menu dropdown-content z-20 w-full rounded-box bg-base-100 p-2 shadow'>
                       <li className='btn'>
-                        <Link to={`/tag-model/${_id}`}>Sample From Model</Link>
+                        <Link to={`/view-model/${_id}`}>Sample From Model</Link>
                       </li>
                       <li className='btn'>
                         <Link
