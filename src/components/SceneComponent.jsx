@@ -69,7 +69,6 @@ export function SceneComponent({
   const reactCanvas = useRef(null);
   const dispatch = useDispatch();
   const controls = useControls(cameraControls);
-  // const [toolTipText, setToolTipText] = useState("undefined");
   const setting = useSelector((state) => state.settingState.setting);
   const [newTaggedInfoName, setNewTaggedInfoName] = useState("");
   const [newTaggedInfoPosition, setNewTaggedInfoPosition] = useState("");
@@ -90,36 +89,6 @@ export function SceneComponent({
       return [];
     }
   };
-
-  // const handleFilterTags = useCallback(
-  //   (search) => {
-  //     const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
-
-  //     const searchResult = tags?.filter((item) => {
-  //       return (
-  //         regex.test(item.objectName?.toLowerCase()) ||
-  //         regex.test(item.taggedInfo?.toLowerCase())
-  //       );
-  //     });
-
-  //     if (searchResult && searchResult[0]) {
-  //       setToolTipText(searchResult[0].objectName);
-  //     } else {
-  //       setToolTipText("undefined");
-  //     }
-  //   },
-  //   [tags]
-  // );
-
-  // useEffect(() => {
-  //   if (newTaggedInfoName) {
-  //     handleFilterTags(newTaggedInfoName);
-  //   }
-  // }, [handleFilterTags, newTaggedInfoName]);
-
-  // useEffect(() => {
-  //   createOrUpdateTooltip(toolTipText);
-  // }, [toolTipText]);
 
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
@@ -305,7 +274,8 @@ export function SceneComponent({
   useEffect(() => {
     tags.map((tag) => {
       let tagInfo = JSON.parse(tag.taggedInfo)
-      drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+      let disc = drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+      addTagHoverEventHandler(disc, tag)
     });
   }, [tags])
 
@@ -345,108 +315,9 @@ export const SpinnerOverlay = () => {
   );
 };
 
-/** purpose: is to display positions that contains tags  */
-export function addAnchor(meshTaggedInfo, scene, onClick) {
-  const position = JSON.parse(
-    JSON.parse(meshTaggedInfo.taggedInfo).tagPosition
-  );
-  const name = JSON.parse(meshTaggedInfo.taggedInfo).name;
-  const styles = {
-    alpha: 1,
-    backgroundColor: meshTaggedInfo?.type === "sampling" ? "red" : meshTaggedInfo?.type === "incident" ? "yellow" : meshTaggedInfo?.type === "safety" ? "green" : "pink",
-    borderColor: "white",
-    fontWeight: "300",
-    height: 8,
-    hoverCursor: "pointer",
-    width: 8,
-  };
-
-  const sphere = MeshBuilder.CreateSphere(
-    "taggedSphere",
-    { diameter: 0, segments: 0, diameterX: 0, diameterY: 0, diameterZ: 0 },
-    scene
-  );
-  sphere.position.copyFrom(new Vector3(position._x, position._y, position._z));
-  sphere.visibility = 0;
-  sphere.isVisible = false;
-  sphere.alpha = 0;
-  sphere.isPickable = false;
-  sphere.renderingGroupId = 0;
-  sphere.isNearPickable = false;
-  sphere.scaling.setAll(0.3);
-
-  const dynamicTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI(
-    "ImGUI",
-    true,
-    scene
-  );
-
-  sphere.actionManager = new ActionManager(scene);
-
-  // Show tooltip on hover
-  sphere.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, function () {
-      var tooltip = document.getElementById("tooltip");
-      if (!tooltip) {
-        tooltip = document.createElement("div");
-        tooltip.id = "tooltip";
-        tooltip.style =
-          "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-        document.body.appendChild(tooltip);
-      }
-      tooltip.innerHTML = `<p> ${meshTaggedInfo.objectName
-        }<br/>
-        <span class='text-xs'>${meshTaggedInfo?.type === "sampling" ? meshTaggedInfo?.sample?.name : "type"
-        }: <span class='text-xs'>${meshTaggedInfo?.type === "sampling" ? meshTaggedInfo.presence : meshTaggedInfo?.type === "incident" ? meshTaggedInfo?.incident?.name : meshTaggedInfo?.type
-        }</span></span>
-        <br/><span class='text-xs'>Date: ${formatDate(
-          meshTaggedInfo.createdAt
-        )}</span><br/><span class='text-xs'>Time: ${formatTime(
-          meshTaggedInfo.createdAt
-        )}</span></p>`;
-      tooltip.style.display = "block";
-    })
-  );
-
-  // Hide tooltip when hover ends
-  sphere.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, function () {
-      var tooltip = document.getElementById("tooltip");
-      if (!tooltip) {
-        tooltip = document.createElement("div");
-        tooltip.id = "tooltip";
-        tooltip.style =
-          "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-        document.body.appendChild(tooltip);
-      }
-      tooltip.style.display = "none";
-    })
-  );
-
-  const anchor = new GUI.Ellipse("anchor");
-  anchor.isPointerBlocker = true;
-  anchor.height = styles.height + "px";
-  anchor.width = styles.width + "px";
-  anchor.alpha = styles.alpha;
-  anchor.color = styles.borderColor;
-  anchor.background = styles.backgroundColor;
-  anchor.linkOffsetY = 0;
-  anchor.hoverCursor = styles.hoverCursor;
-  anchor.isPickable = false;
-  anchor.onPointerClickObservable.addOnce(() => {
-    onClick(meshTaggedInfo, sphere.position);
-  });
-  dynamicTexture.addControl(anchor);
-  anchor.linkWithMesh(sphere);
-  sphere._freeze();
-}
-
 export const onSceneReady = (scene, dispatch) => {
   // hack
   // setupVideoRecording(scene);
-  let selectedMesh = null;
-
-  const jetBox = scene.getMeshByName("jetBox");
 
   scene.onPointerObservable.add((pointerInfo) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
@@ -475,53 +346,46 @@ export const onSceneReady = (scene, dispatch) => {
       }
     }
   })
-
-  // Show information pop-up when hovering over a mesh
-  scene.onPointerMove = function (evt, pickResult) {
-    if (pickResult && pickResult.pickedMesh) {
-      pickResult.pickedMesh.isPickable = true;
-      if (selectedMesh && selectedMesh !== pickResult.pickedMesh) {
-        hideTooltip();
-      } else {
-        showTooltip(evt.clientX, evt.clientY);
-      }
-    } else {
-      hideTooltip();
-    }
-  };
 };
 
-export function showTooltip(clientX, clientY) {
-  var tooltip = document.getElementById("tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.id = "tooltip";
-    tooltip.style =
-      "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-    document.body.appendChild(tooltip);
-  }
-  tooltip.style.left = clientX + 10 + "px";
-  tooltip.style.top = clientY + 10 + "px";
-  tooltip.style.display = "block";
-}
+function addTagHoverEventHandler(tag, tagData) {
+  tag.actionManager = new ActionManager(window.scene);
 
-export function createOrUpdateTooltip(objectName) {
-  var tooltip = document.getElementById("tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.id = "tooltip";
-    tooltip.style =
-      "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-    document.body.appendChild(tooltip);
-  }
-  tooltip.textContent = objectName || "undefined";
-}
+  // Show tagtip on hover
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, function (event) {
+      deleteTagTip()
+      const tagtip = document.createElement("div");
+      tagtip.id = "tagtip";
+      tagtip.style =
+        "position: fixed; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
+      tagtip.innerHTML = `<p> ${tagData.objectName || "unnamed object"
+        }<br/>
+        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : "safety"
+        }: <span class='text-xs'>${tagData?.type === "sampling" ? tagData.presence : tagData?.type === "incident" ? tagData?.incident : ""
+        }</span></span>
+        <br/><span class='text-xs'>Date: ${formatDate(
+          tagData.createdAt
+        )}</span><br/><span class='text-xs'>Time: ${formatTime(
+          tagData.createdAt
+        )}</span></p>`;
+      tagtip.style.display = "block";
+      tagtip.style.left = event.pointerX + 10 + "px";
+      tagtip.style.top = event.pointerY + 10 + "px";
+      document.body.appendChild(tagtip);
+    })
+  );
 
-export function hideTooltip() {
-  var tooltip = document.getElementById("tooltip");
-  if (tooltip) {
-    tooltip.style.display = "none";
+  function deleteTagTip() {
+    var tagtip = document.getElementById("tagtip");
+    tagtip?.remove()
   }
+
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, function () {
+      deleteTagTip()
+    })
+  );
 }
 
 export const stopRecording = (videoRecorder) => {
@@ -661,7 +525,7 @@ function makeColorFromType(type) {
 }
 
 function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
-  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, tessellation: 64 }, scene);
+  const disc = BABYLON.MeshBuilder.CreateDisc(`${name || Date.now()}`, { radius: 0.25, tessellation: 64 }, scene);
   const material = new BABYLON.StandardMaterial(name, scene);
   if (isTag) {
     material.diffuseColor = makeColorFromType(type); // red color
@@ -669,7 +533,11 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
   disc.material = material;
-  applyMeshOptimizations(disc)
+
+  applyOpRecursivelyOnSubmeshes(disc, () => {
+    applyMeshOptimizations(disc)
+  })
+
   disc.position = new Vector3(position.x, position.y - 1.6, position.z);
   disc.rotation.x = Math.PI / 2;
   return disc
@@ -678,7 +546,7 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
 export function drawTag(scene, position, name = `${Date.now()}`, type) {
   if (!position) return
   if (!scene) return
-  createDiscAtPosition(name, position, scene, true, type)
+  return createDiscAtPosition(name, position, scene, true, type)
 }
 
 export function replaceInstanceWithClone(instanceMesh) {
@@ -740,6 +608,7 @@ function optimizeScene(scene) {
   // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
   // scene.freezeActiveMeshes()
   scene.autoClear = true
+  scene.skipPointerMovePicking = false
   // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
   // optimizer.start();
 }
