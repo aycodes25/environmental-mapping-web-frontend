@@ -76,6 +76,10 @@ export function filterDataByDateAndTimeRange(
   startTime = '00:00',
   endTime = '23:59'
 ) {
+
+  if (!startDate || !endDate || !startTime || !endTime) {
+    return data
+  }
   // Convert startDate, startTime, endDate, and endTime to Date objects
   const startTimeParts = startTime.split(':').map(Number);
   const endTimeParts = endTime.split(':').map(Number);

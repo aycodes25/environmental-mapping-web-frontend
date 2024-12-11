@@ -46,6 +46,8 @@ let saveCameraPositionAndDirection = {
   inSunView: false
 }
 
+let discs = []
+
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
   // cameraSpeed: { value: 3, min: 0, max: 10, step:1 },
@@ -272,10 +274,13 @@ export function SceneComponent({
   }, []);
 
   useEffect(() => {
+    discs.forEach(d => hideDisc(d))
+    discs = []
     tags.map((tag) => {
       let tagInfo = JSON.parse(tag.taggedInfo)
       let disc = drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
       addTagHoverEventHandler(disc, tag)
+      discs.push(disc)
     });
   }, [tags])
 
@@ -505,6 +510,13 @@ export function hideSpotLight() {
     currSpotlight = null
     currTagPos = null
     window.currTagPos = currTagPos
+  }
+}
+
+export function hideDisc(disc) {
+  if (disc) {
+    disc.isVisible = false
+    disc.dispose()
   }
 }
 

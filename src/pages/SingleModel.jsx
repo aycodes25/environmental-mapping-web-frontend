@@ -28,6 +28,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { toggleSetting } from '../redux/actions/settingActions';
 import { InputLabel, MenuItem, Select } from '@mui/material';
 import TagModelForm from '../components/TagModelForm';
+import { FormInput } from '../components';
 
 const SingleModel = () => {
   const { model } = useLoaderData();
@@ -62,7 +63,6 @@ const SingleModel = () => {
   const navigate = useNavigate();
 
   async function fetchSamples() {
-    // hack
     await customFetch.get('/sample/samples').then(({ data }) => {
       if (data?.data) {
         const samplesNew = data.data.map((item) => ({
@@ -144,19 +144,22 @@ const SingleModel = () => {
 
   const handleFilterTags = useCallback(
     (search) => {
+      if (!search.length) {
+        setTagsData(model.tags || [])
+        return
+      }
       const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
 
-      const searchResult = tagsData.filter((item) => {
+      const searchResult = (model.tags || []).filter((item) => {
         return (
           regex.test(item.objectName?.toLowerCase()) ||
-          regex.test(item.incident?.name?.toLowerCase()) ||
+          regex.test(item.incident?.toLowerCase()) ||
           regex.test(item.presence?.toLowerCase()) ||
-          regex.test(item.sample?.name?.toLowerCase()) ||
+          regex.test(item.sample?.toLowerCase()) ||
           regex.test(item.locations?.toLowerCase()) ||
           regex.test(item.text?.toLowerCase()) ||
-          regex.test(item?.type?.toLowerCase()) ||
-          regex.test(item?.slug?.toLowerCase()) ||
-          regex.test(item.taggedInfo?.toLowerCase())
+          regex.test(item.type?.toLowerCase()) ||
+          regex.test(item.slug?.toLowerCase())
         );
       });
 
@@ -223,36 +226,36 @@ const SingleModel = () => {
     setFilterApplied(true);
     setReviewerState('allReviewer');
     const result = await filterDataByDateAndTimeRange(
-      tagsData,
+      model.tags || [],
       startDate,
       endDate,
       startTime,
       endTime
     );
     if (result.length && typeChoosed === 'sampling') {
-      if (sampleChoosed.length && resultChoosed.length) {
-        const filterResult = await result.filter((item) => item?.sample?._id.toLowerCase() === sampleChoosed.toLowerCase() && item?.presence.toLowerCase() === resultChoosed.toLowerCase());
+      if (sampleChoosed.length) {
+        const filterResult = result.filter((item) => item?.sample?.toLowerCase() === sampleChoosed.toLowerCase() && (item?.presence.toLowerCase() === resultChoosed.toLowerCase() || !resultChoosed));
         setTagsData(filterResult);
       } else {
-        setTagsData(result);
+        toast.error("please choose sample type, aborting filter apply");
       }
     } else if (result.length && typeChoosed === 'incident') {
       if (incidentChoosed.length) {
-        const filterResult = await result.filter((item) => item?.incident?._id.toLowerCase() === incidentChoosed.toLowerCase());
+        const filterResult = result.filter((item) => item?.incident?.toLowerCase() === incidentChoosed.toLowerCase());
         setTagsData(filterResult);
       } else {
-        setTagsData(result);
+        toast.error("please choose incident type, aborting filter apply");
       }
     } else if (result.length && typeChoosed === 'safety') {
       if (typeChoosed.length) {
-        const filterResult = await result.filter((item) => item?.type === typeChoosed.toLowerCase());
+        const filterResult = result.filter((item) => item?.type === typeChoosed.toLowerCase());
         setTagsData(filterResult);
       } else {
         setTagsData(result);
       }
     } else {
       if (typeChoosed.length) {
-        const filterResult = await tagsData.filter((item) => item?.type === typeChoosed.toLowerCase());
+        const filterResult = tagsData.filter((item) => item?.type === typeChoosed.toLowerCase());
         setTagsData(filterResult);
       } else {
         setTagsData([]);
@@ -260,18 +263,13 @@ const SingleModel = () => {
     }
 
   };
+
   const ClearFilter = () => {
     setFilterApplied(false);
     setReviewerState('allReviewer');
     resetTagsData();
   };
 
-  // eslint-disable-next-line no-unused-vars
-  const CancelFilter = () => {
-    setFilterApplied(false);
-    setReviewerState('allReviewer');
-    resetTagsData();
-  };
   const CancelExport = () => {
     setFileExported(false);
     setExportData(false);
@@ -289,6 +287,7 @@ const SingleModel = () => {
       toast.success(
         response.data.message || 'All Samples deleted successfully'
       );
+      setTagsData([])
     } else {
       toast.error(response.data.message);
     }
@@ -472,7 +471,7 @@ const SingleModel = () => {
                   <div className='flex flex-col gap-4 justify-start items-center mx-auto w-full'>
                     <div className='flex flex-col justify-start w-full'>
                       {/* accordion start */}
-                      <AccordionWrapper data={tagsData} />
+                      <AccordionWrapper data={tagsData} setTagsData={setTagsData} />
                       {/* accordion end */}
                     </div>
                     <div
@@ -541,31 +540,24 @@ const SingleModel = () => {
                           >
                             Filter by Type
                           </InputLabel>
-                          <Select
-                            className='w-full h-10 border shadow-none input input-bordered'
-                            labelId='demo-simple-select-label'
-                            id='demo-simple-select-label'
+                          <select
                             value={typeChoosed}
                             onChange={(e) => setTypeChoosed(e.target.value)}
-                            autoWidth
                             name='type'
-                            label='Type'>
-                            <MenuItem
-                              className='w-full'
-                              value="safety">
-                              Safety
-                            </MenuItem>
-                            <MenuItem
-                              className='w-full'
-                              value="sampling">
-                              Sampling
-                            </MenuItem>
-                            <MenuItem
-                              className='w-full'
-                              value="incident">
-                              Incident
-                            </MenuItem>
-                          </Select>
+                            required
+                            className="w-full p-2 border rounded"
+                          >
+                            <option value="" disabled>Select Type</option>
+                            {[
+                              { value: "safety", label: "Safety" },
+                              { value: "incident", label: "Incident" },
+                              { value: "sampling", label: "Sampling" }
+                            ].map((item) => (
+                              <option key={item.value} value={item.value}>
+                                {item.label}
+                              </option>
+                            ))}
+                          </select>
                         </div>
                       </div>
                       {typeChoosed === "incident" && <div className='fromWrapper'>
@@ -576,25 +568,16 @@ const SingleModel = () => {
                           >
                             Filter by Incident
                           </InputLabel>
-                          <Select
-                            className='w-full h-10 border shadow-none input input-bordered'
-                            labelId='demo-simple-select-label'
-                            id='demo-simple-select-label'
-                            value={incidentChoosed}
+                          <FormInput
                             onChange={(e) => setIncidentChoosed(e.target.value)}
-                            autoWidth
+                            label='Incident'
+                            type='text'
                             name='incident'
-                            label='Incident'>
-                            {Array.isArray(incidents) &&
-                              incidents.map((items, index) => (
-                                <MenuItem
-                                  className='w-full'
-                                  key={index}
-                                  value={items.value}>
-                                  {items.label}
-                                </MenuItem>
-                              ))}
-                          </Select>
+                            placeholder='Incident'
+                            size='input-sm'
+                            value={incidentChoosed}
+                            options={["Crack", "Spill"]}
+                          />
                         </div>
 
                       </div>}
@@ -606,25 +589,16 @@ const SingleModel = () => {
                           >
                             Filter by sample
                           </InputLabel>
-                          <Select
-                            className='w-full h-10 border shadow-none input input-bordered'
-                            labelId='demo-simple-select-label'
-                            id='demo-simple-select-label'
-                            value={sampleChoosed}
+                          <FormInput
                             onChange={(e) => setSampleChoosed(e.target.value)}
-                            autoWidth
+                            label='Type of sample'
+                            type='text'
                             name='sample'
-                            label='Sample'>
-                            {Array.isArray(samples) &&
-                              samples.map((items, index) => (
-                                <MenuItem
-                                  className='w-full'
-                                  key={index}
-                                  value={items.value}>
-                                  {items.label}
-                                </MenuItem>
-                              ))}
-                          </Select>
+                            placeholder='Please enter the type of sample'
+                            size='input-sm'
+                            value={sampleChoosed}
+                            options={["Salmonella", "Listeria"]}
+                          />
                         </div>
 
                       </div>}
@@ -673,7 +647,11 @@ const SingleModel = () => {
 
                 {/* filter end */}
               </div>}
-              {activePane === "tag-model" && <TagModelForm model={model} />}
+              {activePane === "tag-model" && <TagModelForm
+                model={model}
+                setTagsData={setTagsData}
+                tagsData={tagsData}
+              />}
             </div>
           </div>
         </div>
