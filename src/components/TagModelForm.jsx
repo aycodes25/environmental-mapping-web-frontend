@@ -28,7 +28,7 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
 import { drawTag } from './SceneComponent';
 
-const TagModelForm = ({ model }) => {
+const TagModelForm = ({ model, setTagsData, tagsData }) => {
     const dispatch = useDispatch();
     const setting = useSelector(memoize((state) => state.settingState.setting));
     const settingMode = () => {
@@ -162,7 +162,7 @@ const TagModelForm = ({ model }) => {
             return
         }
 
-        if (formData.type === "sampling" && !formData.sample || !formData.presence) {
+        if (formData.type === "sampling" && (!formData.sample || !formData.presence)) {
             toast.error("Please ensure you have set sample type and result")
             return
         }
@@ -192,7 +192,13 @@ const TagModelForm = ({ model }) => {
                 // drop tag visible
                 let tagId = Date.now()
                 let tagPosition = currTagPos
-                drawTag(scene, tagPosition, tagId, formData.type)
+                let tags = [...tagsData]
+                tags.push({
+                    ...formData,
+                    taggedInfo: newTaggedInfo,
+                    objectName: newTaggedInfoName
+                })
+                setTagsData(tags)
             } else {
                 toast.error(response.data?.message);
             }
