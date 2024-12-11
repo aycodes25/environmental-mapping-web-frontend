@@ -159,7 +159,8 @@ const SingleModel = () => {
           regex.test(item.locations?.toLowerCase()) ||
           regex.test(item.text?.toLowerCase()) ||
           regex.test(item.type?.toLowerCase()) ||
-          regex.test(item.slug?.toLowerCase())
+          regex.test(item.slug?.toLowerCase()) ||
+          regex.test("sample") // search hit if user types in sample
         );
       });
 
@@ -254,12 +255,7 @@ const SingleModel = () => {
         setTagsData(result);
       }
     } else {
-      if (typeChoosed.length) {
-        const filterResult = tagsData.filter((item) => item?.type === typeChoosed.toLowerCase());
-        setTagsData(filterResult);
-      } else {
-        setTagsData([]);
-      }
+      setTagsData(result);
     }
 
   };
