@@ -4,9 +4,10 @@ import React, { useEffect, useState } from "react";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { AiOutlineCloudUpload } from "react-icons/ai";
 import { FormControl, MenuItem, Select } from "@mui/material";
+import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 
 const singleUserQuery = (id) => {
   return {
@@ -31,13 +32,16 @@ export const singleUserLoader =
 
 const EditUser = () => {
   const { user } = useLoaderData();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullname: user.fullname,
     username: user.username,
+    password: "",
     email: user.email,
     role: user.role,
     image: user.imageUrl,
-    location: user.location,
+    location: user.locations?._id,
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -68,6 +72,11 @@ const EditUser = () => {
   }
 
   useEffect(() => {
+    const pageViewer = getUserFromLocalStorage()
+    if (pageViewer?.role !== "superAdmin") {
+      toast.error("You are not permitted to view this page")
+      navigate(-1)
+    }
     fetchLocations();
   }, []);
 
@@ -140,6 +149,18 @@ const EditUser = () => {
             />
           </div>
           <div className="flex flex-col justify-center items-start w-full">
+            <p>Password</p>
+            <input
+              type="text"
+              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
+              name="password"
+              value={formData.password}
+              placeholder="Enter your new password"
+              onChange={handleChange}
+              required
+            />
+          </div>
+          <div className="flex flex-col justify-center items-start w-full">
             <p>Username</p>
             <input
               type="text"
@@ -172,7 +193,7 @@ const EditUser = () => {
             <select
               name="location"
               className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              value={formData?.location?._id}
+              value={formData.location}
               onChange={handleChange}
               required
             >

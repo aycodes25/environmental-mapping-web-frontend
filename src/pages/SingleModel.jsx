@@ -48,7 +48,7 @@ const SingleModel = () => {
   const [filterApplied, setFilterApplied] = useState(false);
   const [exportData, setExportData] = useState(false);
   const [fileExported, setFileExported] = useState(false);
-  const [tagsData, setTagsData] = useState();
+  const [tagsData, setTagsData] = useState([]);
   const [newTaggedInfoName, setNewTaggedInfoName] = useState('');
   const [newTaggedInfoPosition, setNewTaggedInfoPosition] = useState('');
   const [newTaggedInfo, setNewTaggedInfo] = useState({});
@@ -299,7 +299,7 @@ const SingleModel = () => {
         {/*threejs animation wrapper start  */}
         <div className='h-screen threejsWrapper'>
           <div className='w-screen h-screen threejsAnimationWrapper'>
-            <ModelViewBabylon MODEL_URL={model.file} tags={model?.tags} />
+            <ModelViewBabylon MODEL_URL={model.file} tags={tagsData} />
           </div>
           <div className='navigation'>
             <div onClick={goBack}>

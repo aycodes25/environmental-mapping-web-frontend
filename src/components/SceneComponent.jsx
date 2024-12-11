@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Color3,
   VideoRecorder,
@@ -11,7 +11,6 @@ import {
   // Matrix,
   MeshBuilder,
   Camera,
-  ArcRotateCamera,
   // hack
   FreeCamera,
   HemisphericLight,
@@ -20,15 +19,10 @@ import {
   Scene,
   ActionManager,
   ExecuteCodeAction,
-  CannonJSPlugin,
-  SpotLight,
-  Texture,
   VertexData,
   Mesh,
-  GPUParticleSystem
 } from "@babylonjs/core";
 import { SceneLoader } from "babylonjs";
-import { GridMaterial } from "@babylonjs/materials";
 import * as cannon from "cannon";
 import "babylonjs-loaders";
 import * as GUI from "babylonjs-gui";
@@ -40,18 +34,17 @@ import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
 
-//hack
-// all below not used
-// import RedCapet from '../assets/RedCapet.png';
-// import redCircle from '../assets/redCircle.png';
-// import ColoredCircle from '../assets/pngwing.png';
-// import RainBow from '../assets/pngRainbow.png';
-
 let currTagPos = null
 let currSpotlight = null
 let currCameraPosition = null
 let currCameraDirection = null
 let currentCameraRotation = null
+let saveCameraPositionAndDirection = {
+  position: null,
+  direction: null,
+  rotation: null,
+  inSunView: false
+}
 
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
@@ -64,32 +57,6 @@ const cameraControls = {
   // panInertia: { value: 0.9, min: 0, max: 1, step:0.1 },
   apply: true,
 };
-
-function updateCameraSettings(scene, controls) {
-  scene.getCameraByName("camera0").angularSensibilityX =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').speed = controls.cameraSpeed;
-  scene.getCameraByName("camera0").angularSensibilityY =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').panningSensibility = controls.panSensitivity;
-  scene.getCameraByName("camera0").wheelPrecision = controls.zoomSensitivity;
-  // scene.getCameraByName('camera0').inertia = controls.zoomInertia;
-  scene.getCameraByName("camera0").pinchPrecision = controls.zoomSensitivity;
-  scene.getCameraByName("camera0").pinchDeltaPercentage =
-    controls.zoomSensitivity;
-
-  // scene.getCameraByName("camera1").angularSensibilityX =
-  //   controls.angularSensibility;
-  // // scene.getCameraByName('camera1').speed = controls.cameraSpeed;
-  // scene.getCameraByName("camera1").angularSensibilityY =
-  //   controls.angularSensibility;
-  // // scene.getCameraByName('camera1').panningSensibility = controls.panSensitivity;
-  // scene.getCameraByName("camera1").wheelPrecision = controls.zoomSensitivity;
-  // // scene.getCameraByName('camera1').inertia = controls.zoomInertia;
-  // scene.getCameraByName("camera1").pinchPrecision = controls.zoomSensitivity;
-  // scene.getCameraByName("camera1").pinchDeltaPercentage =
-  //   controls.zoomSensitivity;
-}
 
 export function SceneComponent({
   baseUrl,
@@ -154,38 +121,11 @@ export function SceneComponent({
   //   createOrUpdateTooltip(toolTipText);
   // }, [toolTipText]);
 
-  // hack
-  // useEffect(() => {
-  //   const [meshName, tagPosition] = destructureTaggedInfo(modelInteractionData);
-  //   if (
-  //     meshName &&
-  //     destructureTaggedInfo(modelInterationActiveData?.taggedInfo)[0]
-  //   ) {
-  //     setNewTaggedInfoName(modelInterationActiveData.objectName);
-  //   } else {
-  //     setNewTaggedInfoName(meshName);
-  //   }
-  //   setNewTaggedInfoPosition(tagPosition);
-  //   setNewTaggedInfo(modelInteractionData);
-  // }, [modelInteractionData, modelInterationActiveData]);
-
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-
-    const sunAngleCamera = new ArcRotateCamera(
-      "camera0",
-      Math.PI / 2,
-      Math.PI / 2,
-      100,
-      new Vector3(0, 100, 0),
-      scene
-    );
-
-    // hack
-    sunAngleCamera.rotation = new Vector3(-Math.PI / 2, 0, 0);
 
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
     light.intensity = controls.contrast;
@@ -195,13 +135,31 @@ export function SceneComponent({
 
     let is2DView;
 
+    const handleHeatMapClick = (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      let camera1 = scene.getCameraByName("camera1")
+      if (saveCameraPositionAndDirection.inSunView) {
+        saveCameraPositionAndDirection.inSunView = false
+        camera1.position = saveCameraPositionAndDirection.position.clone()
+        camera1.direction = saveCameraPositionAndDirection.direction.clone()
+        camera1.rotation = saveCameraPositionAndDirection.rotation.clone()
+      } else {
+        saveCameraPositionAndDirection.inSunView = true
+        saveCameraPositionAndDirection.position = camera1.position.clone()
+        saveCameraPositionAndDirection.direction = camera1.getForwardRay().direction.clone()
+        saveCameraPositionAndDirection.rotation = new Vector3(
+          camera1.rotation.x,
+          camera1.rotation.y,
+          camera1.rotation.z,
+        )
+        centerCameras(scene, true)
+      }
+    }
+
     const heatmapButton = document.getElementById("heatmapButton");
-    heatmapButton.addEventListener("click", () => {
-      scene.activeCamera =
-        scene.activeCamera !== sunAngleCamera
-          ? sunAngleCamera
-          : scene.getCameraByName("camera1");
-    });
+    heatmapButton.removeEventListener("click", handleHeatMapClick);
+    heatmapButton.addEventListener("click", handleHeatMapClick);
 
     const screenshotButton = document.getElementById("screenshotButton");
     screenshotButton.addEventListener("click", () => {
@@ -259,16 +217,6 @@ export function SceneComponent({
     dynamicTexture.addControl(ellipse_jetBox);
     ellipse_jetBox.linkWithMesh(jetBox);
 
-    scene.onBeforeRenderObservable.add(() => {
-      if (scene.activeCamera === sunAngleCamera) {
-        ellipse_jetBox.isVisible = true;
-      } else {
-        ellipse_jetBox.isVisible = false;
-      }
-    });
-    const angle = 1 * (2 * Math.PI);
-    const radius = 4;
-
     const camera1 = new FreeCamera(
       `camera1`,
       jetBox.position,
@@ -289,66 +237,11 @@ export function SceneComponent({
     });
 
     scene.activeCamera = scene.getCameraByName("camera1");
-    document.addEventListener("keydown", (event) => {
-      // Check if the "=" key is pressed to flip between camera 0 and 1
-      if (event.key === "=") {
-        const selectedCamera =
-          scene.activeCamera === scene.getCameraByName("camera1")
-            ? scene.getCameraByName("camera0")
-            : scene.getCameraByName("camera1");
-        if (selectedCamera) {
-          scene.activeCamera = selectedCamera;
-        }
-      }
-    });
 
     scene.beginAnimation(jetBox, 0, 100, true);
 
     scene.onBeforeRenderObservable.addOnce(() => {
       BabylonControls(scene);
-    });
-
-    let boundaryRadius;
-    let boundaryCenter;
-    // scene.onReadyObservable.addOnce(() => {
-    //   const loadedMeshes = scene.meshes;
-
-    //   // Calculate the bounding box
-    //   const centroid = Vector3.Zero();
-    //   let maxExtent = 0;
-    //   loadedMeshes.forEach((mesh) => {
-    //     const tagPosition = mesh.getAbsolutePosition();
-    //     centroid.addInPlace(tagPosition);
-    //     const distance = Vector3.Distance(tagPosition, centroid);
-    //     if (distance > maxExtent) {
-    //       maxExtent = distance;
-    //     }
-    //   });
-    //   centroid.scaleInPlace(1 / loadedMeshes.length);
-
-    //   scene.getCameraByName("camera0").setTarget(centroid);
-    //   jetBox.position.addInPlace(centroid);
-    //   boundaryRadius = maxExtent;
-    //   boundaryCenter = centroid.clone();
-    // });
-
-    // scene.onReadyObservable.addOnce(() => {
-    //   // Check if the new position is within the boundary
-    //   const newPosition = new Vector3(jetBox.position);
-    //   const distanceToBoundaryCenter = Vector3.Distance(
-    //     newPosition,
-    //     boundaryCenter
-    //   );
-
-    //   if (distanceToBoundaryCenter <= boundaryRadius) {
-    //     jetBox.position.copyFrom(newPosition);
-    //   } else {
-    //     jetBox.position.copyFrom(boundaryCenter);
-    //   }
-    // });
-
-    scene.registerBeforeRender(() => {
-      updateCameraSettings(scene, controls);
     });
 
     return [scene];
@@ -383,15 +276,10 @@ export function SceneComponent({
       toast.success("model is ready!");
     };
 
-    if (scene.isReady()) {
-      tags.map((tag) => {
-        let tagInfo = JSON.parse(tag.taggedInfo)
-        drawTag(scene, tagInfo.tagPosition)
-      });
-      handleSceneReady();
-    } else {
-      scene.onReadyObservable.addOnce(handleSceneReady);
-    }
+
+    scene.onReadyObservable.addOnce(() => {
+      handleSceneReady()
+    });
 
     scene.onReadyObservable.addOnce(() => {
       setIsLoading(false);
@@ -412,14 +300,14 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
-
-    return () => {
-      // engine.stopRenderLoop(renderLoop);
-      // scene.getEngine().dispose();
-      // scene.dispose();
-      // window.removeEventListener("resize", resize);
-    };
   }, []);
+
+  useEffect(() => {
+    tags.map((tag) => {
+      let tagInfo = JSON.parse(tag.taggedInfo)
+      drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+    });
+  }, [tags])
 
   return (
     <>
@@ -433,7 +321,6 @@ export function SceneComponent({
         id="renderCanvas"
         className="h-screen w-full cursor-pointer"
         ref={reactCanvas}
-        // hack - remove external props to prevent rerender
         {...rest}
       />
     </>
@@ -565,10 +452,6 @@ export const onSceneReady = (scene, dispatch) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
       const pickResult = pointerInfo.pickInfo
 
-      // if (scene.activeCamera === scene.getCameraByName("camera1")) {
-      //   updateSpotLight(pickResult, scene);
-      // }
-
       if (pickResult.hit) {
 
         const pointCoordinates = pickResult.pickedPoint;
@@ -589,11 +472,6 @@ export const onSceneReady = (scene, dispatch) => {
             )
           );
         }
-
-        // const activeCamera = scene.activeCamera;
-        // if (activeCamera && activeCamera.name === "camera0" && jetBox) {
-        //   jetBox.position = pointCoordinates;
-        // }
       }
     }
   })
@@ -666,30 +544,6 @@ export const stopRecording = (videoRecorder) => {
   toast.success("Video recording stopped");
 };
 
-export function ensureHighlightableRecursively(mesh, scene) {
-  // hack
-  // if (
-  //   mesh !== scene.getMeshByName("jetBox") ||
-  //   mesh !== scene.getMeshByName("taggedSphere") ||
-  //   mesh.name === "taggedSphere"
-  // ) {
-  //   mesh.isPickable = true;
-  //   mesh.visibility = 1;
-  //   mesh.isVisible = true;
-  //   //  mesh.material = new StandardMaterial("defaultMaterial", scene);
-  //   //   mesh.material.diffuseColor = mesh.material.diffuseColor;
-  //   //   mesh.material.specularColor = mesh.material.specularColor;
-  //   if (mesh.renderingGroupId === 0) {
-  //     mesh.renderingGroupId = 1;
-  //   }
-  //   if (mesh.getChildMeshes) {
-  //     var childMeshes = mesh.getChildMeshes();
-  //     childMeshes.forEach(function (childMesh) {
-  //       ensureHighlightableRecursively(childMesh, scene);
-  //     });
-  //   }
-  // }
-}
 
 export function gridBoxOnMesh(mesh, scene) {
   const boundingBox = mesh.getBoundingInfo().boundingBox;
@@ -790,12 +644,27 @@ export function hideSpotLight() {
   }
 }
 
+function makeColorFromType(type) {
+  if (!type) {
+    return new BABYLON.Color3(1, 0, 0)
+  }
+  switch (type) {
+    case "sampling":
+      return new BABYLON.Color3(0, 0.5, 0.5)
+    case "incident":
+      return new BABYLON.Color3(0, 0, 0)
+    case "safety":
+      return new BABYLON.Color3(1, 0, 0)
+    default:
+      return new BABYLON.Color3(1, 0, 0)
+  }
+}
 
-function createDiscAtPosition(name, position, scene, isTag = false) {
-  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.5, tessellation: 64 }, scene);
+function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
+  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.25, tessellation: 64 }, scene);
   const material = new BABYLON.StandardMaterial(name, scene);
   if (isTag) {
-    material.diffuseColor = new BABYLON.Color3(1, 0, 0); // red color
+    material.diffuseColor = makeColorFromType(type); // red color
   } else {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
@@ -806,10 +675,10 @@ function createDiscAtPosition(name, position, scene, isTag = false) {
   return disc
 }
 
-export function drawTag(scene, position, name = `${Date.now()}`) {
+export function drawTag(scene, position, name = `${Date.now()}`, type) {
   if (!position) return
   if (!scene) return
-  createDiscAtPosition(name, position, scene, true)
+  createDiscAtPosition(name, position, scene, true, type)
 }
 
 export function replaceInstanceWithClone(instanceMesh) {
@@ -952,7 +821,7 @@ function importGLFileInScene(glFile, scene) {
   });
 }
 
-function centerCameras(scene) {
+function centerCameras(scene, setSunAngleCamera = false) {
   const loadedMeshes = scene.meshes;
 
   // Calculate the bounding box
@@ -968,9 +837,14 @@ function centerCameras(scene) {
   });
   centroid.scaleInPlace(1 / loadedMeshes.length);
 
-  // scene.getCameraByName("camera0").setTarget(centroid.clone())
-  // scene.getCameraByName("camera0").radius = 10
-  scene.getCameraByName("camera1").position = centroid.clone()
+  if (setSunAngleCamera) {
+    let camera = scene.getCameraByName("camera1")
+    camera.position = centroid.clone()
+    camera.rotation.x = Math.PI / 2;
+    camera.position.y = 150
+  } else {
+    scene.getCameraByName("camera1").position = centroid.clone()
+  }
 }
 
 export function resetCameraLocation(desc) {
