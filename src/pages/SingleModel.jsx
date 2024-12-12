@@ -282,6 +282,7 @@ const SingleModel = () => {
       toast.success(
         response.data.message || 'All Samples deleted successfully'
       );
+      model.tags = []
       setTagsData([])
     } else {
       toast.error(response.data.message);
@@ -466,7 +467,7 @@ const SingleModel = () => {
                   <div className='flex flex-col gap-4 justify-start items-center mx-auto w-full'>
                     <div className='flex flex-col justify-start w-full'>
                       {/* accordion start */}
-                      <AccordionWrapper data={tagsData} setTagsData={setTagsData} />
+                      <AccordionWrapper data={tagsData} setTagsData={setTagsData} model={model} />
                       {/* accordion end */}
                     </div>
                     <div

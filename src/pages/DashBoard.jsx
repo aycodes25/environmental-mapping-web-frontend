@@ -155,16 +155,14 @@ const DashBoard = () => {
               className="text-white"
             >
               <ChartBox
-                number={parseFloat(positivityRateYearToDate).toFixed(2)}
-                title="Positivity Rate Year To Date"
+                number={returnNumberOrZero(parseFloat(positivityRateYearToDate).toFixed(2))}
                 bg="text"
               />
             </ExpandableCard>
 
             <ExpandableCard title="Positivity Rate This Month">
               <ChartBox
-                number={parseFloat(positivityRateThisMonth).toFixed(2)}
-                title="Positivity Rate This Month"
+                number={returnNumberOrZero(parseFloat(positivityRateThisMonth).toFixed(2))}
               />
             </ExpandableCard>
 
@@ -175,7 +173,6 @@ const DashBoard = () => {
             >
               <ChartBox
                 number={positiveTagsThisMonth}
-                title="Positive Samples This Month"
               />
             </ExpandableCard>
 
@@ -186,7 +183,6 @@ const DashBoard = () => {
             >
               <ChartBox
                 number={totalTagsThisMonth}
-                title="Total Samples This Month"
               />
             </ExpandableCard>
           </div>
@@ -320,5 +316,10 @@ const DashBoard = () => {
     </div>
   );
 };
+
+function returnNumberOrZero(value) {
+  if (typeof Number(value) === "number" && value !== "NaN") return value
+  return 0
+}
 
 export default DashBoard;

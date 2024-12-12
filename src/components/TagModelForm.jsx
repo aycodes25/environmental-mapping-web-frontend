@@ -1,19 +1,15 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useEffect, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
-import { useLoaderData, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import '../styles/singleModel.css';
-import CancelOutlinedIcon from '@mui/icons-material/CancelOutlined';
-import MenuIcon from '@mui/icons-material/Menu';
 
 import { FormInput } from '../components';
 import { CiCirclePlus } from 'react-icons/ci';
 import { useDispatch, useSelector } from 'react-redux';
 import { memoize } from 'proxy-memoize';
 import { customFetch } from '../utils';
-import ModelViewBabylon from '../components/ModelViewBabylon';
 import { toast } from 'react-toastify';
-import ModelOnScreenControls from '../components/ModelOnScreenControls';
 import {
     Button,
     InputLabel,
@@ -24,20 +20,14 @@ import {
 import { useQueryClient } from '@tanstack/react-query';
 import { dispatchSelectedMeshTags } from '../redux/actions/meshActions';
 import { toggleSetting } from '../redux/actions/settingActions';
-import SettingsIcon from '@mui/icons-material/Settings';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
-import { drawTag } from './SceneComponent';
 
 const TagModelForm = ({ model, setTagsData, tagsData }) => {
     const dispatch = useDispatch();
     const setting = useSelector(memoize((state) => state.settingState.setting));
-    const settingMode = () => {
-        dispatch(toggleSetting(!setting));
-    };
 
     const [samples, setSamples] = useState([]);
     const [incidents, setIncidents] = useState([]);
-    const [mobile, setMobile] = useState(false);
     const [addSample, setAddSample] = useState(false);
     const [addIncident, setAddIncident] = useState(false);
     const [newTaggedInfoName, setNewTaggedInfoName] = useState("");
@@ -190,15 +180,15 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
             if (response.data?.status !== 'error') {
                 toast.success(`Tag added successfully`);
                 // drop tag visible
-                let tagId = Date.now()
-                let tagPosition = currTagPos
                 let tags = [...tagsData]
                 tags.push({
                     ...formData,
                     taggedInfo: newTaggedInfo,
-                    objectName: newTaggedInfoName
+                    objectName: newTaggedInfoName,
+                    _id: response.data.data._id
                 })
                 setTagsData(tags)
+                model.tags = tags
             } else {
                 toast.error(response.data?.message);
             }
