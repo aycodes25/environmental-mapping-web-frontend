@@ -4,7 +4,7 @@ import React, { useEffect, useState } from "react";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
-import { useLoaderData } from "react-router-dom";
+import { useLoaderData, useNavigate } from "react-router-dom";
 import { Upload, UserCog } from "lucide-react"; // Import icons
 
 
@@ -89,7 +89,7 @@ const EditUser = () => {
     fetchLocations();
   }, []);
 
-  const handleClick = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -117,10 +117,10 @@ const EditUser = () => {
       setIsSubmitting(false);
     }
   };
-return (
+  return (
     <div className="py-8">
       <Card className="mx-auto max-w-2xl bg-white shadow-md">
-           <CardHeader className="text-center space-y-1">
+        <CardHeader className="text-center space-y-1">
           <div className="flex justify-center mb-2">
             <div className="h-12 w-12 rounded-full bg-[#021431]/10 flex items-center justify-center">
               <UserCog className="h-6 w-6 text-blue-500" />
@@ -133,7 +133,7 @@ return (
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleClick} encType="multipart/form-data" className="space-y-4">
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
             {/* Full Name */}
             <div className="space-y-2">
               <Label className="text-gray-700">Full Name</Label>
@@ -144,7 +144,7 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your fullname"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                
+
               />
             </div>
 
@@ -158,7 +158,6 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                
               />
             </div>
 
@@ -172,7 +171,6 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your password"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-               
               />
             </div>
 
@@ -186,17 +184,17 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your username"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-              
+
               />
             </div>
 
             {/* Role Selection */}
             <div className="space-y-2">
               <Label className="text-gray-700">User Role</Label>
-              <Select 
-                name="role" 
-                value={formData.role} 
-                onValueChange={(value) => handleChange({ target: { name: 'role', value }})}
+              <Select
+                name="role"
+                value={formData.role}
+                onValueChange={(value) => handleChange({ target: { name: 'role', value } })}
               >
                 <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
                   <SelectValue placeholder="Select user role" />
@@ -223,18 +221,18 @@ return (
             {/* Location Selection */}
             <div className="space-y-2">
               <Label className="text-gray-700">Location</Label>
-              <Select 
-                name="location" 
-                value={formData?.location?._id || ""} 
-                onValueChange={(value) => handleChange({ target: { name: 'location', value }})}
+              <Select
+                name="location"
+                value={formData?.location?._id || ""}
+                onValueChange={(value) => handleChange({ target: { name: 'location', value } })}
               >
                 <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border border-gray-200 shadow-lg">
                   {Array.isArray(locations) && locations.map((item, index) => (
-                    <SelectItem 
-                      key={index} 
+                    <SelectItem
+                      key={index}
                       value={item.value}
                       className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
                     >
@@ -259,8 +257,8 @@ return (
                   <p className="text-sm text-gray-500">JPEG, PNG up to 2MB</p>
                 </div>
                 <label className="cursor-pointer">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     type="button"
                     className="hover:bg-[#021431] hover:text-white transition-colors"
                   >
@@ -278,8 +276,8 @@ return (
             </div>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-11 bg-[#021431] hover:bg-[#021431]/90 text-white"
               disabled={isSubmitting}
             >

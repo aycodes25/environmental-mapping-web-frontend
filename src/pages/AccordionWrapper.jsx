@@ -14,11 +14,11 @@ import { toast } from 'react-toastify';
 import EvidenceImage from './EvidenceImage';
 import { resetCameraLocation } from '../components/SceneComponent';
 
-const AccordionWrapper = ({ data, setTagsData }) => {
-  const [expanded, setExpanded] = useState(false);
+const AccordionWrapper = ({ data, setTagsData, model }) => {
+  const [expanded, setExpanded] = useState("");
   const [open, setOpen] = React.useState(false);
   const handleChange = (panel) => (event, isExpanded) => {
-    setExpanded(isExpanded ? panel : false);
+    setExpanded(isExpanded ? panel : "");
   };
 
   const handleOpen = (e) => {
@@ -31,6 +31,7 @@ const AccordionWrapper = ({ data, setTagsData }) => {
       toast.success(response.data.message || 'Samples deleted successfully');
       let tags = data.filter(tag => tag._id !== id)
       setTagsData(tags)
+      model.tags = tags
     } else {
       toast.error(response.data.message);
     }
@@ -44,7 +45,6 @@ const AccordionWrapper = ({ data, setTagsData }) => {
           <Accordion
             key={index}
             className={`accordionWrapper border-solid border-2 w-full ${item?.type === "sampling" ? "border-red-900" : item?.type === "safety" ? "border-blue-900" : "border-gray-300"}`}
-            id='accordionWrapper'
             expanded={expanded === id}
             onChange={handleChange(id)}>
             <AccordionSummary
