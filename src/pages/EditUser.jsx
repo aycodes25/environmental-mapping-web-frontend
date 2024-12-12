@@ -5,9 +5,8 @@ import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { Upload, UserCog } from "lucide-react"; 
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
-
+import { Upload, UserCog } from "lucide-react"; // Import icons
 
 
 
@@ -17,7 +16,6 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
-
 
 
 const singleUserQuery = (id) => {
@@ -45,6 +43,7 @@ const EditUser = () => {
   const { user } = useLoaderData();
     const navigate = useNavigate();
 
+  
   const [formData, setFormData] = useState({
     fullname: user?.fullname || "",
     username: user?.username || "",
@@ -52,7 +51,6 @@ const EditUser = () => {
     role: user?.role || "",
     image: user?.imageUrl || "",
     location: user?.location || "",
-
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -126,7 +124,6 @@ return (
           <div className="flex justify-center mb-2">
             <div className="h-12 w-12 rounded-full bg-[#021431]/10 flex items-center justify-center">
               <UserCog className="h-6 w-6 text-blue-500" />
-
             </div>
           </div>
           <CardTitle className="text-3xl font-bold">Edit User</CardTitle>
@@ -147,7 +144,7 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your fullname"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+                
               />
             </div>
 
@@ -161,7 +158,21 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+                
+              />
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Password</Label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
+               
               />
             </div>
 
@@ -175,7 +186,7 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your username"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+              
               />
             </div>
 
