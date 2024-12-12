@@ -636,7 +636,7 @@ function updateCameraPosition(scene) {
 
 function applyMeshOptimizations(mesh) {
   // applyOcclusionAlgo(mesh)
-  mesh.isReady() && mesh.freezeWorldMatrix()
+  // mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
   mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   mesh.isPickable = true // because .performancePriority == BABYLON.ScenePerformancePriority.Aggressive
 }

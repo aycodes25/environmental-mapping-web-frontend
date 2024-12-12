@@ -1,10 +1,8 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useEffect, useState } from "react";
-import { FaEye, FaEyeSlash } from "react-icons/fa";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
-import { SubmitBtn, Successful } from "../components";
-import { AiOutlineCloudUpload } from "react-icons/ai";
+import { Successful } from "../components";
 import { Upload, UserPlus, Eye, EyeOff } from "lucide-react"; // Import icons
 
 
@@ -57,7 +55,7 @@ const AddUser = () => {
     fetchLocations();
   }, []);
 
-  const handleClick = async (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
     try {
@@ -88,7 +86,7 @@ const AddUser = () => {
     }
   };
 
-  
+
   return (
     <div className="py-8">
       <Card className="mx-auto max-w-2xl bg-white shadow-md">
@@ -105,7 +103,7 @@ const AddUser = () => {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleClick} encType="multipart/form-data" className="space-y-4">
+          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
             {/* Form fields */}
             <div className="space-y-2">
               <Label className="text-gray-700">Full Name</Label>
@@ -174,59 +172,59 @@ const AddUser = () => {
             {/* Role Selection */}
             <div className="space-y-2">
               <Label className="text-gray-700">User Role</Label>
-              <Select 
-                name="role" 
-                value={formData.role} 
-                onValueChange={(value) => handleChange({ target: { name: 'role', value }})}
+              <Select
+                name="role"
+                value={formData.role}
+                onValueChange={(value) => handleChange({ target: { name: 'role', value } })}
               >
                 <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
                   <SelectValue placeholder="Select user role" />
                 </SelectTrigger>
-               <SelectContent className="bg-white border border-gray-200 shadow-lg">
-          <SelectItem 
-          value="tagger" 
-            className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
-          >
-            Sampler
-                    </SelectItem>
-            <SelectItem 
-    value="reviewer" 
-    className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
-  >
-    Reviewer
-  </SelectItem>
-  <SelectItem 
-    value="admin" 
-    className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
-  >
-    Admin
-  </SelectItem>
-      </SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                  <SelectItem
+                    value="tagger"
+                    className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
+                  >
+                    Sampler
+                  </SelectItem>
+                  <SelectItem
+                    value="reviewer"
+                    className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
+                  >
+                    Reviewer
+                  </SelectItem>
+                  <SelectItem
+                    value="admin"
+                    className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
+                  >
+                    Admin
+                  </SelectItem>
+                </SelectContent>
               </Select>
             </div>
 
             {/* Location Selection */}
             <div className="space-y-2">
               <Label className="text-gray-700">Location</Label>
-              <Select 
-                name="location" 
-                value={formData.location} 
-                onValueChange={(value) => handleChange({ target: { name: 'location', value }})}
+              <Select
+                name="location"
+                value={formData.location}
+                onValueChange={(value) => handleChange({ target: { name: 'location', value } })}
               >
                 <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
                   <SelectValue placeholder="Select location" />
                 </SelectTrigger>
-               <SelectContent className="bg-white border border-gray-200 shadow-lg">
-             {locations.map((item, index) => (
-             <SelectItem 
-            key={index} 
-           value={item.value}
-       className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
-               >
-      {item.label}
-    </SelectItem>
-  ))}
-</SelectContent>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                  {locations.map((item, index) => (
+                    <SelectItem
+                      key={index}
+                      value={item.value}
+                      className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
               </Select>
             </div>
 
@@ -244,8 +242,8 @@ const AddUser = () => {
                   <p className="text-sm text-gray-500">JPEG, PNG up to 2MB</p>
                 </div>
                 <label className="cursor-pointer">
-                  <Button 
-                    variant="outline" 
+                  <Button
+                    variant="outline"
                     type="button"
                     className="hover:bg-[#021431] hover:text-white transition-colors"
                   >
@@ -263,8 +261,8 @@ const AddUser = () => {
             </div>
 
             {/* Submit Button */}
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               className="w-full h-11 bg-[#021431] hover:bg-[#021431]/90 text-white"
               disabled={isSubmitting}
             >
