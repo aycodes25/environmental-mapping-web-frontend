@@ -26,7 +26,7 @@ const HeaderTwo = ({ className, style }) => {
         <div className='flex gap-4 userInfo'>
           <div className='avatar'>
             <div className='w-10 h-10 rounded-full'>
-              <img src='https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg' />
+              {/* <img src='https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg' /> */}
             </div>
           </div>
           <p className='flex flex-row justify-center items-center text-lg font-bold capitalize sm:text-sm'>
