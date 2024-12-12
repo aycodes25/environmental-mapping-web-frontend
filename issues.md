@@ -18,5 +18,26 @@
 - you can test this weird behaviour by uncommenting the code and you are welcome to find a fix so we can have a consistent UI
 
 
+
+
+## UI Enhancement: Login and User Profile Pages
+- Implemented modern UI using Shadcn components for better user experience
+- Redesigned login page with improved form layout and validation
+- Enhanced edit profile page with:
+  - Better form organization
+  - Improved input fields styling
+  - Modern file upload interface
+  - Responsive layout adjustments
+  - Enhanced select dropdowns
+- Added loading states and animations
+- Improved error handling visual feedback
+- Maintained consistent color scheme
+- Enhanced mobile responsiveness
+- Added proper form validation feedback
+
 ## Feature requests / change
 ## Future bugs to come
+
+
+
+

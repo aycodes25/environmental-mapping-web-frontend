@@ -78,8 +78,8 @@ const isRoleValue = (inputString) => {
             <div className='w-10 h-10 rounded-full'>
               <img
                 src={`${currentUser?.imageUrl ? getRealFileUrl(currentUser.imageUrl) :
-                  'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
-                  }`}
+                  "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=1000&auto=format&fit=crop"
+                }`}
                 alt=''
               />
             </div>

@@ -5,8 +5,17 @@ import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
 import { useLoaderData } from "react-router-dom";
-import { AiOutlineCloudUpload } from "react-icons/ai";
-import { FormControl, MenuItem, Select } from "@mui/material";
+import { Upload, UserCog } from "lucide-react"; // Import icons
+
+
+
+// Import shadcn components
+import { Button } from "../components/ui/button";
+import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
+import { Input } from "../components/ui/input";
+import { Label } from "../components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+
 
 const singleUserQuery = (id) => {
   return {
@@ -30,14 +39,14 @@ export const singleUserLoader =
     };
 
 const EditUser = () => {
-  const { user } = useLoaderData();
+   const { user } = useLoaderData();
   const [formData, setFormData] = useState({
-    fullname: user.fullname,
-    username: user.username,
-    email: user.email,
-    role: user.role,
-    image: user.imageUrl,
-    location: user.location,
+    fullname: user?.fullname || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    image: user?.imageUrl || "",
+    location: user?.location || "",
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -99,120 +108,171 @@ const EditUser = () => {
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <div className="py-8 AddUser">
-      <form
-        method="POST"
-        encType="multipart/form-data"
-        className='flex flex-col justify-start items-center w-full h-screen'
-        onSubmit={handleClick}
-      >
-        <div className="flex flex-col gap-4 justify-center items-center w-full max-w-2xl">
-          <div className="heading">
-            <h1 className="text-3xl font-bold text-center">Edit User</h1>
-            <p className="mb-3 text-center font-[3400]">
-              Please edit user details
-            </p>
-          </div>
-          <div className="flex flex-col justify-center items-start w-full">
-            <p>Fullname</p>
-            <input
-              type="text"
-              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              name="fullname"
-              value={formData.fullname}
-              placeholder="Enter your fullname"
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="flex flex-col justify-center items-start w-full">
-            <p>Email</p>
-            <input
-              type="text"
-              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              name="email"
-              value={formData.email}
-              placeholder="Enter your email"
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="flex flex-col justify-center items-start w-full">
-            <p>Username</p>
-            <input
-              type="text"
-              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              name="username"
-              value={formData.username}
-              placeholder="Enter your username"
-              onChange={handleChange}
-              required
-            />
-          </div>
-          <div className="flex flex-col justify-center items-start w-full">
-            <p>User Role</p>
-            <select
-              name="role"
-              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              value={formData.role}
-              onChange={handleChange}
-              required
-            >
-              <option>Select user role...</option>
-              {user.role === "superAdmin" && <option value="superAdmin">SuperAdmin</option>}
-              <option value="tagger">Sampler</option>
-              <option value="reviewer">Reviewer</option>
-              <option value="admin">Admin</option>
-            </select>
-          </div>
-          <div className='mt-2 mb-4 w-full form-control'>
-            <p>Location</p>
-            <select
-              name="location"
-              className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
-              value={formData?.location?._id}
-              onChange={handleChange}
-              required
-            >
-              {Array.isArray(locations) &&
-                locations.map((items, index) => (
-                  <option key={index} value={items.value}>
-                    {items.label}
-                  </option>
-                ))}
-            </select>
-
-          </div>
-          <div
-            className={`flex flex-col items-center gap-y-2 w-full rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4`}
-          >
-            <div className="img">
-              <AiOutlineCloudUpload />
+return (
+    <div className="py-8">
+      <Card className="mx-auto max-w-2xl bg-white shadow-md">
+           <CardHeader className="text-center space-y-1">
+          <div className="flex justify-center mb-2">
+            <div className="h-12 w-12 rounded-full bg-[#021431]/10 flex items-center justify-center">
+              <UserCog className="h-6 w-6 text-blue-500" />
             </div>
-            <div className="text-center">
-              <h3 className="text-lg font-bold">
-                Choose a cover photo to upload
-              </h3>
-              <p>JPEG, PNG, up to 2MB</p>
-            </div>
-            <label className="btn">
-              <span>{imageName || "Browse Files"}</span>
+          </div>
+          <CardTitle className="text-3xl font-bold">Edit User</CardTitle>
+          <p className="text-center text-gray-500 font-[400]">
+            Please edit user details
+          </p>
+        </CardHeader>
+
+        <CardContent>
+          <form onSubmit={handleClick} encType="multipart/form-data" className="space-y-4">
+            {/* Full Name */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Full Name</Label>
               <input
-                type="file"
-                name="image"
-                accept=".jpg, .jpeg, .png, .webp"
-                className="hidden"
+                type="text"
+                name="fullname"
+                value={formData.fullname}
                 onChange={handleChange}
+                placeholder="Enter your fullname"
+                className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
+                required
               />
-            </label>
-          </div>
-          <div className="mt-4 w-full">
-            <SubmitBtn text="Edit User" isSubmitting={isSubmitting} />
-          </div>
-        </div>
-      </form>
+            </div>
+
+            {/* Email */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Email</Label>
+              <input
+                type="email"
+                name="email"
+                value={formData.email}
+                onChange={handleChange}
+                placeholder="Enter your email"
+                className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Username */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Username</Label>
+              <input
+                type="text"
+                name="username"
+                value={formData.username}
+                onChange={handleChange}
+                placeholder="Enter your username"
+                className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
+                required
+              />
+            </div>
+
+            {/* Role Selection */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">User Role</Label>
+              <Select 
+                name="role" 
+                value={formData.role} 
+                onValueChange={(value) => handleChange({ target: { name: 'role', value }})}
+              >
+                <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
+                  <SelectValue placeholder="Select user role" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                  {user.role === "superAdmin" && (
+                    <SelectItem value="superAdmin" className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white">
+                      SuperAdmin
+                    </SelectItem>
+                  )}
+                  <SelectItem value="tagger" className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white">
+                    Sampler
+                  </SelectItem>
+                  <SelectItem value="reviewer" className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white">
+                    Reviewer
+                  </SelectItem>
+                  <SelectItem value="admin" className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white">
+                    Admin
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Location Selection */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Location</Label>
+              <Select 
+                name="location" 
+                value={formData?.location?._id || ""} 
+                onValueChange={(value) => handleChange({ target: { name: 'location', value }})}
+              >
+                <SelectTrigger className="w-full h-11 border-gray-400 bg-white focus:ring-2 focus:ring-[#021431] focus:border-transparent">
+                  <SelectValue placeholder="Select location" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border border-gray-200 shadow-lg">
+                  {Array.isArray(locations) && locations.map((item, index) => (
+                    <SelectItem 
+                      key={index} 
+                      value={item.value}
+                      className="hover:bg-[#021431] hover:text-white focus:bg-[#021431] focus:text-white"
+                    >
+                      {item.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Image Upload */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Profile Image</Label>
+              <div className="flex flex-col items-center gap-y-2 w-full rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-6 hover:bg-gray-50 transition-colors">
+                <div className="h-12 w-12 rounded-full bg-[#021431]/10 flex items-center justify-center">
+                  <Upload className="h-6 w-6 text-blue-500" />
+                </div>
+                <div className="space-y-1 text-center">
+                  <h3 className="text-lg font-bold text-gray-700">
+                    Choose a cover photo to upload
+                  </h3>
+                  <p className="text-sm text-gray-500">JPEG, PNG up to 2MB</p>
+                </div>
+                <label className="cursor-pointer">
+                  <Button 
+                    variant="outline" 
+                    type="button"
+                    className="hover:bg-[#021431] hover:text-white transition-colors"
+                  >
+                    {imageName || "Browse Files"}
+                  </Button>
+                  <input
+                    type="file"
+                    name="image"
+                    accept=".jpg, .jpeg, .png, .webp"
+                    className="hidden"
+                    onChange={handleChange}
+                  />
+                </label>
+              </div>
+            </div>
+
+            {/* Submit Button */}
+            <Button 
+              type="submit" 
+              className="w-full h-11 bg-[#021431] hover:bg-[#021431]/90 text-white"
+              disabled={isSubmitting}
+            >
+              {isSubmitting ? (
+                <div className="flex items-center justify-center space-x-2">
+                  <div className="h-4 w-4 border-2 border-white border-t-transparent animate-spin rounded-full" />
+                  <span>Updating...</span>
+                </div>
+              ) : (
+                "Update Profile"
+              )}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
+
       <Successful
         text="User Edited"
         showModal={showModal}
