@@ -5,6 +5,8 @@ import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
 import { useLoaderData, useNavigate } from "react-router-dom";
+
+import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import { Upload, UserCog } from "lucide-react"; // Import icons
 
 
@@ -16,7 +18,6 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
-import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 
 const singleUserQuery = (id) => {
   return {
@@ -41,16 +42,16 @@ export const singleUserLoader =
 
 const EditUser = () => {
   const { user } = useLoaderData();
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
+  
   const [formData, setFormData] = useState({
-    fullname: user.fullname,
-    username: user.username,
-    password: "",
-    email: user.email,
-    role: user.role,
-    image: user.imageUrl,
-    location: user.locations?._id,
+    fullname: user?.fullname || "",
+    username: user?.username || "",
+    email: user?.email || "",
+    role: user?.role || "",
+    image: user?.imageUrl || "",
+    location: user?.location || "",
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
