@@ -76,6 +76,10 @@ export function filterDataByDateAndTimeRange(
   startTime = '00:00',
   endTime = '23:59'
 ) {
+
+  if (!startDate || !endDate) {
+    return data
+  }
   // Convert startDate, startTime, endDate, and endTime to Date objects
   const startTimeParts = startTime.split(':').map(Number);
   const endTimeParts = endTime.split(':').map(Number);
@@ -85,12 +89,12 @@ export function filterDataByDateAndTimeRange(
 
   endDate = new Date(endDate);
   endDate.setHours(endTimeParts[0], endTimeParts[1], 59, 999);
-
   // Filter the data based on the date-time range
   const filteredData = data.filter((item) => {
     const createdAt = new Date(item.createdAt);
-    return createdAt >= startDate && createdAt <= endDate;
+    return createdAt.getTime() >= startDate.getTime() && createdAt.getTime() <= endDate.getTime();
   });
+
 
   return filteredData;
 }

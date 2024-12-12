@@ -16,6 +16,7 @@ import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 
+import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 
 const singleUserQuery = (id) => {
   return {
@@ -39,14 +40,17 @@ export const singleUserLoader =
     };
 
 const EditUser = () => {
-   const { user } = useLoaderData();
+  const { user } = useLoaderData();
+  const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
-    fullname: user?.fullname || "",
-    username: user?.username || "",
-    email: user?.email || "",
-    role: user?.role || "",
-    image: user?.imageUrl || "",
-    location: user?.location || "",
+    fullname: user.fullname,
+    username: user.username,
+    password: "",
+    email: user.email,
+    role: user.role,
+    image: user.imageUrl,
+    location: user.locations?._id,
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -77,6 +81,11 @@ const EditUser = () => {
   }
 
   useEffect(() => {
+    const pageViewer = getUserFromLocalStorage()
+    if (pageViewer?.role !== "superAdmin") {
+      toast.error("You are not permitted to view this page")
+      navigate(-1)
+    }
     fetchLocations();
   }, []);
 
@@ -135,7 +144,7 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your fullname"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+                
               />
             </div>
 
@@ -149,7 +158,21 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your email"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+                
+              />
+            </div>
+
+            {/* Password */}
+            <div className="space-y-2">
+              <Label className="text-gray-700">Password</Label>
+              <input
+                type="password"
+                name="password"
+                value={formData.password}
+                onChange={handleChange}
+                placeholder="Enter your password"
+                className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
+               
               />
             </div>
 
@@ -163,7 +186,7 @@ return (
                 onChange={handleChange}
                 placeholder="Enter your username"
                 className="w-full h-11 px-3 py-2 rounded-md border border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#021431] focus:border-transparent"
-                required
+              
               />
             </div>
 
