@@ -4,8 +4,10 @@ import React, { useEffect, useState } from "react";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn, Successful } from "../components";
-import { useLoaderData } from "react-router-dom";
-import { Upload, UserCog } from "lucide-react"; // Import icons
+import { useLoaderData, useNavigate } from "react-router-dom";
+import { Upload, UserCog } from "lucide-react"; 
+import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
+
 
 
 
@@ -15,6 +17,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card"
 import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+
 
 
 const singleUserQuery = (id) => {
@@ -39,7 +42,9 @@ export const singleUserLoader =
     };
 
 const EditUser = () => {
-   const { user } = useLoaderData();
+  const { user } = useLoaderData();
+    const navigate = useNavigate();
+
   const [formData, setFormData] = useState({
     fullname: user?.fullname || "",
     username: user?.username || "",
@@ -47,6 +52,7 @@ const EditUser = () => {
     role: user?.role || "",
     image: user?.imageUrl || "",
     location: user?.location || "",
+
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -77,6 +83,11 @@ const EditUser = () => {
   }
 
   useEffect(() => {
+    const pageViewer = getUserFromLocalStorage()
+    if (pageViewer?.role !== "superAdmin") {
+      toast.error("You are not permitted to view this page")
+      navigate(-1)
+    }
     fetchLocations();
   }, []);
 
@@ -115,6 +126,7 @@ return (
           <div className="flex justify-center mb-2">
             <div className="h-12 w-12 rounded-full bg-[#021431]/10 flex items-center justify-center">
               <UserCog className="h-6 w-6 text-blue-500" />
+
             </div>
           </div>
           <CardTitle className="text-3xl font-bold">Edit User</CardTitle>

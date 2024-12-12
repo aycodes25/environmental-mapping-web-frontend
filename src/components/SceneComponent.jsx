@@ -1,7 +1,7 @@
 /* eslint-disable no-unused-vars */
 /* eslint-disable react-refresh/only-export-components */
 /* eslint-disable react/prop-types */
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   Color3,
   VideoRecorder,
@@ -11,7 +11,6 @@ import {
   // Matrix,
   MeshBuilder,
   Camera,
-  ArcRotateCamera,
   // hack
   FreeCamera,
   HemisphericLight,
@@ -20,15 +19,10 @@ import {
   Scene,
   ActionManager,
   ExecuteCodeAction,
-  CannonJSPlugin,
-  SpotLight,
-  Texture,
   VertexData,
   Mesh,
-  GPUParticleSystem
 } from "@babylonjs/core";
 import { SceneLoader } from "babylonjs";
-import { GridMaterial } from "@babylonjs/materials";
 import * as cannon from "cannon";
 import "babylonjs-loaders";
 import * as GUI from "babylonjs-gui";
@@ -40,18 +34,19 @@ import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
 
-//hack
-// all below not used
-// import RedCapet from '../assets/RedCapet.png';
-// import redCircle from '../assets/redCircle.png';
-// import ColoredCircle from '../assets/pngwing.png';
-// import RainBow from '../assets/pngRainbow.png';
-
 let currTagPos = null
 let currSpotlight = null
 let currCameraPosition = null
 let currCameraDirection = null
 let currentCameraRotation = null
+let saveCameraPositionAndDirection = {
+  position: null,
+  direction: null,
+  rotation: null,
+  inSunView: false
+}
+
+let discs = []
 
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
@@ -65,32 +60,6 @@ const cameraControls = {
   apply: true,
 };
 
-function updateCameraSettings(scene, controls) {
-  scene.getCameraByName("camera0").angularSensibilityX =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').speed = controls.cameraSpeed;
-  scene.getCameraByName("camera0").angularSensibilityY =
-    controls.angularSensibility;
-  // scene.getCameraByName('camera0').panningSensibility = controls.panSensitivity;
-  scene.getCameraByName("camera0").wheelPrecision = controls.zoomSensitivity;
-  // scene.getCameraByName('camera0').inertia = controls.zoomInertia;
-  scene.getCameraByName("camera0").pinchPrecision = controls.zoomSensitivity;
-  scene.getCameraByName("camera0").pinchDeltaPercentage =
-    controls.zoomSensitivity;
-
-  // scene.getCameraByName("camera1").angularSensibilityX =
-  //   controls.angularSensibility;
-  // // scene.getCameraByName('camera1').speed = controls.cameraSpeed;
-  // scene.getCameraByName("camera1").angularSensibilityY =
-  //   controls.angularSensibility;
-  // // scene.getCameraByName('camera1').panningSensibility = controls.panSensitivity;
-  // scene.getCameraByName("camera1").wheelPrecision = controls.zoomSensitivity;
-  // // scene.getCameraByName('camera1').inertia = controls.zoomInertia;
-  // scene.getCameraByName("camera1").pinchPrecision = controls.zoomSensitivity;
-  // scene.getCameraByName("camera1").pinchDeltaPercentage =
-  //   controls.zoomSensitivity;
-}
-
 export function SceneComponent({
   baseUrl,
   filenameWithExtension,
@@ -102,7 +71,6 @@ export function SceneComponent({
   const reactCanvas = useRef(null);
   const dispatch = useDispatch();
   const controls = useControls(cameraControls);
-  // const [toolTipText, setToolTipText] = useState("undefined");
   const setting = useSelector((state) => state.settingState.setting);
   const [newTaggedInfoName, setNewTaggedInfoName] = useState("");
   const [newTaggedInfoPosition, setNewTaggedInfoPosition] = useState("");
@@ -124,68 +92,11 @@ export function SceneComponent({
     }
   };
 
-  // const handleFilterTags = useCallback(
-  //   (search) => {
-  //     const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
-
-  //     const searchResult = tags?.filter((item) => {
-  //       return (
-  //         regex.test(item.objectName?.toLowerCase()) ||
-  //         regex.test(item.taggedInfo?.toLowerCase())
-  //       );
-  //     });
-
-  //     if (searchResult && searchResult[0]) {
-  //       setToolTipText(searchResult[0].objectName);
-  //     } else {
-  //       setToolTipText("undefined");
-  //     }
-  //   },
-  //   [tags]
-  // );
-
-  // useEffect(() => {
-  //   if (newTaggedInfoName) {
-  //     handleFilterTags(newTaggedInfoName);
-  //   }
-  // }, [handleFilterTags, newTaggedInfoName]);
-
-  // useEffect(() => {
-  //   createOrUpdateTooltip(toolTipText);
-  // }, [toolTipText]);
-
-  // hack
-  // useEffect(() => {
-  //   const [meshName, tagPosition] = destructureTaggedInfo(modelInteractionData);
-  //   if (
-  //     meshName &&
-  //     destructureTaggedInfo(modelInterationActiveData?.taggedInfo)[0]
-  //   ) {
-  //     setNewTaggedInfoName(modelInterationActiveData.objectName);
-  //   } else {
-  //     setNewTaggedInfoName(meshName);
-  //   }
-  //   setNewTaggedInfoPosition(tagPosition);
-  //   setNewTaggedInfo(modelInteractionData);
-  // }, [modelInteractionData, modelInterationActiveData]);
-
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
-
-    const sunAngleCamera = new ArcRotateCamera(
-      "camera0",
-      Math.PI / 2,
-      Math.PI / 2,
-      100,
-      new Vector3(0, 100, 0),
-      scene
-    );
-
-    // hack
-    sunAngleCamera.rotation = new Vector3(-Math.PI / 2, 0, 0);
 
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
     light.intensity = controls.contrast;
@@ -195,13 +106,31 @@ export function SceneComponent({
 
     let is2DView;
 
+    const handleHeatMapClick = (e) => {
+      e.preventDefault()
+      e.stopPropagation()
+      let camera1 = scene.getCameraByName("camera1")
+      if (saveCameraPositionAndDirection.inSunView) {
+        saveCameraPositionAndDirection.inSunView = false
+        camera1.position = saveCameraPositionAndDirection.position.clone()
+        camera1.direction = saveCameraPositionAndDirection.direction.clone()
+        camera1.rotation = saveCameraPositionAndDirection.rotation.clone()
+      } else {
+        saveCameraPositionAndDirection.inSunView = true
+        saveCameraPositionAndDirection.position = camera1.position.clone()
+        saveCameraPositionAndDirection.direction = camera1.getForwardRay().direction.clone()
+        saveCameraPositionAndDirection.rotation = new Vector3(
+          camera1.rotation.x,
+          camera1.rotation.y,
+          camera1.rotation.z,
+        )
+        centerCameras(scene, true)
+      }
+    }
+
     const heatmapButton = document.getElementById("heatmapButton");
-    heatmapButton.addEventListener("click", () => {
-      scene.activeCamera =
-        scene.activeCamera !== sunAngleCamera
-          ? sunAngleCamera
-          : scene.getCameraByName("camera1");
-    });
+    heatmapButton.removeEventListener("click", handleHeatMapClick);
+    heatmapButton.addEventListener("click", handleHeatMapClick);
 
     const screenshotButton = document.getElementById("screenshotButton");
     screenshotButton.addEventListener("click", () => {
@@ -259,16 +188,6 @@ export function SceneComponent({
     dynamicTexture.addControl(ellipse_jetBox);
     ellipse_jetBox.linkWithMesh(jetBox);
 
-    scene.onBeforeRenderObservable.add(() => {
-      if (scene.activeCamera === sunAngleCamera) {
-        ellipse_jetBox.isVisible = true;
-      } else {
-        ellipse_jetBox.isVisible = false;
-      }
-    });
-    const angle = 1 * (2 * Math.PI);
-    const radius = 4;
-
     const camera1 = new FreeCamera(
       `camera1`,
       jetBox.position,
@@ -289,66 +208,11 @@ export function SceneComponent({
     });
 
     scene.activeCamera = scene.getCameraByName("camera1");
-    document.addEventListener("keydown", (event) => {
-      // Check if the "=" key is pressed to flip between camera 0 and 1
-      if (event.key === "=") {
-        const selectedCamera =
-          scene.activeCamera === scene.getCameraByName("camera1")
-            ? scene.getCameraByName("camera0")
-            : scene.getCameraByName("camera1");
-        if (selectedCamera) {
-          scene.activeCamera = selectedCamera;
-        }
-      }
-    });
 
     scene.beginAnimation(jetBox, 0, 100, true);
 
     scene.onBeforeRenderObservable.addOnce(() => {
       BabylonControls(scene);
-    });
-
-    let boundaryRadius;
-    let boundaryCenter;
-    // scene.onReadyObservable.addOnce(() => {
-    //   const loadedMeshes = scene.meshes;
-
-    //   // Calculate the bounding box
-    //   const centroid = Vector3.Zero();
-    //   let maxExtent = 0;
-    //   loadedMeshes.forEach((mesh) => {
-    //     const tagPosition = mesh.getAbsolutePosition();
-    //     centroid.addInPlace(tagPosition);
-    //     const distance = Vector3.Distance(tagPosition, centroid);
-    //     if (distance > maxExtent) {
-    //       maxExtent = distance;
-    //     }
-    //   });
-    //   centroid.scaleInPlace(1 / loadedMeshes.length);
-
-    //   scene.getCameraByName("camera0").setTarget(centroid);
-    //   jetBox.position.addInPlace(centroid);
-    //   boundaryRadius = maxExtent;
-    //   boundaryCenter = centroid.clone();
-    // });
-
-    // scene.onReadyObservable.addOnce(() => {
-    //   // Check if the new position is within the boundary
-    //   const newPosition = new Vector3(jetBox.position);
-    //   const distanceToBoundaryCenter = Vector3.Distance(
-    //     newPosition,
-    //     boundaryCenter
-    //   );
-
-    //   if (distanceToBoundaryCenter <= boundaryRadius) {
-    //     jetBox.position.copyFrom(newPosition);
-    //   } else {
-    //     jetBox.position.copyFrom(boundaryCenter);
-    //   }
-    // });
-
-    scene.registerBeforeRender(() => {
-      updateCameraSettings(scene, controls);
     });
 
     return [scene];
@@ -383,15 +247,10 @@ export function SceneComponent({
       toast.success("model is ready!");
     };
 
-    if (scene.isReady()) {
-      tags.map((tag) => {
-        let tagInfo = JSON.parse(tag.taggedInfo)
-        drawTag(scene, tagInfo.tagPosition)
-      });
-      handleSceneReady();
-    } else {
-      scene.onReadyObservable.addOnce(handleSceneReady);
-    }
+
+    scene.onReadyObservable.addOnce(() => {
+      handleSceneReady()
+    });
 
     scene.onReadyObservable.addOnce(() => {
       setIsLoading(false);
@@ -412,14 +271,18 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
-
-    return () => {
-      // engine.stopRenderLoop(renderLoop);
-      // scene.getEngine().dispose();
-      // scene.dispose();
-      // window.removeEventListener("resize", resize);
-    };
   }, []);
+
+  useEffect(() => {
+    discs.forEach(d => hideDisc(d))
+    discs = []
+    tags.map((tag) => {
+      let tagInfo = JSON.parse(tag.taggedInfo)
+      let disc = drawTag(window.scene, tagInfo.tagPosition, `${tag.name || Date.now()}`, tag.type)
+      addTagHoverEventHandler(disc, tag)
+      discs.push(disc)
+    });
+  }, [tags])
 
   return (
     <>
@@ -433,7 +296,6 @@ export function SceneComponent({
         id="renderCanvas"
         className="h-screen w-full cursor-pointer"
         ref={reactCanvas}
-        // hack - remove external props to prevent rerender
         {...rest}
       />
     </>
@@ -458,116 +320,13 @@ export const SpinnerOverlay = () => {
   );
 };
 
-/** purpose: is to display positions that contains tags  */
-export function addAnchor(meshTaggedInfo, scene, onClick) {
-  const position = JSON.parse(
-    JSON.parse(meshTaggedInfo.taggedInfo).tagPosition
-  );
-  const name = JSON.parse(meshTaggedInfo.taggedInfo).name;
-  const styles = {
-    alpha: 1,
-    backgroundColor: meshTaggedInfo?.type === "sampling" ? "red" : meshTaggedInfo?.type === "incident" ? "yellow" : meshTaggedInfo?.type === "safety" ? "green" : "pink",
-    borderColor: "white",
-    fontWeight: "300",
-    height: 8,
-    hoverCursor: "pointer",
-    width: 8,
-  };
-
-  const sphere = MeshBuilder.CreateSphere(
-    "taggedSphere",
-    { diameter: 0, segments: 0, diameterX: 0, diameterY: 0, diameterZ: 0 },
-    scene
-  );
-  sphere.position.copyFrom(new Vector3(position._x, position._y, position._z));
-  sphere.visibility = 0;
-  sphere.isVisible = false;
-  sphere.alpha = 0;
-  sphere.isPickable = false;
-  sphere.renderingGroupId = 0;
-  sphere.isNearPickable = false;
-  sphere.scaling.setAll(0.3);
-
-  const dynamicTexture = GUI.AdvancedDynamicTexture.CreateFullscreenUI(
-    "ImGUI",
-    true,
-    scene
-  );
-
-  sphere.actionManager = new ActionManager(scene);
-
-  // Show tooltip on hover
-  sphere.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, function () {
-      var tooltip = document.getElementById("tooltip");
-      if (!tooltip) {
-        tooltip = document.createElement("div");
-        tooltip.id = "tooltip";
-        tooltip.style =
-          "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-        document.body.appendChild(tooltip);
-      }
-      tooltip.innerHTML = `<p> ${meshTaggedInfo.objectName
-        }<br/>
-        <span class='text-xs'>${meshTaggedInfo?.type === "sampling" ? meshTaggedInfo?.sample?.name : "type"
-        }: <span class='text-xs'>${meshTaggedInfo?.type === "sampling" ? meshTaggedInfo.presence : meshTaggedInfo?.type === "incident" ? meshTaggedInfo?.incident?.name : meshTaggedInfo?.type
-        }</span></span>
-        <br/><span class='text-xs'>Date: ${formatDate(
-          meshTaggedInfo.createdAt
-        )}</span><br/><span class='text-xs'>Time: ${formatTime(
-          meshTaggedInfo.createdAt
-        )}</span></p>`;
-      tooltip.style.display = "block";
-    })
-  );
-
-  // Hide tooltip when hover ends
-  sphere.actionManager.registerAction(
-    new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, function () {
-      var tooltip = document.getElementById("tooltip");
-      if (!tooltip) {
-        tooltip = document.createElement("div");
-        tooltip.id = "tooltip";
-        tooltip.style =
-          "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-        document.body.appendChild(tooltip);
-      }
-      tooltip.style.display = "none";
-    })
-  );
-
-  const anchor = new GUI.Ellipse("anchor");
-  anchor.isPointerBlocker = true;
-  anchor.height = styles.height + "px";
-  anchor.width = styles.width + "px";
-  anchor.alpha = styles.alpha;
-  anchor.color = styles.borderColor;
-  anchor.background = styles.backgroundColor;
-  anchor.linkOffsetY = 0;
-  anchor.hoverCursor = styles.hoverCursor;
-  anchor.isPickable = false;
-  anchor.onPointerClickObservable.addOnce(() => {
-    onClick(meshTaggedInfo, sphere.position);
-  });
-  dynamicTexture.addControl(anchor);
-  anchor.linkWithMesh(sphere);
-  sphere._freeze();
-}
-
 export const onSceneReady = (scene, dispatch) => {
   // hack
   // setupVideoRecording(scene);
-  let selectedMesh = null;
-
-  const jetBox = scene.getMeshByName("jetBox");
 
   scene.onPointerObservable.add((pointerInfo) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
       const pickResult = pointerInfo.pickInfo
-
-      // if (scene.activeCamera === scene.getCameraByName("camera1")) {
-      //   updateSpotLight(pickResult, scene);
-      // }
 
       if (pickResult.hit) {
 
@@ -589,61 +348,49 @@ export const onSceneReady = (scene, dispatch) => {
             )
           );
         }
-
-        // const activeCamera = scene.activeCamera;
-        // if (activeCamera && activeCamera.name === "camera0" && jetBox) {
-        //   jetBox.position = pointCoordinates;
-        // }
       }
     }
   })
-
-  // Show information pop-up when hovering over a mesh
-  scene.onPointerMove = function (evt, pickResult) {
-    if (pickResult && pickResult.pickedMesh) {
-      pickResult.pickedMesh.isPickable = true;
-      if (selectedMesh && selectedMesh !== pickResult.pickedMesh) {
-        hideTooltip();
-      } else {
-        showTooltip(evt.clientX, evt.clientY);
-      }
-    } else {
-      hideTooltip();
-    }
-  };
 };
 
-export function showTooltip(clientX, clientY) {
-  var tooltip = document.getElementById("tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.id = "tooltip";
-    tooltip.style =
-      "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-    document.body.appendChild(tooltip);
-  }
-  tooltip.style.left = clientX + 10 + "px";
-  tooltip.style.top = clientY + 10 + "px";
-  tooltip.style.display = "block";
-}
+function addTagHoverEventHandler(tag, tagData) {
+  tag.actionManager = new ActionManager(window.scene);
 
-export function createOrUpdateTooltip(objectName) {
-  var tooltip = document.getElementById("tooltip");
-  if (!tooltip) {
-    tooltip = document.createElement("div");
-    tooltip.id = "tooltip";
-    tooltip.style =
-      "position: absolute; display: none; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
-    document.body.appendChild(tooltip);
-  }
-  tooltip.textContent = objectName || "undefined";
-}
+  // Show tagtip on hover
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, function (event) {
+      deleteTagTip()
+      const tagtip = document.createElement("div");
+      tagtip.id = "tagtip";
+      tagtip.style =
+        "position: fixed; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
+      tagtip.innerHTML = `<p> ${tagData.objectName || "unnamed object"
+        }<br/>
+        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : "safety"
+        }: <span class='text-xs'>${tagData?.type === "sampling" ? tagData.presence : tagData?.type === "incident" ? tagData?.incident : ""
+        }</span></span>
+        <br/><span class='text-xs'>Date: ${formatDate(
+          tagData.createdAt
+        )}</span><br/><span class='text-xs'>Time: ${formatTime(
+          tagData.createdAt
+        )}</span></p>`;
+      tagtip.style.display = "block";
+      tagtip.style.left = event.pointerX + 10 + "px";
+      tagtip.style.top = event.pointerY + 10 + "px";
+      document.body.appendChild(tagtip);
+    })
+  );
 
-export function hideTooltip() {
-  var tooltip = document.getElementById("tooltip");
-  if (tooltip) {
-    tooltip.style.display = "none";
+  function deleteTagTip() {
+    var tagtip = document.getElementById("tagtip");
+    tagtip?.remove()
   }
+
+  tag.actionManager.registerAction(
+    new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, function () {
+      deleteTagTip()
+    })
+  );
 }
 
 export const stopRecording = (videoRecorder) => {
@@ -666,30 +413,6 @@ export const stopRecording = (videoRecorder) => {
   toast.success("Video recording stopped");
 };
 
-export function ensureHighlightableRecursively(mesh, scene) {
-  // hack
-  // if (
-  //   mesh !== scene.getMeshByName("jetBox") ||
-  //   mesh !== scene.getMeshByName("taggedSphere") ||
-  //   mesh.name === "taggedSphere"
-  // ) {
-  //   mesh.isPickable = true;
-  //   mesh.visibility = 1;
-  //   mesh.isVisible = true;
-  //   //  mesh.material = new StandardMaterial("defaultMaterial", scene);
-  //   //   mesh.material.diffuseColor = mesh.material.diffuseColor;
-  //   //   mesh.material.specularColor = mesh.material.specularColor;
-  //   if (mesh.renderingGroupId === 0) {
-  //     mesh.renderingGroupId = 1;
-  //   }
-  //   if (mesh.getChildMeshes) {
-  //     var childMeshes = mesh.getChildMeshes();
-  //     childMeshes.forEach(function (childMesh) {
-  //       ensureHighlightableRecursively(childMesh, scene);
-  //     });
-  //   }
-  // }
-}
 
 export function gridBoxOnMesh(mesh, scene) {
   const boundingBox = mesh.getBoundingInfo().boundingBox;
@@ -790,26 +513,52 @@ export function hideSpotLight() {
   }
 }
 
+export function hideDisc(disc) {
+  if (disc) {
+    disc.isVisible = false
+    disc.dispose()
+  }
+}
 
-function createDiscAtPosition(name, position, scene, isTag = false) {
-  const disc = BABYLON.MeshBuilder.CreateDisc("disc", { radius: 0.5, tessellation: 64 }, scene);
+function makeColorFromType(type) {
+  if (!type) {
+    return new BABYLON.Color3(1, 0, 0)
+  }
+  switch (type) {
+    case "sampling":
+      return new BABYLON.Color3(0, 0.5, 0.5)
+    case "incident":
+      return new BABYLON.Color3(0, 0, 0)
+    case "safety":
+      return new BABYLON.Color3(1, 0, 0)
+    default:
+      return new BABYLON.Color3(1, 0, 0)
+  }
+}
+
+function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
+  const disc = BABYLON.MeshBuilder.CreateDisc(`${name || Date.now()}`, { radius: 0.25, tessellation: 64 }, scene);
   const material = new BABYLON.StandardMaterial(name, scene);
   if (isTag) {
-    material.diffuseColor = new BABYLON.Color3(1, 0, 0); // red color
+    material.diffuseColor = makeColorFromType(type); // red color
   } else {
     material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
   }
   disc.material = material;
-  applyMeshOptimizations(disc)
+
+  applyOpRecursivelyOnSubmeshes(disc, () => {
+    applyMeshOptimizations(disc)
+  })
+
   disc.position = new Vector3(position.x, position.y - 1.6, position.z);
   disc.rotation.x = Math.PI / 2;
   return disc
 }
 
-export function drawTag(scene, position, name = `${Date.now()}`) {
+export function drawTag(scene, position, name = `${Date.now()}`, type) {
   if (!position) return
   if (!scene) return
-  createDiscAtPosition(name, position, scene, true)
+  return createDiscAtPosition(name, position, scene, true, type)
 }
 
 export function replaceInstanceWithClone(instanceMesh) {
@@ -871,6 +620,7 @@ function optimizeScene(scene) {
   // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
   // scene.freezeActiveMeshes()
   scene.autoClear = true
+  scene.skipPointerMovePicking = false
   // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
   // optimizer.start();
 }
@@ -952,7 +702,7 @@ function importGLFileInScene(glFile, scene) {
   });
 }
 
-function centerCameras(scene) {
+function centerCameras(scene, setSunAngleCamera = false) {
   const loadedMeshes = scene.meshes;
 
   // Calculate the bounding box
@@ -968,9 +718,14 @@ function centerCameras(scene) {
   });
   centroid.scaleInPlace(1 / loadedMeshes.length);
 
-  // scene.getCameraByName("camera0").setTarget(centroid.clone())
-  // scene.getCameraByName("camera0").radius = 10
-  scene.getCameraByName("camera1").position = centroid.clone()
+  if (setSunAngleCamera) {
+    let camera = scene.getCameraByName("camera1")
+    camera.position = centroid.clone()
+    camera.rotation.x = Math.PI / 2;
+    camera.position.y = 150
+  } else {
+    scene.getCameraByName("camera1").position = centroid.clone()
+  }
 }
 
 export function resetCameraLocation(desc) {

@@ -14,7 +14,7 @@ import { toast } from 'react-toastify';
 import EvidenceImage from './EvidenceImage';
 import { resetCameraLocation } from '../components/SceneComponent';
 
-const AccordionWrapper = ({ data }) => {
+const AccordionWrapper = ({ data, setTagsData }) => {
   const [expanded, setExpanded] = useState(false);
   const [open, setOpen] = React.useState(false);
   const handleChange = (panel) => (event, isExpanded) => {
@@ -29,6 +29,8 @@ const AccordionWrapper = ({ data }) => {
     const response = await customFetch.delete(`/tag/tags-delete/${id}`);
     if (response.data.status !== 'error') {
       toast.success(response.data.message || 'Samples deleted successfully');
+      let tags = data.filter(tag => tag._id !== id)
+      setTagsData(tags)
     } else {
       toast.error(response.data.message);
     }
