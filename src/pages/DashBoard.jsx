@@ -4,11 +4,12 @@ import { ChartBox, ModelList, PieChartBox } from "../components";
 import "../styles/DashBoard.css";
 import { customFetch } from "../utils";
 import { useLoaderData, useNavigate } from "react-router-dom";
-import { Card } from "@mui/material";
 import { toast } from "react-toastify";
 import SampleChart from "../components/SampleChart";
 import LineChart from "../components/LineChart";
 import BarChart from "../components/BarChart";
+import { ExpandableCard } from "../components/ExpandableCard";
+
 
 const url = "/user/dashboard";
 
@@ -124,127 +125,133 @@ const DashBoard = () => {
 
   return (
     <div className="flex flex-col flex-grow p-5 w-auto">
+      {/* Navigation */}
       <div className="flex justify-center items-center mb-16">
         <div className="flex gap-4 justify-center items-center px-4 py-1 rounded-full bg-slate-300">
-          <h3
-            className={`${activeItem === "Overview" ? "text-white bg-black" : ""
-              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
-            onClick={() => handleItemClick("Overview")}
-          >
-            Overview
-          </h3>
-          <h3
-            className={`${activeItem === "Sample" ? "text-white bg-black" : ""
-              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
-            onClick={() => handleItemClick("Sample")}
-          >
-            Sample
-          </h3>
-          <h3
-            className={`${activeItem === "Incident" ? "text-white bg-black" : ""
-              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
-            onClick={() => handleItemClick("Incident")}
-          >
-            Incident
-          </h3>
-          <h3
-            className={`${activeItem === "Activity" ? "text-white bg-black" : ""
-              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
-            onClick={() => handleItemClick("Activity")}
-          >
-            Activity
-          </h3>
+          {["Overview", "Sample", "Incident", "Activity"].map((item) => (
+            <button
+              key={item}
+              className={`
+                px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold
+                transition-all duration-200
+                ${activeItem === item ? "text-white bg-black" : "hover:bg-black/10"}
+              `}
+              onClick={() => handleItemClick(item)}
+            >
+              {item}
+            </button>
+          ))}
         </div>
       </div>
-      {activeItem === "Overview" ? (
+
+      {/* Overview Section */}
+      {activeItem === "Overview" && (
         <div className="flex flex-col gap-4 justify-center items-center w-full">
-          <div className="flex flex-row w-full max-[1025px]:flex-wrap justify-center items-center gap-4 max-[1025px]:gap-2">
-            <Card className="flex flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] aspect-video bg-[#333fc5] ">
+          {/* First Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+            <ExpandableCard
+              title="Positivity Rate Year To Date"
+              bgColor="bg-[#333fc5]"
+              className="text-white"
+            >
               <ChartBox
-                {...{
-                  number: parseFloat(positivityRateYearToDate).toFixed(2),
-                  title: "Positivity Rate Year To Date",
-                }}
+                number={parseFloat(positivityRateYearToDate).toFixed(2)}
+                title="Positivity Rate Year To Date"
                 bg="text"
               />
-            </Card>
-            <Card className="flex flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] aspect-video">
+            </ExpandableCard>
+
+            <ExpandableCard title="Positivity Rate This Month">
               <ChartBox
-                {...{
-                  number: parseFloat(positivityRateThisMonth).toFixed(2),
-                  title: "Positivity Rate This Month",
-                }}
+                number={parseFloat(positivityRateThisMonth).toFixed(2)}
+                title="Positivity Rate This Month"
               />
-            </Card>
-            <Card className="flex flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] aspect-video bg-[#746c6c]">
+            </ExpandableCard>
+
+            <ExpandableCard
+              title="Positive Samples This Month"
+              bgColor="bg-[#746c6c]"
+              className="text-white"
+            >
               <ChartBox
-                {...{
-                  number: positiveTagsThisMonth,
-                  title: "Positive Samples This Month",
-                }}
+                number={positiveTagsThisMonth}
+                title="Positive Samples This Month"
               />
-            </Card>
-            <Card className="flex flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] aspect-video bg-[#5EA33E]">
+            </ExpandableCard>
+
+            <ExpandableCard
+              title="Total Samples This Month"
+              bgColor="bg-[#5EA33E]"
+              className="text-white"
+            >
               <ChartBox
-                {...{
-                  number: totalTagsThisMonth,
-                  title: "Total Samples This Month",
-                }}
+                number={totalTagsThisMonth}
+                title="Total Samples This Month"
               />
-            </Card>
+            </ExpandableCard>
           </div>
-          <div className="flex w-full flex-row max-[1025px]:flex-wrap justify-center items-center gap-4 max-[1025px]:gap-2">
-            <Card
+
+          {/* Second Row */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
+            <ExpandableCard
+              title="Today's Facilities"
+              bgColor="bg-[#746c6c]"
+              className="text-white"
               onClick={() => navigate("models")}
-              title="click to navigate to model page"
-              className="flex cursor-pointer flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] bg-[#746c6c] aspect-video"
+              isClickable
             >
               <ChartBox {...dailyModels} />
-            </Card>
-            <Card
+            </ExpandableCard>
+
+            <ExpandableCard
+              title="Total Facilities"
+              bgColor="bg-[#5EA33E]"
+              className="text-white"
               onClick={() => navigate("models")}
-              title="click to navigate to model page"
-              className="flex cursor-pointer flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] bg-[#5EA33E] aspect-video"
+              isClickable
             >
               <ChartBox {...totalModel} />
-            </Card>
-            <Card
+            </ExpandableCard>
+
+            <ExpandableCard
+              title="Samplers"
               onClick={() => navigate("users")}
-              title="click to navigate to users page"
-              className="flex cursor-pointer flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] aspect-video"
+              isClickable
             >
               <ChartBox {...taggers} />
-            </Card>
-            <Card
+            </ExpandableCard>
+
+            <ExpandableCard
+              title="Reviewers"
+              bgColor="bg-[#333fc5]"
+              className="text-white"
               onClick={() => navigate("users")}
-              title="click to navigate to users page"
-              className="flex cursor-pointer flex-col w-[24.5%] min-h-44 max-md:w-full max-[1025px]:w-[49%] bg-[#333fc5] aspect-video"
+              isClickable
             >
               <ChartBox {...reviewers} bg="text" />
-            </Card>
+            </ExpandableCard>
           </div>
-          <div className="flex justify-center items-center w-full gap-2l">
-            <Card className="w-full box box9">
+
+          {/* Pie Chart */}
+          <div className="w-full">
+            <ExpandableCard title="Location Distribution">
               <PieChartBox data={data} />
-            </Card>
+            </ExpandableCard>
           </div>
         </div>
-      ) : activeItem === "Sample" ? (
-        <>
-          <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-            <div className="flex flex-row justify-center items-center w-full">
-              <h2 className="capitalize"> Charts for samples </h2>
-            </div>
-            <div className="w-full h-[600px] flex flex-col">
+      )}
+
+      {/* Sample Section */}
+      {activeItem === "Sample" && (
+        <div className="space-y-4">
+          <ExpandableCard title="Sample Charts">
+            <div className="h-[600px]">
               <SampleChart barChartSampleType={barChartSampleType} />
             </div>
-            <div className="w-full h-[600px] flex flex-col gap-2">
-              <div className="flex flex-row justify-center items-center w-full">
-                <h2 className="capitalize">
-                  {" "}
-                  Graph of samples for this month{" "}
-                </h2>
-              </div>
+          </ExpandableCard>
+
+          <ExpandableCard title="Samples This Month">
+            <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
                 xAxisKey="_id"
@@ -252,13 +259,10 @@ const DashBoard = () => {
                 data={tagsThisMonth}
               />
             </div>
-            <div className="w-full h-[600px] flex flex-col gap-2">
-              <div className="flex flex-row justify-center items-center w-full">
-                <h2 className="capitalize">
-                  {" "}
-                  Graph of samples for last month{" "}
-                </h2>
-              </div>
+          </ExpandableCard>
+
+          <ExpandableCard title="Samples Last Month">
+            <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
                 xAxisKey="_id"
@@ -266,10 +270,10 @@ const DashBoard = () => {
                 data={tagsLastMonth}
               />
             </div>
-            <div className="w-full h-[600px] flex flex-col gap-2">
-              <div className="flex flex-row justify-center items-center w-full">
-                <h2 className="capitalize"> Graph of samples year to date </h2>
-              </div>
+          </ExpandableCard>
+
+          <ExpandableCard title="Samples Year to Date">
+            <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
                 xAxisKey="_id"
@@ -277,13 +281,10 @@ const DashBoard = () => {
                 data={tagsYearToDate}
               />
             </div>
-            <div className="w-full h-[600px] flex flex-col gap-2">
-              <div className="flex flex-row justify-center items-center w-full">
-                <h2 className="capitalize">
-                  {" "}
-                  Graph of positivity rate per month year to date{" "}
-                </h2>
-              </div>
+          </ExpandableCard>
+
+          <ExpandableCard title="Positivity Rate Per Month">
+            <div className="h-[600px]">
               <LineChart
                 lineDataKey="positivityRate"
                 xAxisKey="month"
@@ -291,24 +292,30 @@ const DashBoard = () => {
                 data={positivityRatePerMonthYearToDate}
               />
             </div>
-          </section>
-        </>
-      ) : activeItem === "Incident" ? (
-        <>
-          <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-            <div className="w-full h-[600px] flex flex-col gap-2 p-4">
+          </ExpandableCard>
+        </div>
+      )}
+
+      {/* Incident Section */}
+      {activeItem === "Incident" && (
+        <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
+          <ExpandableCard title="Incident Overview">
+            <div className="h-[600px]">
               <SampleChart barChartSampleType={barChartIncidentType} />
             </div>
-          </section>
-        </>
-      ) : (
-        <>
-          <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-            <div className="w-full h-[600px] flex flex-col gap-2 p-4">
+          </ExpandableCard>
+        </section>
+      )}
+
+      {/* Activity Section */}
+      {activeItem === "Activity" && (
+        <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
+          <ExpandableCard title="Recent Upload Models">
+            <div className="h-[600px]">
               <ModelList text="Recent Upload Models" users={recentModels} />
             </div>
-          </section>
-        </>
+          </ExpandableCard>
+        </section>
       )}
     </div>
   );

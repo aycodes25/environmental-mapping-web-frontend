@@ -35,6 +35,28 @@
 - Enhanced mobile responsiveness
 - Added proper form validation feedback
 
+
+
+## UI Enhancement: Dashboard Redesign
+- Migrated from Material-UI to Shadcn components for better consistency
+- Enhanced Dashboard cards with:
+  - Expandable functionality with smooth animations
+  - Visual indicators for expandable content
+  - Rotating chevron icons
+  - Hover effects with gradient overlays
+  - Scale transitions on hover and expansion
+  - Fade effects for collapsed content
+  - Improved responsive layout
+  - Better color scheme consistency
+  - Animated borders and shadows
+- Technical improvements:
+  - Added reusable ExpandableCard component
+  - Implemented smooth transitions using CSS
+  - Better state management for card expansion
+  - Improved accessibility with visual feedback
+  - Maintained all existing functionality while enhancing UX
+
+
 ## Feature requests / change
 ## Future bugs to come
 
