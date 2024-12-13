@@ -93,7 +93,7 @@ const Login = () => {
   return (
     <div className="min-h-screen flex">
       {/* Left side - Hero Image */}
-      <div className="lg:flex lg:w-1/2 text-center relative bg-gray-900">
+      {/* <div className="lg:flex lg:w-1/2 text-center relative bg-gray-900">
         <div className="absolute inset-0 bg-gradient-to-t from-gray-900/80 to-gray-900/20" />
         <img 
           src={png} 
@@ -106,7 +106,7 @@ const Login = () => {
             Secure, efficient, and reliable environmental data management system.
           </p>
         </div>
-      </div>
+      </div> */}
 
       {/* Right side - Login Form */}
       <div className="flex-1 flex items-center justify-center p-8 bg-gradient-to-b from-gray-50 to-white">
@@ -183,12 +183,7 @@ const Login = () => {
                   Remember me
                 </label>
               </div>
-              <Link
-                to="/reset-password"
-                className="text-sm font-medium text-primary hover:text-primary/80 transition-colors"
-              >
-                Forgot password?
-              </Link>
+
             </div>
 
             <div className="space-y-4">

@@ -8,7 +8,7 @@ import { toast } from "react-toastify";
 import SampleChart from "../components/SampleChart";
 import LineChart from "../components/LineChart";
 import BarChart from "../components/BarChart";
-import { ExpandableCard } from "../components/ExpandableCard";
+import { DashboardCard } from "../components/DashboardCard";
 
 
 const url = "/user/dashboard";
@@ -149,7 +149,7 @@ const DashBoard = () => {
         <div className="flex flex-col gap-4 justify-center items-center w-full">
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-            <ExpandableCard
+            <DashboardCard
               title="Positivity Rate Year To Date"
               bgColor="bg-[#333fc5]"
               className="text-white"
@@ -158,15 +158,15 @@ const DashBoard = () => {
                 number={returnNumberOrZero(parseFloat(positivityRateYearToDate).toFixed(2))}
                 bg="text"
               />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard title="Positivity Rate This Month">
+            <DashboardCard title="Positivity Rate This Month">
               <ChartBox
                 number={returnNumberOrZero(parseFloat(positivityRateThisMonth).toFixed(2))}
               />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard
+            <DashboardCard
               title="Positive Samples This Month"
               bgColor="bg-[#746c6c]"
               className="text-white"
@@ -174,9 +174,9 @@ const DashBoard = () => {
               <ChartBox
                 number={positiveTagsThisMonth}
               />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard
+            <DashboardCard
               title="Total Samples This Month"
               bgColor="bg-[#5EA33E]"
               className="text-white"
@@ -184,12 +184,12 @@ const DashBoard = () => {
               <ChartBox
                 number={totalTagsThisMonth}
               />
-            </ExpandableCard>
+            </DashboardCard>
           </div>
 
           {/* Second Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-            <ExpandableCard
+            <DashboardCard
               title="Today's Facilities"
               bgColor="bg-[#746c6c]"
               className="text-white"
@@ -197,9 +197,9 @@ const DashBoard = () => {
               isClickable
             >
               <ChartBox {...dailyModels} />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard
+            <DashboardCard
               title="Total Facilities"
               bgColor="bg-[#5EA33E]"
               className="text-white"
@@ -207,17 +207,17 @@ const DashBoard = () => {
               isClickable
             >
               <ChartBox {...totalModel} />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard
+            <DashboardCard
               title="Samplers"
               onClick={() => navigate("users")}
               isClickable
             >
               <ChartBox {...taggers} />
-            </ExpandableCard>
+            </DashboardCard>
 
-            <ExpandableCard
+            <DashboardCard
               title="Reviewers"
               bgColor="bg-[#333fc5]"
               className="text-white"
@@ -225,14 +225,14 @@ const DashBoard = () => {
               isClickable
             >
               <ChartBox {...reviewers} bg="text" />
-            </ExpandableCard>
+            </DashboardCard>
           </div>
 
           {/* Pie Chart */}
           <div className="w-full">
-            <ExpandableCard title="Location Distribution">
+            <DashboardCard title="Location Distribution">
               <PieChartBox data={data} />
-            </ExpandableCard>
+            </DashboardCard>
           </div>
         </div>
       )}
@@ -240,13 +240,13 @@ const DashBoard = () => {
       {/* Sample Section */}
       {activeItem === "Sample" && (
         <div className="space-y-4">
-          <ExpandableCard title="Sample Charts">
+          <DashboardCard title="Sample Charts">
             <div className="h-[600px]">
               <SampleChart barChartSampleType={barChartSampleType} />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
 
-          <ExpandableCard title="Samples This Month">
+          <DashboardCard title="Samples This Month">
             <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
@@ -255,9 +255,9 @@ const DashBoard = () => {
                 data={tagsThisMonth}
               />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
 
-          <ExpandableCard title="Samples Last Month">
+          <DashboardCard title="Samples Last Month">
             <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
@@ -266,9 +266,9 @@ const DashBoard = () => {
                 data={tagsLastMonth}
               />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
 
-          <ExpandableCard title="Samples Year to Date">
+          <DashboardCard title="Samples Year to Date">
             <div className="h-[600px]">
               <BarChart
                 barDataKey="count"
@@ -277,9 +277,9 @@ const DashBoard = () => {
                 data={tagsYearToDate}
               />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
 
-          <ExpandableCard title="Positivity Rate Per Month">
+          <DashboardCard title="Positivity Rate Per Month">
             <div className="h-[600px]">
               <LineChart
                 lineDataKey="positivityRate"
@@ -288,29 +288,29 @@ const DashBoard = () => {
                 data={positivityRatePerMonthYearToDate}
               />
             </div>
-          </ExpandableCard>
+            </DashboardCard>
         </div>
       )}
 
       {/* Incident Section */}
       {activeItem === "Incident" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <ExpandableCard title="Incident Overview">
+          <DashboardCard title="Incident Overview"> 
             <div className="h-[600px]">
               <SampleChart barChartSampleType={barChartIncidentType} />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
         </section>
       )}
 
       {/* Activity Section */}
       {activeItem === "Activity" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <ExpandableCard title="Recent Upload Models">
+          <DashboardCard title="Recent Upload Models">
             <div className="h-[600px]">
               <ModelList text="Recent Upload Models" users={recentModels} />
             </div>
-          </ExpandableCard>
+          </DashboardCard>
         </section>
       )}
     </div>

@@ -74,6 +74,36 @@
   - Enhanced accessibility
 
 
+
+
+1. **ModelCard Component Enhancements**
+   - Improved dropdown menu styling and functionality
+   - Added consistent white background to dropdowns
+   - Implemented hover state with #021431 background color
+   - Added pointer cursor to dropdown items
+   - Enhanced z-index for better menu visibility
+   - Improved overall component styling and transitions
+
+2. **AllModels Layout Optimization**
+   - Restructured grid layout for better model display
+   - Implemented flex-wrap for responsive design
+   - Set up proper spacing between model cards
+   - Optimized for 3 models per row display
+   - Added minimum width constraints for better responsiveness
+
+3. **Login Page Redesign**
+   - Removed left sided cover image in the login page
+
+### Technical Details
+- Updated dropdown menu implementation using Shadcn components
+- Implemented proper styling for hover states and transitions
+- Enhanced responsive design for various screen sizes
+- Improved visual hierarchy and user experience
+- Added proper documentation and code organization
+
+
+
+
 ## Feature requests / change
 ## Future bugs to come
 
