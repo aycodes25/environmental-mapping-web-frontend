@@ -23,7 +23,6 @@ import {
   Mesh,
 } from "@babylonjs/core";
 import { SceneLoader } from "babylonjs";
-import * as cannon from "cannon";
 import "babylonjs-loaders";
 import * as GUI from "babylonjs-gui";
 import { toast } from "react-toastify";
@@ -33,6 +32,7 @@ import { dispatchSelectedMesh } from "../redux/actions/meshActions";
 import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
+import { useLocation } from "react-router-dom";
 
 let currTagPos = null
 let currSpotlight = null
@@ -94,6 +94,12 @@ export function SceneComponent({
 
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
+    if (window.scene) {
+      // navigating back after having created scene therefore reload
+      // page to prevent weird screen bug
+      window.scene = undefined
+      window.location.reload()
+    }
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
@@ -219,8 +225,6 @@ export function SceneComponent({
   }
 
   useEffect(() => {
-    window.CANNON = cannon;
-
     setupDB()
       .then(db => {
       })
@@ -271,6 +275,12 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
+
+    return () => {
+      engine.stopRenderLoop()
+      scene.dispose()
+      window.removeEventListener("resize", resize)
+    }
   }, []);
 
   useEffect(() => {
