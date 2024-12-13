@@ -14,6 +14,10 @@ import { useQueryClient, useMutation } from '@tanstack/react-query';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
 import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
+// import ModalCard component
+import { ModelCard } from '../components/ModelCard';
+
+
 const url = '/model/get-models';
 
 const modelQuery = {
@@ -203,145 +207,28 @@ const AllModels = () => {
             <p className='max-sm:text-sm'>Search</p>
           </div>
         </div>
-        <div className='allModelsWrapper gap-3 max-md:w-full max-md:flex-col max-sm:flex max-sm:p-3'>
-          {modelList?.map((item, index) => {
-            // eslint-disable-next-line no-unused-vars
-            const { _id, coverPicture, modelName } = item;
-            return (
-              <Card
-                className={`${deleteModel
-                  ? 'w-80 h-auto opacity max-md:w-full p-2'
-                  : 'w-80 h-auto max-md:w-full p-2'
-                  }`}
-                key={index}>
-                <div
-                  className={`${deleteModel
-                    ? 'opacity h-60 bg-cover rounded-md block w-full'
-                    : 'block bg-cover h-60 rounded-md w-full'
-                    }`}
-                  style={{
-                    backgroundImage: `url("${getRealFileUrl(coverPicture || "") ??
-                      'https://res.cloudinary.com/diqqf3eq2/image/upload/v1595959131/person-3_rxtqvi.jpg'
-                      }")`,
-                  }}>
-                  {deleteModel && (
-                    <div className='checkbox'>
-                      <input
-                        id={_id}
-                        onClick={() => handleCheckedForSoftDelete(_id)}
-                        type='checkbox'
-                        name='check'
-                      />
-                      <label htmlFor={_id}></label>
-                    </div>
-                  )}
-                </div>
-                <div className='w-full truncate p-1 font-bold capitalize'>
-                  {modelName}
-                </div>
-                <div className='flex w-[100%] items-center justify-between gap-2'>
-                  <div className='dropdown dropdown-top w-full'>
-                    <div
-                      tabIndex={0}
-                      role='button'
-                      className='btn btn-outline btn-neutral btn-sm w-full flex-row justify-center rounded-full'>
-                      <span>View</span> <KeyboardArrowUpIcon />
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className='menu dropdown-content z-20 w-full rounded-box bg-base-100 p-2 shadow'>
-                      <li className='btn'>
-                        {/* // hack */}
-                        {/* <Link to={`/view-model/${_id}`}>View Model</Link> */}
-                        <Link to={`/view-model/${_id}`}>View Model</Link>
-                      </li>
-                      <li className='btn'>
-                        <Link
-                          to={`/${['admin', 'superAdmin'].includes(user?.role)
-                            ? 'admin'
-                            : user?.role
-                            }/view-evidences/${_id}`}>
-                          View Samples
-                        </Link>
-                      </li>
-                      <li className='btn'>
-                        <Link
-                          to={`/${['admin', 'superAdmin'].includes(user?.role)
-                            ? 'admin'
-                            : user?.role
-                            }/view-incidents/${_id}`}>
-                          View Incidents
-                        </Link>
-                      </li>
-                      <li className='btn'>
-                        <Link
-                          to={`/${['admin', 'superAdmin'].includes(user?.role)
-                            ? 'admin'
-                            : user?.role
-                            }/view-safety/${_id}`}>
-                          Safety tool
-                        </Link>
-                      </li>
-                    </ul>
-                  </div>
-                  <Button className='w-2/12 items-center justify-center'>
-                    <FaEdit
-                      className='h-10 w-5'
-                      onClick={() =>
-                        navigate(
-                          `/${['admin', 'superAdmin'].includes(user?.role)
-                            ? 'admin'
-                            : user?.role
-                          }/edit-model/${_id}`
-                        )
-                      }
-                    />
-                  </Button>
-                </div>
-                <div className='flex w-[100%] items-center justify-between gap-2'>
-                  <div className='dropdown dropdown-top w-full'>
-                    <div
-                      tabIndex={0}
-                      role='button'
-                      className='btn btn-outline btn-neutral btn-sm w-full flex-row justify-center rounded-full'>
-                      <span>Sample</span> <KeyboardArrowUpIcon />
-                    </div>
-                    <ul
-                      tabIndex={0}
-                      className='menu dropdown-content z-20 w-full rounded-box bg-base-100 p-2 shadow'>
-                      <li className='btn'>
-                        <Link to={`/view-model/${_id}`}>Sample From Model</Link>
-                      </li>
-                      <li className='btn'>
-                        <Link
-                          to={`${['admin', 'superAdmin'].includes(user?.role)
-                            ? '/admin'
-                            : '/sampler'
-                            }/granular-tagging-list/${_id}`}>
-                          Sample From Feature List
-                        </Link>
-                      </li>
-                      {['admin', 'superAdmin', 'tagger', 'sampler'].includes(
-                        user?.role
-                      ) && (
-                          <li className='btn'>
-                            <Link to={`/tag-list-create/${_id}`}>
-                              New Sample Feature (Create List)
-                            </Link>
-                          </li>
-                        )}
-                    </ul>
-                  </div>
-                  <Button
-                    className='w-2/12 items-center justify-center'
-                    onClick={() => handleDeleteAModel(_id)}>
-                    <FaTrash className='h-10 w-5' />
-                  </Button>
-                </div>
-              </Card>
-            );
-          })}
-        </div>
+<div className='flex flex-wrap justify-start gap-6 p-6'>
+  {modelList?.map((item, index) => (
+    <div className="w-[calc(33.33%-1rem)] min-w-[300px]">
+      <ModelCard
+        key={index}
+        model={item}
+        onDelete={handleDeleteAModel}
+        onEdit={(id) => 
+          navigate(
+            `/${['admin', 'superAdmin'].includes(user?.role)
+              ? 'admin'
+              : user?.role
+            }/edit-model/${id}`
+          )
+        }
+        deleteModel={deleteModel}
+        onCheck={handleCheckedForSoftDelete}
+        userRole={user?.role}
+      />
+    </div>
+  ))}
+</div>
 
         <div className='navigatonBtnContainer'>
           <ReactPaginate
