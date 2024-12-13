@@ -617,12 +617,8 @@ function optimizeScene(scene) {
   // this improved perf significantly with some caveats
   // look here https://doc.babylonjs.com/features/featuresDeepDive/scene/optimize_your_scene#aggressive-mode
   scene.performancePriority = BABYLON.ScenePerformancePriority.Aggressive
-  // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
-  // scene.freezeActiveMeshes()
   scene.autoClear = true
   scene.skipPointerMovePicking = false
-  // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
-  // optimizer.start();
 }
 
 function updateCameraPosition(scene) {
@@ -636,7 +632,7 @@ function updateCameraPosition(scene) {
 
 function applyMeshOptimizations(mesh) {
   // applyOcclusionAlgo(mesh)
-  // mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
+  mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
   mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   mesh.isPickable = true // because .performancePriority == BABYLON.ScenePerformancePriority.Aggressive
 }
