@@ -42,9 +42,9 @@ export const singleUserLoader =
 
 const EditUser = () => {
   const { user } = useLoaderData();
-    const navigate = useNavigate();
+  const navigate = useNavigate();
 
-  
+
   const [formData, setFormData] = useState({
     fullname: user?.fullname || "",
     username: user?.username || "",
@@ -52,6 +52,7 @@ const EditUser = () => {
     role: user?.role || "",
     image: user?.imageUrl || "",
     location: user?.location || "",
+    password: ""
   });
   // const [visible, setVisible] = useState(false);
   const [showModal, setShowModal] = useState(false);

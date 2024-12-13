@@ -3616,6 +3616,10 @@ html {
   width: 100vw;
 }
 
+.w-\[150px\] {
+  width: 150px;
+}
+
 .min-w-32 {
   min-width: 8rem;
 }
@@ -3666,6 +3670,10 @@ html {
 
 .max-w-md {
   max-width: 28rem;
+}
+
+.max-w-full {
+  max-width: 100%;
 }
 
 .flex-1 {
