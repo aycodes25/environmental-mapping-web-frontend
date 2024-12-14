@@ -299,28 +299,24 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                 options={["Crack", "Spill"]}
                             />
                         </div>}
-                        {formData?.type === "sampling" && <div className='form-control'>
-                            <InputLabel
-                                className='label w-full'
-                                id='result'>
-                                Result
-                            </InputLabel>
-                            <Select
-                                className='input input-bordered h-10 w-full border shadow-none'
-                                labelId='result-select'
-                                id='result'
-                                value={formData?.presence}
+                        {formData?.type === "sampling" && <div className='form-control mt-5'>
+                            <select
                                 onChange={handleInputChange}
-                                autoWidth
-                                name='presence'
-                                label='Sample Presence'>
-                                <MenuItem className='w-full' value='positive'>
-                                    positive
-                                </MenuItem>
-                                <MenuItem className='w-full' value='negative'>
-                                    negative
-                                </MenuItem>
-                            </Select>
+                                name="presence"
+                                value={formData.presence}
+                                required
+                                className="w-full p-2 border rounded"
+                            >
+                                <option value="" disabled>Result</option>
+                                {[
+                                    { value: "positive", label: "positive" },
+                                    { value: "negative", label: "negative" }
+                                ].map((item) => (
+                                    <option key={item.value} value={item.value}>
+                                        {item.label}
+                                    </option>
+                                ))}
+                            </select>
                         </div>}
                         {["sampling", "incident"].includes(formData.type) && <FormInput
                             onChange={handleInputChange}
