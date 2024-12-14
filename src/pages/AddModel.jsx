@@ -58,6 +58,10 @@ const AddModel = () => {
     setIsSubmitting(true);
     try {
       const formDataForUpload = new FormData();
+      if (!formData.file) {
+        toast.error("please provide a model file")
+        return
+      }
       formDataForUpload.append("modelName", formData.modelName);
       formDataForUpload.append("description", formData.description);
       formDataForUpload.append("location", formData.location);
@@ -184,7 +188,6 @@ const AddModel = () => {
                 accept=".jpg, .jpeg, .png, .webp"
                 className="hidden"
                 onChange={handleInputChange}
-                required
               />
             </label>
           </div>

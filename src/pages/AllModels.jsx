@@ -207,28 +207,27 @@ const AllModels = () => {
             <p className='max-sm:text-sm'>Search</p>
           </div>
         </div>
-<div className='flex flex-wrap justify-start gap-6 p-6'>
-  {modelList?.map((item, index) => (
-    <div className="w-[calc(33.33%-1rem)] min-w-[300px]">
-      <ModelCard
-        key={index}
-        model={item}
-        onDelete={handleDeleteAModel}
-        onEdit={(id) => 
-          navigate(
-            `/${['admin', 'superAdmin'].includes(user?.role)
-              ? 'admin'
-              : user?.role
-            }/edit-model/${id}`
-          )
-        }
-        deleteModel={deleteModel}
-        onCheck={handleCheckedForSoftDelete}
-        userRole={user?.role}
-      />
-    </div>
-  ))}
-</div>
+        <div className='flex flex-wrap justify-start gap-6 p-6'>
+          {modelList?.map((item, index) => (
+            <div key={index} className="w-[calc(33.33%-1rem)] min-w-[300px]">
+              <ModelCard
+                model={item}
+                onDelete={handleDeleteAModel}
+                onEdit={(id) =>
+                  navigate(
+                    `/${['admin', 'superAdmin'].includes(user?.role)
+                      ? 'admin'
+                      : user?.role
+                    }/edit-model/${id}`
+                  )
+                }
+                deleteModel={deleteModel}
+                onCheck={handleCheckedForSoftDelete}
+                userRole={user?.role}
+              />
+            </div>
+          ))}
+        </div>
 
         <div className='navigatonBtnContainer'>
           <ReactPaginate
