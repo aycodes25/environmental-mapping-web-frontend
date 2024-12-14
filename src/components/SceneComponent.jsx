@@ -112,6 +112,7 @@ export function SceneComponent({
       .then(() => {
         setIsLoading(false);
         toast.success("model is ready!");
+        setupVideoRecording(scene);
       })
 
     let is2DView;
@@ -329,9 +330,6 @@ export const SpinnerOverlay = () => {
 };
 
 export const onSceneReady = (scene, dispatch) => {
-  // hack
-  // setupVideoRecording(scene);
-
   scene.onPointerObservable.add((pointerInfo) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
       const pickResult = pointerInfo.pickInfo
@@ -402,7 +400,7 @@ function addTagHoverEventHandler(tag, tagData) {
 }
 
 export const stopRecording = (videoRecorder) => {
-  videoRecorder.stopRecording((blob) => {
+  videoRecorder.isRecording && videoRecorder.stopRecording((blob) => {
     const videoUrl = URL.createObjectURL(blob);
     const videoElement = document.createElement("a");
     videoElement.style.display = "block";
@@ -422,44 +420,9 @@ export const stopRecording = (videoRecorder) => {
 };
 
 
-export function gridBoxOnMesh(mesh, scene) {
-  const boundingBox = mesh.getBoundingInfo().boundingBox;
-  const boundingBoxSize = boundingBox.maximum.subtract(boundingBox.minimum);
-  const gridSize = 0.1;
-  const gridColor = new Color3(0.0, 1.0, 0.0);
-  const numGridBoxesX = Math.ceil(boundingBoxSize.x / gridSize);
-  const numGridBoxesY = Math.ceil(boundingBoxSize.y / gridSize);
-  const numGridBoxesZ = Math.ceil(boundingBoxSize.z / gridSize);
-  for (let i = 0; i < numGridBoxesX; i++) {
-    for (let j = 0; j < numGridBoxesY; j++) {
-      for (let k = 0; k < numGridBoxesZ; k++) {
-        const x = boundingBox.minimum.x + i * gridSize + gridSize / 2;
-        const y = boundingBox.minimum.y + j * gridSize + gridSize / 2;
-        const z = boundingBox.minimum.z + k * gridSize + gridSize / 2;
-        const box = MeshBuilder.CreateBox("gridBox", { size: gridSize }, scene);
-        box.position = new Vector3(x, y, z);
-        box.material = new StandardMaterial("gridBoxMaterial", scene);
-        box.material.diffuseColor = gridColor;
-        box.isPickable = true;
-        box.actionManager = new ActionManager(scene);
-        box.actionManager.registerAction(
-          new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
-            box.material.emissiveColor = new Color3(1, 1, 1);
-          })
-        );
-        box.actionManager.registerAction(
-          new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
-            box.material.emissiveColor = Color3.Black();
-          })
-        );
-      }
-    }
-  }
-}
-
 export const startRecording = (videoRecorder) => {
   const maxRecordingDuration = 60 * 2 * 1000;
-  videoRecorder.startRecording();
+  videoRecorder.startRecording("video-record.webm", maxRecordingDuration);
   toast.success("Video recording started");
   setTimeout(() => {
     stopRecording(videoRecorder);
@@ -474,8 +437,10 @@ export const setupVideoRecording = (scene) => {
     recordButton.addEventListener("click", () => {
       if (!videoRecorder.isRecording) {
         startRecording(videoRecorder);
+        recordButton.style.backgroundColor = "red"
       } else {
         stopRecording(videoRecorder);
+        recordButton.style.backgroundColor = ""
       }
     });
   }
