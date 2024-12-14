@@ -32,7 +32,6 @@ import { dispatchSelectedMesh } from "../redux/actions/meshActions";
 import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
-import { useLocation } from "react-router-dom";
 
 let currTagPos = null
 let currSpotlight = null
@@ -487,16 +486,8 @@ export function saveScreenshot(scene) {
     scene.getEngine(),
     scene.activeCamera,
     { width: 1024, height: 900 },
-    function (data) {
-      const imageUrl = URL.createObjectURL(data);
-      const screenshotElement = document.createElement("a");
-      screenshotElement.style.display = "none";
-      screenshotElement.href = imageUrl;
-      screenshotElement.download = "screenshot.jpeg";
-      document.body.appendChild(screenshotElement);
-      screenshotElement.click();
-      document.body.removeChild(screenshotElement);
-    }
+    null,
+    true
   );
   toast.success("Screenshot saved");
 }
