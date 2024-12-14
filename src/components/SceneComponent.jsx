@@ -23,7 +23,6 @@ import {
   Mesh,
 } from "@babylonjs/core";
 import { SceneLoader } from "babylonjs";
-import * as cannon from "cannon";
 import "babylonjs-loaders";
 import * as GUI from "babylonjs-gui";
 import { toast } from "react-toastify";
@@ -33,6 +32,7 @@ import { dispatchSelectedMesh } from "../redux/actions/meshActions";
 import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
+import { useLocation } from "react-router-dom";
 
 let currTagPos = null
 let currSpotlight = null
@@ -47,6 +47,7 @@ let saveCameraPositionAndDirection = {
 }
 
 let discs = []
+let discsClone = [] // used to reposition tags in 2d view
 
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
@@ -94,6 +95,12 @@ export function SceneComponent({
 
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
+    if (window.scene) {
+      // navigating back after having created scene therefore reload
+      // page to prevent weird screen bug
+      window.scene = undefined
+      window.location.reload()
+    }
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
@@ -103,6 +110,10 @@ export function SceneComponent({
 
     // this also saves the loaded file in indexedDb
     loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene)
+      .then(() => {
+        setIsLoading(false);
+        toast.success("model is ready!");
+      })
 
     let is2DView;
 
@@ -115,6 +126,7 @@ export function SceneComponent({
         camera1.position = saveCameraPositionAndDirection.position.clone()
         camera1.direction = saveCameraPositionAndDirection.direction.clone()
         camera1.rotation = saveCameraPositionAndDirection.rotation.clone()
+        removeTagsClone()
       } else {
         saveCameraPositionAndDirection.inSunView = true
         saveCameraPositionAndDirection.position = camera1.position.clone()
@@ -125,6 +137,7 @@ export function SceneComponent({
           camera1.rotation.z,
         )
         centerCameras(scene, true)
+        displayTagsClonesHighUp()
       }
     }
 
@@ -219,8 +232,6 @@ export function SceneComponent({
   }
 
   useEffect(() => {
-    window.CANNON = cannon;
-
     setupDB()
       .then(db => {
       })
@@ -243,21 +254,11 @@ export function SceneComponent({
 
     const handleSceneReady = () => {
       onSceneReady(scene);
-      setIsLoading(false);
-      toast.success("model is ready!");
     };
 
 
     scene.onReadyObservable.addOnce(() => {
       handleSceneReady()
-    });
-
-    scene.onReadyObservable.addOnce(() => {
-      setIsLoading(false);
-    });
-
-    scene.onDisposeObservable.addOnce(() => {
-      setIsLoading(true);
     });
 
     const renderLoop = () => {
@@ -271,6 +272,12 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
+
+    return () => {
+      engine.stopRenderLoop()
+      scene.dispose()
+      window.removeEventListener("resize", resize)
+    }
   }, []);
 
   useEffect(() => {
@@ -282,6 +289,8 @@ export function SceneComponent({
       addTagHoverEventHandler(disc, tag)
       discs.push(disc)
     });
+    removeTagsClone()
+    displayTagsClonesHighUp()
   }, [tags])
 
   return (
@@ -561,6 +570,30 @@ export function drawTag(scene, position, name = `${Date.now()}`, type) {
   return createDiscAtPosition(name, position, scene, true, type)
 }
 
+function displayTagsClonesHighUp() {
+  const camera = window.scene.activeCamera;
+
+  discs.forEach(disc => {
+    let discClone = disc.clone(disc.name + "_clone")
+    discClone.unfreezeWorldMatrix()
+    const diffX = camera.position.x - discClone.position.x
+    const diffY = camera.position.y - discClone.position.y
+    const diffZ = camera.position.z - discClone.position.z
+    discClone.position.x = discClone.position.x + (diffX / 2)
+    discClone.position.y = discClone.position.y + (diffY / 2)
+    discClone.position.z = discClone.position.z + (diffZ / 2)
+    discsClone.push(discClone)
+  });
+}
+
+function removeTagsClone() {
+  discsClone.forEach(disc => {
+    disc.isVisible = false
+    disc.dispose()
+  })
+  discsClone = []
+}
+
 export function replaceInstanceWithClone(instanceMesh) {
 
   if (!instanceMesh.ownerMesh) {
@@ -617,12 +650,8 @@ function optimizeScene(scene) {
   // this improved perf significantly with some caveats
   // look here https://doc.babylonjs.com/features/featuresDeepDive/scene/optimize_your_scene#aggressive-mode
   scene.performancePriority = BABYLON.ScenePerformancePriority.Aggressive
-  // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
-  // scene.freezeActiveMeshes()
   scene.autoClear = true
   scene.skipPointerMovePicking = false
-  // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
-  // optimizer.start();
 }
 
 function updateCameraPosition(scene) {
@@ -636,7 +665,7 @@ function updateCameraPosition(scene) {
 
 function applyMeshOptimizations(mesh) {
   // applyOcclusionAlgo(mesh)
-  // mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
+  mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
   mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   mesh.isPickable = true // because .performancePriority == BABYLON.ScenePerformancePriority.Aggressive
 }
@@ -664,7 +693,7 @@ function loadSceneFromGlb(url, scene) {
   let fileName = urlSplit.pop()
   // deleteFromDb(url).then(console.log) // just in case to force refetch
   // return
-  checkUrlInIndexedDb(url)
+  return checkUrlInIndexedDb(url)
     .then(result => {
       console.log(result)
       if (result.isInDb) {
@@ -672,9 +701,9 @@ function loadSceneFromGlb(url, scene) {
           // type: "model/gltf-binary"
         });
 
-        importGLFileInScene(glFile, scene)
+        return importGLFileInScene(glFile, scene)
       } else {
-        fetch(url)
+        return fetch(url)
           .then((response) => response.blob())
           .then((blob) => {
 
@@ -684,22 +713,25 @@ function loadSceneFromGlb(url, scene) {
 
             storeBlobInDb(url, blob)
 
-            importGLFileInScene(glFile, scene)
+            return importGLFileInScene(glFile, scene)
           });
       }
     })
 }
 
 function importGLFileInScene(glFile, scene) {
-  SceneLoader.ImportMeshAsync("", "", glFile, scene).then((result) => {
-    result.meshes.forEach(mesh => {
-      applyOpRecursivelyOnSubmeshes(mesh, () => {
-        applyMeshOptimizations(mesh)
-      })
+  return new Promise((resolve) => {
+    SceneLoader.ImportMeshAsync("", "", glFile, scene).then((result) => {
+      result.meshes.forEach(mesh => {
+        applyOpRecursivelyOnSubmeshes(mesh, () => {
+          applyMeshOptimizations(mesh)
+        })
+      });
+      optimizeScene(scene)
+      centerCameras(scene)
+      resolve()
     });
-    optimizeScene(scene)
-    centerCameras(scene)
-  });
+  })
 }
 
 function centerCameras(scene, setSunAngleCamera = false) {
@@ -722,7 +754,7 @@ function centerCameras(scene, setSunAngleCamera = false) {
     let camera = scene.getCameraByName("camera1")
     camera.position = centroid.clone()
     camera.rotation.x = Math.PI / 2;
-    camera.position.y = 150
+    camera.position.y += 150
   } else {
     scene.getCameraByName("camera1").position = centroid.clone()
   }
