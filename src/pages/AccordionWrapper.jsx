@@ -29,8 +29,8 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
     const response = await customFetch.delete(`/tag/tags-delete/${id}`);
     if (response.data.status !== 'error') {
       toast.success(response.data.message || 'Samples deleted successfully');
-      let tags = data.filter(tag => tag._id !== id)
-      setTagsData(tags)
+      let tags = model.tags?.filter(tag => tag._id !== id)
+      setTagsData(tags || [])
       model.tags = tags
     } else {
       toast.error(response.data.message);

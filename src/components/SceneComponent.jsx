@@ -32,6 +32,7 @@ import { dispatchSelectedMesh } from "../redux/actions/meshActions";
 import { useControls, Leva } from "leva";
 import { memoize } from "proxy-memoize";
 import { formatDate, formatTime, getRealFileUrl } from "../utils";
+import { useLocation } from "react-router-dom";
 
 let currTagPos = null
 let currSpotlight = null
