@@ -23,7 +23,6 @@ import {
   Mesh,
 } from "@babylonjs/core";
 import { SceneLoader } from "babylonjs";
-import * as cannon from "cannon";
 import "babylonjs-loaders";
 import * as GUI from "babylonjs-gui";
 import { toast } from "react-toastify";
@@ -47,6 +46,7 @@ let saveCameraPositionAndDirection = {
 }
 
 let discs = []
+let discsClone = [] // used to reposition tags in 2d view
 
 const cameraControls = {
   cameraSensitivity: { value: 1, min: 0, max: 10, step: 1 },
@@ -94,6 +94,12 @@ export function SceneComponent({
 
   function delayCreateScene(engine, baseUrl, filenameWithExtension) {
     const scene = new Scene(engine);
+    if (window.scene) {
+      // navigating back after having created scene therefore reload
+      // page to prevent weird screen bug
+      window.scene = undefined
+      window.location.reload()
+    }
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
     const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
@@ -103,6 +109,11 @@ export function SceneComponent({
 
     // this also saves the loaded file in indexedDb
     loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene)
+      .then(() => {
+        setIsLoading(false);
+        toast.success("model is ready!");
+        setupVideoRecording(scene);
+      })
 
     let is2DView;
 
@@ -115,6 +126,7 @@ export function SceneComponent({
         camera1.position = saveCameraPositionAndDirection.position.clone()
         camera1.direction = saveCameraPositionAndDirection.direction.clone()
         camera1.rotation = saveCameraPositionAndDirection.rotation.clone()
+        removeTagsClone()
       } else {
         saveCameraPositionAndDirection.inSunView = true
         saveCameraPositionAndDirection.position = camera1.position.clone()
@@ -125,6 +137,7 @@ export function SceneComponent({
           camera1.rotation.z,
         )
         centerCameras(scene, true)
+        displayTagsClonesHighUp()
       }
     }
 
@@ -219,8 +232,6 @@ export function SceneComponent({
   }
 
   useEffect(() => {
-    window.CANNON = cannon;
-
     setupDB()
       .then(db => {
       })
@@ -243,21 +254,11 @@ export function SceneComponent({
 
     const handleSceneReady = () => {
       onSceneReady(scene);
-      setIsLoading(false);
-      toast.success("model is ready!");
     };
 
 
     scene.onReadyObservable.addOnce(() => {
       handleSceneReady()
-    });
-
-    scene.onReadyObservable.addOnce(() => {
-      setIsLoading(false);
-    });
-
-    scene.onDisposeObservable.addOnce(() => {
-      setIsLoading(true);
     });
 
     const renderLoop = () => {
@@ -271,6 +272,12 @@ export function SceneComponent({
     };
 
     window.addEventListener("resize", resize);
+
+    return () => {
+      engine.stopRenderLoop()
+      scene.dispose()
+      window.removeEventListener("resize", resize)
+    }
   }, []);
 
   useEffect(() => {
@@ -282,6 +289,8 @@ export function SceneComponent({
       addTagHoverEventHandler(disc, tag)
       discs.push(disc)
     });
+    removeTagsClone()
+    displayTagsClonesHighUp()
   }, [tags])
 
   return (
@@ -321,9 +330,6 @@ export const SpinnerOverlay = () => {
 };
 
 export const onSceneReady = (scene, dispatch) => {
-  // hack
-  // setupVideoRecording(scene);
-
   scene.onPointerObservable.add((pointerInfo) => {
     if (pointerInfo.type === BABYLON.PointerEventTypes.POINTERPICK) {
       const pickResult = pointerInfo.pickInfo
@@ -394,7 +400,7 @@ function addTagHoverEventHandler(tag, tagData) {
 }
 
 export const stopRecording = (videoRecorder) => {
-  videoRecorder.stopRecording((blob) => {
+  videoRecorder.isRecording && videoRecorder.stopRecording((blob) => {
     const videoUrl = URL.createObjectURL(blob);
     const videoElement = document.createElement("a");
     videoElement.style.display = "block";
@@ -414,44 +420,9 @@ export const stopRecording = (videoRecorder) => {
 };
 
 
-export function gridBoxOnMesh(mesh, scene) {
-  const boundingBox = mesh.getBoundingInfo().boundingBox;
-  const boundingBoxSize = boundingBox.maximum.subtract(boundingBox.minimum);
-  const gridSize = 0.1;
-  const gridColor = new Color3(0.0, 1.0, 0.0);
-  const numGridBoxesX = Math.ceil(boundingBoxSize.x / gridSize);
-  const numGridBoxesY = Math.ceil(boundingBoxSize.y / gridSize);
-  const numGridBoxesZ = Math.ceil(boundingBoxSize.z / gridSize);
-  for (let i = 0; i < numGridBoxesX; i++) {
-    for (let j = 0; j < numGridBoxesY; j++) {
-      for (let k = 0; k < numGridBoxesZ; k++) {
-        const x = boundingBox.minimum.x + i * gridSize + gridSize / 2;
-        const y = boundingBox.minimum.y + j * gridSize + gridSize / 2;
-        const z = boundingBox.minimum.z + k * gridSize + gridSize / 2;
-        const box = MeshBuilder.CreateBox("gridBox", { size: gridSize }, scene);
-        box.position = new Vector3(x, y, z);
-        box.material = new StandardMaterial("gridBoxMaterial", scene);
-        box.material.diffuseColor = gridColor;
-        box.isPickable = true;
-        box.actionManager = new ActionManager(scene);
-        box.actionManager.registerAction(
-          new ExecuteCodeAction(ActionManager.OnPointerOverTrigger, () => {
-            box.material.emissiveColor = new Color3(1, 1, 1);
-          })
-        );
-        box.actionManager.registerAction(
-          new ExecuteCodeAction(ActionManager.OnPointerOutTrigger, () => {
-            box.material.emissiveColor = Color3.Black();
-          })
-        );
-      }
-    }
-  }
-}
-
 export const startRecording = (videoRecorder) => {
   const maxRecordingDuration = 60 * 2 * 1000;
-  videoRecorder.startRecording();
+  videoRecorder.startRecording("video-record.webm", maxRecordingDuration);
   toast.success("Video recording started");
   setTimeout(() => {
     stopRecording(videoRecorder);
@@ -466,8 +437,10 @@ export const setupVideoRecording = (scene) => {
     recordButton.addEventListener("click", () => {
       if (!videoRecorder.isRecording) {
         startRecording(videoRecorder);
+        recordButton.style.backgroundColor = "red"
       } else {
         stopRecording(videoRecorder);
+        recordButton.style.backgroundColor = ""
       }
     });
   }
@@ -478,16 +451,8 @@ export function saveScreenshot(scene) {
     scene.getEngine(),
     scene.activeCamera,
     { width: 1024, height: 900 },
-    function (data) {
-      const imageUrl = URL.createObjectURL(data);
-      const screenshotElement = document.createElement("a");
-      screenshotElement.style.display = "none";
-      screenshotElement.href = imageUrl;
-      screenshotElement.download = "screenshot.jpeg";
-      document.body.appendChild(screenshotElement);
-      screenshotElement.click();
-      document.body.removeChild(screenshotElement);
-    }
+    null,
+    true
   );
   toast.success("Screenshot saved");
 }
@@ -561,6 +526,30 @@ export function drawTag(scene, position, name = `${Date.now()}`, type) {
   return createDiscAtPosition(name, position, scene, true, type)
 }
 
+function displayTagsClonesHighUp() {
+  const camera = window.scene.activeCamera;
+
+  discs.forEach(disc => {
+    let discClone = disc.clone(disc.name + "_clone")
+    discClone.unfreezeWorldMatrix()
+    const diffX = camera.position.x - discClone.position.x
+    const diffY = camera.position.y - discClone.position.y
+    const diffZ = camera.position.z - discClone.position.z
+    discClone.position.x = discClone.position.x + (diffX / 2)
+    discClone.position.y = discClone.position.y + (diffY / 2)
+    discClone.position.z = discClone.position.z + (diffZ / 2)
+    discsClone.push(discClone)
+  });
+}
+
+function removeTagsClone() {
+  discsClone.forEach(disc => {
+    disc.isVisible = false
+    disc.dispose()
+  })
+  discsClone = []
+}
+
 export function replaceInstanceWithClone(instanceMesh) {
 
   if (!instanceMesh.ownerMesh) {
@@ -617,12 +606,8 @@ function optimizeScene(scene) {
   // this improved perf significantly with some caveats
   // look here https://doc.babylonjs.com/features/featuresDeepDive/scene/optimize_your_scene#aggressive-mode
   scene.performancePriority = BABYLON.ScenePerformancePriority.Aggressive
-  // scene.performancePriority = BABYLON.ScenePerformancePriority.Intermediate
-  // scene.freezeActiveMeshes()
   scene.autoClear = true
   scene.skipPointerMovePicking = false
-  // const optimizer = BABYLON.SceneOptimizer.OptimizeAsync(scene);
-  // optimizer.start();
 }
 
 function updateCameraPosition(scene) {
@@ -636,7 +621,7 @@ function updateCameraPosition(scene) {
 
 function applyMeshOptimizations(mesh) {
   // applyOcclusionAlgo(mesh)
-  // mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
+  mesh.isReady() && mesh.freezeWorldMatrix() // causes model corruption on some systems
   mesh.cullingStrategy = BABYLON.AbstractMesh.CULLINGSTRATEGY_BOUNDINGSPHERE_ONLY
   mesh.isPickable = true // because .performancePriority == BABYLON.ScenePerformancePriority.Aggressive
 }
@@ -664,7 +649,7 @@ function loadSceneFromGlb(url, scene) {
   let fileName = urlSplit.pop()
   // deleteFromDb(url).then(console.log) // just in case to force refetch
   // return
-  checkUrlInIndexedDb(url)
+  return checkUrlInIndexedDb(url)
     .then(result => {
       console.log(result)
       if (result.isInDb) {
@@ -672,9 +657,9 @@ function loadSceneFromGlb(url, scene) {
           // type: "model/gltf-binary"
         });
 
-        importGLFileInScene(glFile, scene)
+        return importGLFileInScene(glFile, scene)
       } else {
-        fetch(url)
+        return fetch(url)
           .then((response) => response.blob())
           .then((blob) => {
 
@@ -684,22 +669,25 @@ function loadSceneFromGlb(url, scene) {
 
             storeBlobInDb(url, blob)
 
-            importGLFileInScene(glFile, scene)
+            return importGLFileInScene(glFile, scene)
           });
       }
     })
 }
 
 function importGLFileInScene(glFile, scene) {
-  SceneLoader.ImportMeshAsync("", "", glFile, scene).then((result) => {
-    result.meshes.forEach(mesh => {
-      applyOpRecursivelyOnSubmeshes(mesh, () => {
-        applyMeshOptimizations(mesh)
-      })
+  return new Promise((resolve) => {
+    SceneLoader.ImportMeshAsync("", "", glFile, scene).then((result) => {
+      result.meshes.forEach(mesh => {
+        applyOpRecursivelyOnSubmeshes(mesh, () => {
+          applyMeshOptimizations(mesh)
+        })
+      });
+      optimizeScene(scene)
+      centerCameras(scene)
+      resolve()
     });
-    optimizeScene(scene)
-    centerCameras(scene)
-  });
+  })
 }
 
 function centerCameras(scene, setSunAngleCamera = false) {
@@ -722,7 +710,7 @@ function centerCameras(scene, setSunAngleCamera = false) {
     let camera = scene.getCameraByName("camera1")
     camera.position = centroid.clone()
     camera.rotation.x = Math.PI / 2;
-    camera.position.y = 150
+    camera.position.y += 150
   } else {
     scene.getCameraByName("camera1").position = centroid.clone()
   }

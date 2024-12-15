@@ -88,7 +88,7 @@ const router = createBrowserRouter([
   },
   {
     path: '/tag-model/:id',
-    element: <TagModel />,
+    element: <SingleModel />,
     loader: singleModelLoader(),
     errorElement: <Error />,
   },

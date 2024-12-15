@@ -40,10 +40,14 @@ function ModelOnScreenControls() {
                     <div className="buttonsWrapper">
                         <Button className="controlContainer zoomContainer">
                             <div id='zoomOut' className="ctrlImg zoom z-10 flex h-10 w-10 items-center justify-center text-center">
-                                <ZoomOutIcon className='zoomImg' fontSize='large' />
+                                <ZoomOutIcon className='zoomImg' fontSize='large'
+                                    onClick={() => simulateKeyDown("ArrowDown", "ArrowDown", 40)}
+                                />
                             </div>
                             <div id='zoomIn' className="ctrlImg zoom z-10 flex h-10 w-10 items-center justify-center text-center">
-                                <ZoomInIcon className='zoomImg' fontSize='large' />
+                                <ZoomInIcon className='zoomImg' fontSize='large'
+                                    onClick={() => simulateKeyDown("ArrowUp", "ArrowUp", 38)}
+                                />
                             </div>
                         </Button>
                         <div className="separator"></div>
@@ -55,8 +59,8 @@ function ModelOnScreenControls() {
                                 <CameraAltOutlinedIcon className='camera' />
                             </div>
                         </Button>
-                        <div style={{display:'none'}} className="separator hidden"></div>
-                        <Button style={{display:'none'}} className="controlContainer dimension hidden" id='2DOverlayButton'>
+                        <div style={{ display: 'none' }} className="separator hidden"></div>
+                        <Button style={{ display: 'none' }} className="controlContainer dimension hidden" id='2DOverlayButton'>
                             <div className="ctrlImg z-10 flex h-10 w-10 items-center justify-center text-center">
                                 2D
                             </div>
@@ -84,6 +88,31 @@ function ModelOnScreenControls() {
             </div>
         </>
     )
+}
+
+function simulateKeyDown(key, code, keyCode) {
+    const event = new KeyboardEvent("keydown", {
+        key: key,
+        code: code,
+        keyCode: keyCode,
+        bubbles: true,
+        cancelable: true
+    });
+    renderCanvas.dispatchEvent(event);
+    setTimeout(() => {
+        simulateKeyUp(key, code, keyCode)
+    }, 10);
+}
+
+function simulateKeyUp(key, code, keyCode) {
+    const event = new KeyboardEvent("keyup", {
+        key: key,
+        code: code,
+        keyCode: keyCode,
+        bubbles: true,
+        cancelable: true
+    });
+    renderCanvas.dispatchEvent(event);
 }
 
 export default ModelOnScreenControls
