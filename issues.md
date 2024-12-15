@@ -79,7 +79,6 @@
 1. **ModelCard Component Enhancements**
    - Improved dropdown menu styling and functionality
    - Added consistent white background to dropdowns
-   - Implemented hover state with #021431 background color
    - Added pointer cursor to dropdown items
    - Enhanced z-index for better menu visibility
    - Improved overall component styling and transitions
