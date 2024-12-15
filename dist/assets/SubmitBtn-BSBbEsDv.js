@@ -1,1 +1,0 @@
-import{j as n}from"./index-DespTN1l.js";const a=({text:t,isSubmitting:s})=>n.jsx("button",{type:"submit",className:"btn btn-neutral btn-block",disabled:s,children:s?n.jsxs(n.Fragment,{children:[n.jsx("span",{className:"loading loading-spinner"}),"sending..."]}):t||"submit"});export{a as S};
