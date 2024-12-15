@@ -135,7 +135,7 @@ const EditUser = () => {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
+          <form encType="multipart/form-data" className="space-y-4">
             {/* Full Name */}
             <div className="space-y-2">
               <Label className="text-gray-700">Full Name</Label>
@@ -282,6 +282,7 @@ const EditUser = () => {
               type="submit"
               className="w-full h-11 bg-[#021431] hover:bg-[#021431]/90 text-white"
               disabled={isSubmitting}
+              onClick={handleSubmit}
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center space-x-2">
