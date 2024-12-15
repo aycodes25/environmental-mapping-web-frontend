@@ -191,10 +191,11 @@ const Login = () => {
                 type="submit"
                 className="w-full h-11 text-base font-semibold"
                 disabled={isSubmitting}
+                onClick={handleSubmit}
               >
                 {isSubmitting ? (
                   <div className="flex items-center justify-center space-x-2">
-                    <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                    <div className="w-4 h-4 border-2 border-white border-t-transparent cursor-pointer rounded-full animate-spin" />
                     <span className="text-white">Signing in...</span>
                   </div>
                 ) : (
