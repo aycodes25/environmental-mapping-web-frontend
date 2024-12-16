@@ -85,30 +85,7 @@ export const ModelCard = ({
                   <Eye className="h-4 w-4" /> View Model
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  to={`/${userRole}/view-evidences/${_id}`}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                >
-                  <List className="h-4 w-4" /> View Samples
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  to={`/${userRole}/view-incidents/${_id}`}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                >
-                  <Shield className="h-4 w-4" /> View Incidents
-                </Link>
-              </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  to={`/${userRole}/view-safety/${_id}`}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                >
-                  <Shield className="h-4 w-4" /> Safety Tool
-                </Link>
-              </DropdownMenuItem>
+
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
@@ -145,24 +122,7 @@ export const ModelCard = ({
                   Sample From Model
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild>
-                <Link
-                  to={`/${userRole}/granular-tagging-list/${_id}`}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                >
-                  Sample From Feature List
-                </Link>
-              </DropdownMenuItem>
-              {['admin', 'superAdmin', 'tagger', 'sampler'].includes(userRole) && (
-                <DropdownMenuItem asChild>
-                  <Link
-                    to={`/tag-list-create/${_id}`}
-                    className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                  >
-                    New Sample Feature
-                  </Link>
-                </DropdownMenuItem>
-              )}
+
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
