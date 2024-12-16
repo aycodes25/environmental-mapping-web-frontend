@@ -16,6 +16,7 @@ import KeyboardArrowUpIcon from '@mui/icons-material/KeyboardArrowUp';
 
 // import ModalCard component
 import { ModelCard } from '../components/ModelCard';
+import { deleteFromDb } from '@/components/SceneComponent';
 
 
 const url = '/model/get-models';
@@ -104,6 +105,11 @@ const AllModels = () => {
     setConfirmDelete(false);
     setDeleteModel(false);
     mutation.mutate(modelToDelList);
+    modelList.forEach(m => {
+      if (modelToDelList.includes(m._id)) {
+        deleteFromDb(getRealFileUrl(m.file)).then(console.log)
+      }
+    })
   };
 
   useEffect(() => {
