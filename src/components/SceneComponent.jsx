@@ -653,13 +653,14 @@ function loadSceneFromGlb(url, scene) {
   return checkUrlInIndexedDb(url)
     .then(result => {
       console.log(result)
-      if (result.isInDb) {
+      if (result.isInDb && true === false) { // skip loading from db
         const glFile = new File([result.blob], fileName, {
           // type: "model/gltf-binary"
         });
 
         return importGLFileInScene(glFile, scene)
       } else {
+        console.log("fetching model from server")
         return fetch(url)
           .then((response) => response.blob())
           .then((blob) => {
@@ -805,7 +806,7 @@ function storeBlobInDb(url, blob) {
   });
 }
 
-function deleteFromDb(url) {
+export function deleteFromDb(url) {
   return new Promise((resolve, reject) => {
     const request = indexedDB.open("models", 1);
 
