@@ -66,6 +66,7 @@ const AddModel = () => {
       formDataForUpload.append("description", formData.description);
       formDataForUpload.append("location", formData.location);
       formDataForUpload.append("model", formData.file);
+      formDataForUpload.append("size", formData.file.size);
       formDataForUpload.append("image", formData.coverPicture);
       formDataForUpload.append("userId", currentUser?._id);
 

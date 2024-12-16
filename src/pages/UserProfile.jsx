@@ -40,21 +40,21 @@ const UserProfile = () => {
                     <div className="flex flex-col md:flex-row gap-8">
                         {/* Left Column - Avatar and Main Info */}
                         <div className="flex flex-col items-center space-y-4 md:w-1/3">
-                          <Avatar className="h-32 w-32 ring-4 ring-primary/10">
-              <AvatarImage 
-                src={user.imageUrl || defaultAvatar} 
-                alt={user.fullname || user.username}
-                className="object-cover"
-                />
-                <AvatarFallback className="bg-primary/5">
-              <img 
-              src={defaultAvatar}
-            alt="default profile"
-            className="h-full w-full object-cover"
-        />
-                 </AvatarFallback>
-                      </Avatar>
-                            
+                            <Avatar className="h-32 w-32 ring-4 ring-primary/10">
+                                <AvatarImage
+                                    src={user.imageUrl || defaultAvatar}
+                                    alt={user.fullname || user.username}
+                                    className="object-cover"
+                                />
+                                <AvatarFallback className="bg-primary/5">
+                                    <img
+                                        src={defaultAvatar}
+                                        alt="default profile"
+                                        className="h-full w-full object-cover"
+                                    />
+                                </AvatarFallback>
+                            </Avatar>
+
                             <div className="text-center  space-y-2">
                                 <h2 className="text-2xl font-bold tracking-tight">
                                     {user.fullname || user.username}
@@ -69,10 +69,9 @@ const UserProfile = () => {
                                     className="w-full text-white md:w-auto"
                                     onClick={() =>
                                         navigate(
-                                            `/${
-                                                ['admin', 'superAdmin'].includes(currentUser.role)
-                                                    ? 'admin'
-                                                    : currentUser.role
+                                            `/${['admin', 'superAdmin'].includes(currentUser.role)
+                                                ? 'admin'
+                                                : currentUser.role
                                             }/edit-user/${currentUser._id}`
                                         )
                                     }
@@ -85,22 +84,22 @@ const UserProfile = () => {
                         {/* Right Column - User Details */}
                         <div className="flex-1 space-y-4">
                             <div className="grid gap-4">
-                                <InfoItem 
+                                <InfoItem
                                     icon={UserCircle}
                                     label="Username"
                                     value={user.username}
                                 />
-                                <InfoItem 
+                                <InfoItem
                                     icon={Mail}
                                     label="Email Address"
                                     value={user.email}
                                 />
-                                <InfoItem 
+                                <InfoItem
                                     icon={User}
                                     label="Role"
                                     value={user.role}
                                 />
-                                <InfoItem 
+                                <InfoItem
                                     icon={MapPin}
                                     label="Location"
                                     value={user?.role === "superAdmin" ? "All locations" : user?.locations?.name}

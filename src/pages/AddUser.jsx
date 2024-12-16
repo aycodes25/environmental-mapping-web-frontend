@@ -103,7 +103,7 @@ const AddUser = () => {
         </CardHeader>
 
         <CardContent>
-          <form onSubmit={handleSubmit} encType="multipart/form-data" className="space-y-4">
+          <form encType="multipart/form-data" className="space-y-4">
             {/* Form fields */}
             <div className="space-y-2">
               <Label className="text-gray-700">Full Name</Label>
@@ -262,6 +262,7 @@ const AddUser = () => {
 
             {/* Submit Button */}
             <Button
+              onClick={handleSubmit}
               type="submit"
               className="w-full h-11 bg-[#021431] hover:bg-[#021431]/90 text-white"
               disabled={isSubmitting}
