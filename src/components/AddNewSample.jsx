@@ -52,7 +52,7 @@ function AddNewSample() {
         }
     };
     return (
-        <form className='flex h-auto w-full flex-col items-center justify-center gap-4 overflow-y-auto' onSubmit={handleSubmitSampleForm}>
+        <form className='flex h-auto w-full flex-col items-center justify-center gap-4 overflow-y-auto'>
             <div className='flex w-full flex-col justify-start gap-1'>
                 <label className='flex w-full' htmlFor="name">Name:</label>
                 <input
@@ -76,6 +76,7 @@ function AddNewSample() {
             </div>
             <div className='mb-5 flex w-full flex-col items-center justify-center gap-2'>
                 <Button
+                    onClick={handleSubmitSampleForm}
                     className='btn btn-neutral my-3 h-10 w-full border-solid'
                     type='submit'
                     disabled={isSubmittingSample}>
