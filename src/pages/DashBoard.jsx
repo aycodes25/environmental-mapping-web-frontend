@@ -288,14 +288,14 @@ const DashBoard = () => {
                 data={positivityRatePerMonthYearToDate}
               />
             </div>
-            </DashboardCard>
+          </DashboardCard>
         </div>
       )}
 
       {/* Incident Section */}
       {activeItem === "Incident" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <DashboardCard title="Incident Overview"> 
+          <DashboardCard title="Incident Overview">
             <div className="h-[600px]">
               <SampleChart barChartSampleType={barChartIncidentType} />
             </div>
