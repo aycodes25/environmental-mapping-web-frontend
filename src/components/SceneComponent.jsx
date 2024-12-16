@@ -67,6 +67,7 @@ export function SceneComponent({
   setIsLoading,
   tags,
   onSceneReady,
+  model,
   ...rest
 }) {
   const reactCanvas = useRef(null);
@@ -109,7 +110,7 @@ export function SceneComponent({
     light.intensity = controls.contrast;
 
     // this also saves the loaded file in indexedDb
-    loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene)
+    loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene, model)
       .then(() => {
         setIsLoading(false);
         toast.success("model is ready!");
@@ -645,7 +646,7 @@ function applyOcclusionAlgo(mesh) {
   mesh.occlusionType = BABYLON.AbstractMesh.OCCLUSION_TYPE_STRICT
 }
 
-function loadSceneFromGlb(url, scene) {
+function loadSceneFromGlb(url, scene, model) {
   const urlSplit = url.split("/")
   let fileName = urlSplit.pop()
   // deleteFromDb(url).then(console.log) // just in case to force refetch
@@ -653,7 +654,7 @@ function loadSceneFromGlb(url, scene) {
   return checkUrlInIndexedDb(url)
     .then(result => {
       console.log(result)
-      if (result.isInDb && true === false) { // skip loading from db
+      if (result.isInDb) {
         const glFile = new File([result.blob], fileName, {
           // type: "model/gltf-binary"
         });
@@ -665,6 +666,21 @@ function loadSceneFromGlb(url, scene) {
           .then((response) => response.blob())
           .then((blob) => {
 
+            if (model.size && blob.size !== model.size) {
+              // retry ank keep count
+              let currentRetries = Number(localStorage.getItem("retriesCount") || 0)
+              if (currentRetries >= 3) {
+                toast.error("model load max retries reached, please check your network or reupload this model")
+                localStorage.setItem("retriesCount", "0")
+                return setTimeout(() => {
+                  window.location.href = "/"
+                }, 5000);
+              }
+              localStorage.setItem("retriesCount", `${currentRetries + 1}`)
+              window.location.reload()
+              return
+            }
+            localStorage.setItem("retriesCount", "0")
             const glFile = new File([blob], fileName, {
               // type: "model/gltf-binary"
             });

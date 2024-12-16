@@ -240,7 +240,7 @@ const TagModel = () => {
           {/*babylonjs animation wrapper start  */}
           <div className='threejsWrapper h-screen'>
             <div className='threejsAnimationWrapper h-screen w-screen'>
-              <ModelViewBabylon MODEL_URL={model.file} tags={model?.tags} />
+              <ModelViewBabylon MODEL_URL={model.file} tags={model?.tags} model={model} />
             </div>
             <div className='navigation'>
               <div onClick={goBack}>
