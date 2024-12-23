@@ -257,13 +257,6 @@ const SingleModel = () => {
       } else {
         toast.error("please choose incident type, aborting filter apply");
       }
-    } else if (result.length && typeChoosed === 'safety') {
-      if (typeChoosed.length) {
-        const filterResult = result.filter((item) => item?.type === typeChoosed.toLowerCase());
-        setTagsData(filterResult);
-      } else {
-        setTagsData(result);
-      }
     } else {
       setTagsData(result);
     }
@@ -556,7 +549,6 @@ const SingleModel = () => {
                           >
                             <option value="" disabled>Select Type</option>
                             {[
-                              { value: "safety", label: "Safety" },
                               { value: "incident", label: "Incident" },
                               { value: "sampling", label: "Sampling" }
                             ].map((item) => (
@@ -583,7 +575,7 @@ const SingleModel = () => {
                             placeholder='Incident'
                             size='input-sm'
                             value={incidentChoosed}
-                            options={["Crack", "Spill"]}
+                            options={["Safety", "Crack", "Spill"]}
                           />
                         </div>
 

@@ -191,65 +191,6 @@ const Report = () => {
     []
   );
 
-  const columnSafety = useMemo(
-    () => [
-      {
-        accessorFn: (row, i) => i + 1,
-        header: "SN",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorFn: (row) => row.model?.modelName,
-        header: "Facility",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "objectName",
-        header: "Object Name",
-      },
-      {
-        accessorKey: "slug",
-        header: "Slug",
-      },
-      {
-        accessorFn: (row) => row.model?.location?.name,
-        header: "Factory location",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "locations",
-        header: "Location",
-      },
-      {
-        accessorKey: "evidence",
-        header: "Evidence",
-        cell: (info) => (
-          <img className="w-20 h-20 rounded-full" src={info.getValue()} />
-        ),
-      },
-      {
-        accessorKey: "text",
-        header: "Note",
-      },
-      {
-        accessorFn: (row) => row.user?.fullname,
-        header: "Added By",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorFn: (row) => removeCommas(formatTime(row.createdAt)),
-        header: "Time",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorFn: (row) => removeCommas(formatDate(row.createdAt)),
-        header: "Date",
-        cell: (info) => info.getValue(),
-      },
-    ],
-    []
-  );
-
   return (
     <div className="flex overflow-auto flex-col flex-grow p-5 w-auto h-screen">
       <div className="flex justify-center items-center mb-2">
@@ -268,16 +209,9 @@ const Report = () => {
           >
             Incident
           </h3>
-          <h3
-            className={`${activeItem === "Activity" ? "text-white bg-black" : ""
-              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
-            onClick={() => handleItemClick("Safety")}
-          >
-            Safety
-          </h3>
         </div>
       </div>
-      {activeItem === "Sample" ? (
+      {activeItem === "Sample" && (
         <section className="flex justify-center items-center">
           <TanstackTable
             columns={columnSample}
@@ -288,22 +222,12 @@ const Report = () => {
             setEndDate={setEndDate}
           />
         </section>
-      ) : activeItem === "Incident" ? (
+      )}
+      {activeItem === "Incident" && (
         <section className="flex justify-center items-center">
           <TanstackTable
             columns={columnIncident}
             tableData={tagsData.filter((items) => items.type === "incident")}
-            startDate={startDate}
-            endDate={endDate}
-            setStartDate={setStartDate}
-            setEndDate={setEndDate}
-          />
-        </section>
-      ) : (
-        <section className="flex justify-center items-center">
-          <TanstackTable
-            columns={columnSafety}
-            tableData={tagsData.filter((items) => items.type === "safety")}
             startDate={startDate}
             endDate={endDate}
             setStartDate={setStartDate}

@@ -77,7 +77,7 @@ const ViewEvidences = () => {
             const { createdAt, user, incident } = tag;
             return (
               <div
-                className={`card min-h-[250px] card-side shadow-0 border border-solid border-gray-300 flex-row-reverse w-[45%] min-w-[450px] max-md:w-full ${tag?.type === "sampling" ? "border-red-900" : tag?.type === "safety" ? "border-blue-900" : "border-gray-300"}`}
+                className={`card min-h-[250px] card-side shadow-0 border border-solid border-gray-300 flex-row-reverse w-[45%] min-w-[450px] max-md:w-full ${tag?.type === "sampling" ? "border-red-900" : tag?.type === "incident" ? "border-blue-900" : "border-gray-300"}`}
                 key={i}>
                 {tag?.evidence ? <div className='flex w-[40%] items-center justify-center rounded-r-lg'>
                   <img

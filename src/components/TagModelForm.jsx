@@ -185,7 +185,8 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                     ...formData,
                     taggedInfo: newTaggedInfo,
                     objectName: newTaggedInfoName,
-                    _id: response.data.data._id
+                    _id: response.data.data._id,
+                    createdAt: (new Date()).toISOString()
                 })
                 setTagsData(tags)
                 model.tags = tags
@@ -221,7 +222,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
         <div className='dataHistoryWrapper'>
             {/* header */}
             <div className='header px-2'>
-                <h1 className='text-2xl font-medium'>Add Sample | Incident | Safety</h1>
+                <h1 className='text-2xl font-medium'>Add Sample | Incident</h1>
             </div>
             {/* header end */}
 
@@ -263,7 +264,6 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                             >
                                 <option value="" disabled>Select Type</option>
                                 {[
-                                    { value: "safety", label: "Safety" },
                                     { value: "incident", label: "Incident" },
                                     { value: "sampling", label: "Sampling" }
                                 ].map((item) => (
@@ -296,7 +296,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                 placeholder='Incident'
                                 size='input-sm'
                                 value={formData.incident}
-                                options={["Crack", "Spill"]}
+                                options={["Safety", "Crack", "Spill"]}
                             />
                         </div>}
                         {formData?.type === "sampling" && <div className='form-control mt-5'>

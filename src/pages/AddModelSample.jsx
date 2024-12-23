@@ -198,7 +198,7 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
                 />
                 {/* header */}
                 <div className="p-2 header">
-                  <SectionTitle text="Add Sample | Incident | Safety" />
+                  <SectionTitle text="Add Sample | Incident" />
                 </div>
                 {/* header end */}
 
@@ -252,11 +252,6 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
                           required
                           name='type'
                           label='Type'>
-                          <MenuItem
-                            className='w-full'
-                            value={"safety"}>
-                            Safety
-                          </MenuItem>
                           <MenuItem
                             className='w-full'
                             value={"incident"}>

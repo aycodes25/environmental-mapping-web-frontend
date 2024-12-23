@@ -374,7 +374,7 @@ function addTagHoverEventHandler(tag, tagData) {
         "position: fixed; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
       tagtip.innerHTML = `<p> ${tagData.objectName || "unnamed object"
         }<br/>
-        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : "safety"
+        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : ""
         }: <span class='text-xs'>${tagData?.type === "sampling" ? tagData.presence : tagData?.type === "incident" ? tagData?.incident : ""
         }</span></span>
         <br/><span class='text-xs'>Date: ${formatDate(
@@ -495,8 +495,6 @@ function makeColorFromType(type) {
     case "sampling":
       return new BABYLON.Color3(0, 0.5, 0.5)
     case "incident":
-      return new BABYLON.Color3(0, 0, 0)
-    case "safety":
       return new BABYLON.Color3(1, 0, 0)
     default:
       return new BABYLON.Color3(1, 0, 0)

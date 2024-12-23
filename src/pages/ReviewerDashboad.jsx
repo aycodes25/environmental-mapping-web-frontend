@@ -143,15 +143,6 @@ const ReviewerDashBoard = () => {
                             View Incidents
                           </Link>
                         </li>
-                        <li className='btn'>
-                          <Link
-                            to={`/${['admin', 'superAdmin'].includes(user?.role)
-                              ? 'admin'
-                              : user?.role
-                              }/view-safety/${_id}`}>
-                            Safety tool
-                          </Link>
-                        </li>
                       </ul>
                     </div>
                   </div>
