@@ -28,6 +28,7 @@ export const ReportLoader = () => async () => {
 const Report = () => {
   const { tags } = useLoaderData();
   const [activeItem, setActiveItem] = useState("Sample");
+  const [searchText, setSearchText] = useState("")
   const [startDate, setStartDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
   const [tagsData, setTagsData] = useState(tags);
@@ -52,6 +53,31 @@ const Report = () => {
       setTagsData(tags);
     }
   }, [startDate, endDate, tags]);
+
+  const handleFilterTags = (search) => {
+    setSearchText(search)
+    if (!search.length) {
+      setTagsData(tags || [])
+      return
+    }
+    const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
+
+    const searchResult = (tags || []).filter((item) => {
+      return (
+        regex.test(item.model?.modelName) ||
+        regex.test(item.objectName?.toLowerCase()) ||
+        regex.test(item.incident?.toLowerCase()) ||
+        regex.test(item.presence?.toLowerCase()) ||
+        regex.test(item.sample?.toLowerCase()) ||
+        regex.test(item.locations?.toLowerCase()) ||
+        regex.test(item.text?.toLowerCase()) ||
+        regex.test(item.type?.toLowerCase()) ||
+        regex.test(item.slug?.toLowerCase())
+      );
+    });
+
+    setTagsData(searchResult);
+  }
 
   const columnSample = [
     {
@@ -220,6 +246,8 @@ const Report = () => {
             endDate={endDate}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
+            searchText={searchText}
+            handleFilterTags={handleFilterTags}
           />
         </section>
       )}
@@ -232,6 +260,8 @@ const Report = () => {
             endDate={endDate}
             setStartDate={setStartDate}
             setEndDate={setEndDate}
+            searchText={searchText}
+            handleFilterTags={handleFilterTags}
           />
         </section>
       )}

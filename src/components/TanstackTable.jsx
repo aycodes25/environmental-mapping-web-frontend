@@ -26,6 +26,8 @@ export default function TanstackTable({
   endDate,
   setStartDate,
   setEndDate,
+  searchText,
+  handleFilterTags
 }) {
   const [sorting, setSorting] = useState([]);
   const [pagination, setPagination] = useState({
@@ -123,27 +125,6 @@ export default function TanstackTable({
         pageBreak: 'auto',
         tableLineColor: [0, 0, 0],
         tableLineWidth: 0.1,
-        // didDrawCell: (data) => {
-        //   const cell = data.cell;
-        //   const rowIndex = data.row.index;
-        //   const columnIndex = data.column.index;
-
-        //   const cellValue = cell.raw;
-
-        //   if (typeof cellValue === 'string' && cellValue.startsWith('http')) {
-        //     const img = new Image();
-        //     img.src = cellValue;
-        //     img.onload = () => {
-        //       const cellWidth = cell.width;
-        //       const cellHeight = cell.height;
-        //       const imgWidth = cellWidth * 0.8;
-        //       const imgHeight = cellHeight * 0.8;
-        //       const imgX = cell.x + (cellWidth - imgWidth) / 2;
-        //       const imgY = cell.y + (cellHeight - imgHeight) / 2;
-        //       doc.addImage(img, imgX, imgY, imgWidth, imgHeight);
-        //     };
-        //   }
-        // },
         didDrawPage: (data) => {
           if (data.pageNumber > 1) {
             doc.addPage();
@@ -257,6 +238,18 @@ export default function TanstackTable({
               onClick={() => handleExportPDF()}>
               Download Pdf
             </Button>
+          </div>
+          <div>
+            <input
+              className='block border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-2'
+              type='text'
+              name='search'
+              value={searchText}
+              placeholder='Search'
+              onChange={(e) => {
+                handleFilterTags(e.target.value);
+              }}
+            />
           </div>
           <div className='flex flex-row items-center justify-center gap-1 pt-3'>
             <div className='w-40'>
