@@ -28,8 +28,8 @@ export const ReportLoader = () => async () => {
 const Report = () => {
   const { tags } = useLoaderData();
   const [activeItem, setActiveItem] = useState("Sample");
-  const [startDate, setStartDate] = useState();
-  const [endDate, setEndDate] = useState();
+  const [startDate, setStartDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const [tagsData, setTagsData] = useState(tags);
 
   const handleItemClick = (item) => {
@@ -41,7 +41,6 @@ const Report = () => {
   }, [tags]);
 
   useEffect(() => {
-    // console.log(startDate, endDate);
     if (startDate && endDate && new Date(startDate) <= new Date(endDate)) {
       const result = filterDataByDateRange(tags, startDate, endDate);
       if (result && result.length && endDate) {
@@ -54,11 +53,86 @@ const Report = () => {
     }
   }, [startDate, endDate, tags]);
 
-  const columnSample = useMemo(
+  const columnSample = [
+    {
+      accessorFn: (row, i) => i + 1,
+      header: "SN",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorFn: (row) => row.model?.modelName,
+      header: "Facility",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "objectName",
+      header: "Object Name",
+    },
+    {
+      accessorKey: "slug",
+      header: "Ref",
+    },
+    {
+      accessorFn: (row) => row.model?.location?.name,
+      header: "Factory location",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "locations",
+      header: "Location",
+    },
+    {
+      accessorFn: (row) => row?.sample || "",
+      header: "Sample Type",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "presence",
+      header: "Result",
+    },
+    {
+      accessorKey: "action",
+      header: "Corrective Actions",
+    },
+    {
+      accessorKey: "evidence",
+      header: "Evidence",
+      cell: (info) => (
+        <img className="w-20 h-20 rounded-full" src={info.getValue()} />
+      ),
+    },
+    {
+      accessorFn: (row) => row.user?.fullname,
+      header: "Added By",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorKey: "text",
+      header: "Note",
+    },
+    {
+      accessorFn: (row) => removeCommas(formatTime(row.createdAt)),
+      header: "Time",
+      cell: (info) => info.getValue(),
+    },
+    {
+      accessorFn: (row) => removeCommas(formatDate(row.createdAt)),
+      header: "Date",
+      cell: (info) => info.getValue(),
+    },
+  ]
+
+
+  const columnIncident = useMemo(
     () => [
       {
+        accessorFn: (row, i) => i + 1,
+        header: "SN",
+        cell: (info) => info.getValue(),
+      },
+      {
         accessorFn: (row) => row.model?.modelName,
-        header: "Model Name",
+        header: "Facility",
         cell: (info) => info.getValue(),
       },
       {
@@ -73,88 +147,19 @@ const Report = () => {
         accessorFn: (row) => row.model?.location?.name,
         header: "Factory location",
         cell: (info) => info.getValue(),
-      },
-      {
-        accessorFn: (row) => row?.sample?.name,
-        header: "Sample Type",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "presence",
-        header: "Result",
-      },
-      {
-        accessorKey: "action",
-        header: "Corrective Actions",
       },
       {
         accessorKey: "locations",
         header: "Location",
       },
       {
-        accessorKey: "evidence",
-        header: "Evidence",
-        cell: (info) => (
-          <img className="w-20 h-20 rounded-full" src={info.getValue()} />
-        ),
-      },
-      {
-        accessorFn: (row) => row.user?.fullname,
-        header: "Added By",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "text",
-        header: "Note",
-      },
-      {
-        accessorFn: (row) => removeCommas(formatTime(row.createdAt)),
-        header: "Time",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorFn: (row) => removeCommas(formatDate(row.createdAt)),
-        header: "Date",
-        cell: (info) => info.getValue(),
-      },
-    ],
-    []
-  );
-
-
-  const columnIncident = useMemo(
-    () => [
-      {
-        accessorFn: (row) => row.model?.modelName,
-        header: "Model Name",
-        cell: (info) => info.getValue(),
-      },
-      {
-        accessorKey: "objectName",
-        header: "Object Name",
-      },
-      {
-        accessorKey: "slug",
-        header: "Ref",
-      },
-      {
-        accessorFn: (row) => row.model?.location?.name,
-        header: "Factory location",
-        cell: (info) => info.getValue(),
-      },
-    
-      {
-        accessorFn: (row) => row?.incident?.name,
+        accessorFn: (row) => row?.incident || "",
         header: "Incident",
         cell: (info) => info.getValue(),
       },
       {
         accessorKey: "action",
         header: "Corrective Actions",
-      },
-      {
-        accessorKey: "locations",
-        header: "Location",
       },
       {
         accessorKey: "evidence",
@@ -189,8 +194,13 @@ const Report = () => {
   const columnSafety = useMemo(
     () => [
       {
+        accessorFn: (row, i) => i + 1,
+        header: "SN",
+        cell: (info) => info.getValue(),
+      },
+      {
         accessorFn: (row) => row.model?.modelName,
-        header: "Model Name",
+        header: "Facility",
         cell: (info) => info.getValue(),
       },
       {
@@ -245,25 +255,22 @@ const Report = () => {
       <div className="flex justify-center items-center mb-2">
         <div className="flex gap-4 justify-center items-center px-4 py-1 rounded-full bg-slate-300">
           <h3
-            className={`${
-              activeItem === "Sample" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Sample" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Sample")}
           >
             Sample
           </h3>
           <h3
-            className={`${
-              activeItem === "Incident" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Incident" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Incident")}
           >
             Incident
           </h3>
           <h3
-            className={`${
-              activeItem === "Activity" ? "text-white bg-black" : ""
-            } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
+            className={`${activeItem === "Activity" ? "text-white bg-black" : ""
+              } px-5 max-sm:px-3 py-1 rounded-full cursor-pointer font-bold`}
             onClick={() => handleItemClick("Safety")}
           >
             Safety

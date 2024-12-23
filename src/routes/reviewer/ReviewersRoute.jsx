@@ -4,7 +4,7 @@ import React, { Suspense } from 'react';
 /* eslint-disable no-unused-vars */
 import { QueryClient } from '@tanstack/react-query';
 import Loadable from '../../components/Loadable';
-import { loader as singleModelLoader } from '../../pages/TagModel';
+import { loader as singleModelLoader } from '../../pages/SingleModel';
 import { modelloader } from '../../pages/ReviewerDashboad';
 import { singleUserLoader } from '../../pages/EditUser';
 

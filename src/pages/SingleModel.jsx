@@ -30,6 +30,17 @@ import { InputLabel, MenuItem, Select } from '@mui/material';
 import TagModelForm from '../components/TagModelForm';
 import { FormInput } from '../components';
 
+export const loader =
+  () =>
+    async ({ params }) => {
+      const response = await customFetch(`/model/get-a-models/${params.id}`);
+      if (response?.data.status === 'error') {
+        toast.error(response?.data.message);
+      }
+      return { model: response?.data?.data ?? {} };
+    };
+
+
 const SingleModel = () => {
   const { model } = useLoaderData();
   const { id } = useParams();

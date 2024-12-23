@@ -4,7 +4,6 @@ export { default as AllModels } from './AllModels';
 export { default as AllUsers } from './AllUsers';
 export { default as Login } from './Login';
 export { default as AddModel } from './AddModel';
-export { default as TagModel } from './TagModel';
 export { default as TwoFactor } from './TwoFactor';
 export { default as Error } from './Error';
 export { default as ProtectedRoute } from './ProtectedRoute';

@@ -46,24 +46,24 @@ export default function TanstackTable({
       second: '2-digit',
       hour12: true,
     };
-  
+
     const unit = 'pt';
-    const size = 'A1';
+    const size = 'A3';
     const orientation = 'landscape';
-  
+
     const marginLeft = 20;
     const marginTop = 30;
     const rowsPerPage = 30;
-  
+
     const doc = new jsPDF(orientation, unit, size);
     const pageWidth = doc.internal.pageSize.width; // Get the page width based on the size and orientation
-  
+
     doc.setFontSize(12);
-  
+
     const title = `Exported Data - ${(new Date()).toLocaleString('en-US', options)}`;
-  
+
     const headers = columns.map(column => column.header);
-  
+
     const calculateColumnWidths = (rows) => {
       const maxLengths = headers.map((header, index) => {
         let maxLength = header.length;
@@ -75,10 +75,10 @@ export default function TanstackTable({
         });
         return maxLength + 1;
       });
-  
+
       const charWidth = 6;
       const columnWidths = maxLengths.map(length => Math.max(length * charWidth, 40));
-  
+
       const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
       if (totalWidth > pageWidth) {
         const scaleFactor = pageWidth / totalWidth;
@@ -86,23 +86,23 @@ export default function TanstackTable({
       }
       return columnWidths;
     };
-  
+
     const generateTableRows = (rows) => {
-      return rows.map(row => {
+      return rows.map((row, i) => {
         return columns.map(column => {
           if (column.accessorFn) {
-            return column.accessorFn(row) || '';
+            return column.accessorFn(row, i) || '';
           } else {
             return row[column.accessorKey] || '';
           }
         });
       });
     };
-  
+
     const addTableToPDF = (rows, startY) => {
       const tableRows = generateTableRows(rows);
       const columnWidths = calculateColumnWidths(tableRows);
-  
+
       doc.autoTable({
         head: [headers],
         body: tableRows,
@@ -127,9 +127,9 @@ export default function TanstackTable({
         //   const cell = data.cell;
         //   const rowIndex = data.row.index;
         //   const columnIndex = data.column.index;
-  
+
         //   const cellValue = cell.raw;
-  
+
         //   if (typeof cellValue === 'string' && cellValue.startsWith('http')) {
         //     const img = new Image();
         //     img.src = cellValue;
@@ -153,27 +153,27 @@ export default function TanstackTable({
         },
       });
     };
-  
+
     doc.text(title, marginLeft, 20);
-  
+
     let currentY = marginTop;
     let pageData = [];
-  
+
     for (let i = 0; i < tableData.length; i += rowsPerPage) {
       const slicedData = tableData.slice(i, i + rowsPerPage);
-  
+
       if (doc.internal.pageSize.height - currentY < 10 + (slicedData.length * 15)) {
         doc.addPage();
         doc.setFontSize(12);
         doc.text(title, marginLeft, 20);
         currentY = marginTop;
       }
-  
+
       pageData = slicedData;
       addTableToPDF(pageData, currentY);
       currentY = doc.lastAutoTable.finalY + 10;
     }
-  
+
     doc.save(`exported_data_${(new Date()).toLocaleString('en-US', options)}.pdf`);
   }, [columns, tableData]);
 
@@ -208,9 +208,9 @@ export default function TanstackTable({
 
     // Data rows
     tableData.forEach((row) => {
-      const rowData = columns.map((column) => {
+      const rowData = columns.map((column, i) => {
         if (column.accessorFn) {
-          return column.accessorFn(row) || '';
+          return column.accessorFn(row, i) || '';
         } else {
           return row[column.accessorKey] || '';
         }
