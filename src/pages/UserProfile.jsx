@@ -9,6 +9,7 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent } from "../components/ui/card";
 import { Avatar, AvatarImage, AvatarFallback } from "../components/ui/avatar";
 import { Badge } from "../components/ui/badge";
+import { getRealFileUrl } from "@/utils";
 
 // default avatar
 const defaultAvatar = "https://cdn-icons-png.flaticon.com/512/3177/3177440.png";
@@ -42,7 +43,7 @@ const UserProfile = () => {
                         <div className="flex flex-col items-center space-y-4 md:w-1/3">
                             <Avatar className="h-32 w-32 ring-4 ring-primary/10">
                                 <AvatarImage
-                                    src={user.imageUrl || defaultAvatar}
+                                    src={getRealFileUrl(user.imageUrl) || defaultAvatar}
                                     alt={user.fullname || user.username}
                                     className="object-cover"
                                 />

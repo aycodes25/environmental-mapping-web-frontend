@@ -36,7 +36,6 @@ export default function TanstackTable({
   });
   const tableRef = useRef();
 
-
   const handleExportPDF = useCallback(() => {
     const options = {
       weekday: 'long',
@@ -64,46 +63,26 @@ export default function TanstackTable({
 
     const title = `Exported Data - ${(new Date()).toLocaleString('en-US', options)}`;
 
-    const headers = columns.map(column => column.header);
-
-    const calculateColumnWidths = (rows) => {
-      const maxLengths = headers.map((header, index) => {
-        let maxLength = header.length;
-        rows.forEach(row => {
-          const cellText = row[index] || '';
-          if (cellText.length > maxLength) {
-            maxLength = cellText.length;
-          }
-        });
-        return maxLength + 1;
-      });
-
-      const charWidth = 6;
-      const columnWidths = maxLengths.map(length => Math.max(length * charWidth, 40));
-
-      const totalWidth = columnWidths.reduce((acc, width) => acc + width, 0);
-      if (totalWidth > pageWidth) {
-        const scaleFactor = pageWidth / totalWidth;
-        return columnWidths.map(width => width * scaleFactor);
-      }
-      return columnWidths;
-    };
+    const headers = columns.filter(c => !c.excludeFromReport).map(column => column.header)
 
     const generateTableRows = (rows) => {
-      return rows.map((row, i) => {
-        return columns.map(column => {
+      let visibleColumns = columns.filter(c => !c.excludeFromReport)
+      return rows.map((row, rowIndex) => {
+        let currentRow = []
+        for (let i = 0; i < visibleColumns.length; i++) {
+          let column = visibleColumns[i]
           if (column.accessorFn) {
-            return column.accessorFn(row, i) || '';
+            currentRow.push(column.accessorFn(row, rowIndex) || '');
           } else {
-            return row[column.accessorKey] || '';
+            currentRow.push(row[column.accessorKey] || '');
           }
-        });
+        }
+        return currentRow
       });
     };
 
     const addTableToPDF = (rows, startY) => {
       const tableRows = generateTableRows(rows);
-      const columnWidths = calculateColumnWidths(tableRows);
 
       doc.autoTable({
         head: [headers],
@@ -118,10 +97,6 @@ export default function TanstackTable({
           lineWidth: 0.1,
           lineColor: [0, 0, 0],
         },
-        columnStyles: columnWidths.reduce((styles, width, index) => {
-          styles[index] = { cellWidth: width };
-          return styles;
-        }, {}),
         pageBreak: 'auto',
         tableLineColor: [0, 0, 0],
         tableLineWidth: 0.1,
@@ -184,19 +159,24 @@ export default function TanstackTable({
     const csvContent = [];
 
     // Header row
-    const headers = columns.map((column) => column.header);
+    const headers = columns.filter(c => !c.excludeFromReport).map(column => column.header);
     csvContent.push(headers.join(','));
 
     // Data rows
-    tableData.forEach((row) => {
-      const rowData = columns.map((column, i) => {
-        if (column.accessorFn) {
-          return column.accessorFn(row, i) || '';
-        } else {
-          return row[column.accessorKey] || '';
+    tableData.forEach((row, rowIndex) => {
+      let currentRow = []
+      for (let i = 0; i < columns.length; i++) {
+        let column = columns[i]
+        if (column.excludeFromReport) {
+          continue
         }
-      });
-      csvContent.push(rowData.join(','));
+        if (column.accessorFn) {
+          currentRow.push(column.accessorFn(row, rowIndex) || '');
+        } else {
+          currentRow.push(row[column.accessorKey] || '');
+        }
+      }
+      csvContent.push(currentRow.join(','));
     });
 
     // Join rows with newline character

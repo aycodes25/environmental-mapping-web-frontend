@@ -12,9 +12,6 @@ import { customFetch } from '../utils';
 import { toast } from 'react-toastify';
 import {
     Button,
-    InputLabel,
-    MenuItem,
-    Select,
     Typography,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
@@ -345,7 +342,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                     cols={10}
                                     onChange={handleInputChange}
                                     label='text'
-                                    placeholder='Please enter addition data here'
+                                    placeholder='Please enter additional data here'
                                     type='text'
                                     name='text'
                                     size='input-sm'
