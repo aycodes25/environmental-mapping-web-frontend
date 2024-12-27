@@ -24,7 +24,10 @@ export const ReportLoader = () => async () => {
 
   const the_tags = await customFetch.get("/tag/all-tags");
   if (tags.data?.status !== "error") {
-    tags = the_tags.data.data;
+    console.log(
+      the_tags.data.data.filter((tag) => !tag.model || tag.model.delete)
+    )
+    tags = the_tags.data.data.filter((tag) => tag.model && !tag.model.delete);
   } else {
     toast.error(the_tags.data.message);
   }
