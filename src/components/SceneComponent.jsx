@@ -343,6 +343,21 @@ export const onSceneReady = (scene, dispatch) => {
           updateSpotLight(pickResult, scene);
         }
 
+        // this is here just in case we need to make the discs appear
+        // vertically in the future, stopped working on this because
+        // it will involve calculating the angle of the camera as well
+        // so as to make the vertical disc face the camera,
+        // this will involve saving this state in db as well.
+        // so I'm ignoring this for now
+        // perhaps in the future we can as well use spheres as they do not
+        // have a front or back, if there is a way to make that as efficient as discs
+
+        // let isVertical = false
+
+        // if (pickResult.pickedMesh.getBoundingInfo().boundingBox.maximumWorld.y > pointCoordinates.y + 0.3) {
+        //   isVertical = true
+        // }
+
         if (pickResult.pickedMesh) {
           dispatch(
             dispatchSelectedMesh(
@@ -527,6 +542,10 @@ export function drawTag(scene, position, name = `${Date.now()}`, type) {
 }
 
 function displayTagsClonesHighUp() {
+  if (!saveCameraPositionAndDirection.inSunView) {
+    return
+  }
+
   const camera = window.scene.activeCamera;
 
   discs.forEach(disc => {
@@ -543,6 +562,9 @@ function displayTagsClonesHighUp() {
 }
 
 function removeTagsClone() {
+  if (!saveCameraPositionAndDirection.inSunView) {
+    return
+  }
   discsClone.forEach(disc => {
     disc.isVisible = false
     disc.dispose()

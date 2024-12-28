@@ -172,12 +172,11 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
             formDataForUpload.append('modelId', model?._id);
 
             const response = await customFetch.post('/tag/add', formDataForUpload);
-            queryClient.invalidateQueries('singleModel');
 
             if (response.data?.status !== 'error') {
                 toast.success(`Tag added successfully`);
                 // drop tag visible
-                let tags = [...tagsData]
+                let tags = [...tagsData];
                 tags.push({
                     ...formData,
                     taggedInfo: newTaggedInfo,

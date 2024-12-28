@@ -14,9 +14,7 @@ import { useLoaderData } from "react-router-dom";
 import TanstackTable from "../components/TanstackTable";
 import { Pencil2Icon } from "@radix-ui/react-icons";
 import Modal from "@/components/ui/modal";
-import { getUserFromLocalStorage } from "@/redux/reducers/userReducer";
 
-import { FormInput } from '../components';
 import { Button } from '@mui/material';
 
 export const ReportLoader = () => async () => {
@@ -24,9 +22,6 @@ export const ReportLoader = () => async () => {
 
   const the_tags = await customFetch.get("/tag/all-tags");
   if (tags.data?.status !== "error") {
-    console.log(
-      the_tags.data.data.filter((tag) => !tag.model || tag.model.delete)
-    )
     tags = the_tags.data.data.filter((tag) => tag.model && !tag.model.delete);
   } else {
     toast.error(the_tags.data.message);
