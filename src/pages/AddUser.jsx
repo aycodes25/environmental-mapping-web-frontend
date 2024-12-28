@@ -11,6 +11,8 @@ import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
+import { getUserFromLocalStorage } from "@/redux/reducers/userReducer";
+import { useNavigate } from "react-router-dom";
 
 
 const AddUser = () => {
@@ -28,6 +30,8 @@ const AddUser = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [imageName, setImageName] = useState("");
   const [locations, setLocations] = useState([]);
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     const { name, value, files } = e.target;
     if (name === "image") {
@@ -53,6 +57,14 @@ const AddUser = () => {
 
   useEffect(() => {
     fetchLocations();
+  }, []);
+
+  useEffect(() => {
+    const pageViewer = getUserFromLocalStorage()
+    if (pageViewer?.role !== "superAdmin") {
+      toast.error("You are not permitted to view this page")
+      navigate(-1)
+    }
   }, []);
 
   const handleSubmit = async (e) => {

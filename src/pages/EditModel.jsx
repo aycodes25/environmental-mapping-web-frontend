@@ -162,7 +162,7 @@ const EditModel = () => {
                 accept='.jpg, .jpeg, .png, .webp'
                 className='hidden'
                 onChange={handleInputChange}
-                // required
+              // required
               />
             </label>
           </div>

@@ -5,7 +5,7 @@ import { QueryClient } from '@tanstack/react-query';
 import { loader as modelLoader } from '../../pages/AllModels';
 import { loader as userLoader } from '../../pages/AllUsers';
 import { loader as dashboardLoader } from '../../pages/DashBoard';
-import { loader as singleModelLoader } from '../../pages/TagModel';
+import { loader as singleModelLoader } from '../../pages/SingleModel';
 import { LocationLoader } from '../../pages/Location';
 import { ReportLoader } from '../../pages/Report';
 import { singleUserLoader } from '../../pages/EditUser';

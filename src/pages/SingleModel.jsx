@@ -30,6 +30,17 @@ import { InputLabel, MenuItem, Select } from '@mui/material';
 import TagModelForm from '../components/TagModelForm';
 import { FormInput } from '../components';
 
+export const loader =
+  () =>
+    async ({ params }) => {
+      const response = await customFetch(`/model/get-a-models/${params.id}`);
+      if (response?.data.status === 'error') {
+        toast.error(response?.data.message);
+      }
+      return { model: response?.data?.data ?? {} };
+    };
+
+
 const SingleModel = () => {
   const { model } = useLoaderData();
   const { id } = useParams();
@@ -245,13 +256,6 @@ const SingleModel = () => {
         setTagsData(filterResult);
       } else {
         toast.error("please choose incident type, aborting filter apply");
-      }
-    } else if (result.length && typeChoosed === 'safety') {
-      if (typeChoosed.length) {
-        const filterResult = result.filter((item) => item?.type === typeChoosed.toLowerCase());
-        setTagsData(filterResult);
-      } else {
-        setTagsData(result);
       }
     } else {
       setTagsData(result);
@@ -545,7 +549,6 @@ const SingleModel = () => {
                           >
                             <option value="" disabled>Select Type</option>
                             {[
-                              { value: "safety", label: "Safety" },
                               { value: "incident", label: "Incident" },
                               { value: "sampling", label: "Sampling" }
                             ].map((item) => (
@@ -572,7 +575,7 @@ const SingleModel = () => {
                             placeholder='Incident'
                             size='input-sm'
                             value={incidentChoosed}
-                            options={["Crack", "Spill"]}
+                            options={["Safety", "Crack", "Spill"]}
                           />
                         </div>
 

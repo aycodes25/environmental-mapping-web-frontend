@@ -8,7 +8,7 @@ import { LocationLoader } from '../../pages/Location';
 import { ReportLoader } from '../../pages/Report';
 import { modelTrashLoader } from '../../pages/Trash';
 import { loader as userLoader } from '../../pages/AllUsers';
-import { loader as singleModelLoader } from '../../pages/TagModel';
+import { loader as singleModelLoader } from '../../pages/SingleModel';
 import Loadable from '../../components/Loadable';
 import { QueryClient } from '@tanstack/react-query';
 

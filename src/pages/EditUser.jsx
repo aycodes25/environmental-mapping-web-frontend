@@ -3,7 +3,7 @@ import React, { useEffect, useState } from "react";
 // import { FaEye, FaEyeSlash } from 'react-icons/fa';
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
-import { SubmitBtn, Successful } from "../components";
+import { Successful } from "../components";
 import { useLoaderData, useNavigate } from "react-router-dom";
 
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
@@ -14,7 +14,6 @@ import { Upload, UserCog } from "lucide-react"; // Import icons
 // Import shadcn components
 import { Button } from "../components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "../components/ui/card";
-import { Input } from "../components/ui/input";
 import { Label } from "../components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "../components/ui/select";
 

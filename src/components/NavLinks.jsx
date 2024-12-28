@@ -12,23 +12,27 @@ const NavLinks = () => {
   const user = useSelector(memoize((state) => state.userState.user));
   const localUser = getUserFromLocalStorage();
   const currentUser = localUser || user;
-  const links = [
+  let links = [
     {
       id: 1,
-      url: `${
-        ['admin', 'superAdmin'].includes(currentUser.role)
-          ? '/admin'
-          : `/${currentUser.role}`
-      }`,
+      url: `${['admin', 'superAdmin'].includes(currentUser.role)
+        ? '/admin'
+        : `/${currentUser.role}`
+        }`,
       text: 'Dashboard',
     },
     { id: 2, url: 'models', text: 'Facilities' },
     { id: 3, url: 'users', text: 'Users' },
     { id: 4, url: 'location', text: 'Locations' },
-    { id: 5, url: 'form-features', text: 'Form Features' },
+    // { id: 5, url: 'form-features', text: 'Form Features' },
     { id: 6, url: 'report', text: 'Report' },
     { id: 7, url: 'trash', text: 'Recycle Bin' },
   ];
+
+  if (currentUser.role !== "superAdmin") {
+    // remove users and location links as only superAdmin can have access to those
+    links = links.filter(link => !["users", "location"].includes(link.url))
+  }
 
   return (
     <>

@@ -44,7 +44,7 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
         return (
           <Accordion
             key={index}
-            className={`accordionWrapper border-solid border-2 w-full ${item?.type === "sampling" ? "border-red-900" : item?.type === "safety" ? "border-blue-900" : "border-gray-300"}`}
+            className={`accordionWrapper border-solid border-2 w-full ${item?.type === "sampling" ? "border-red-900" : item?.type === "incident" ? "border-blue-900" : "border-gray-300"}`}
             expanded={expanded === id}
             onChange={handleChange(id)}>
             <AccordionSummary
@@ -61,7 +61,7 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
               id='panel1bh-header'>
               <Box className='heading'>
                 <Box className='flex flex-row flex-nowrap gap-2 justify-start items-center info'>
-                  <p className='text-sm capitalize truncate'>{item?.type === "sampling" ? "Sample" : item?.type === "incident" ? "Incident" : item?.type === "safety" ? "Safety Tool" : "Tag"} Added By {item?.user?.username}</p>
+                  <p className='text-sm capitalize truncate'>{item?.type === "sampling" ? "Sample" : item?.type === "incident" ? "Incident" : "Tag"} Added By {item?.user?.username}</p>
                 </Box>
               </Box>
             </AccordionSummary>

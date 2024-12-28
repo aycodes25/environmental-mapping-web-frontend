@@ -12,9 +12,6 @@ import { customFetch } from '../utils';
 import { toast } from 'react-toastify';
 import {
     Button,
-    InputLabel,
-    MenuItem,
-    Select,
     Typography,
 } from '@mui/material';
 import { useQueryClient } from '@tanstack/react-query';
@@ -175,17 +172,17 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
             formDataForUpload.append('modelId', model?._id);
 
             const response = await customFetch.post('/tag/add', formDataForUpload);
-            queryClient.invalidateQueries('singleModel');
 
             if (response.data?.status !== 'error') {
                 toast.success(`Tag added successfully`);
                 // drop tag visible
-                let tags = [...tagsData]
+                let tags = [...tagsData];
                 tags.push({
                     ...formData,
                     taggedInfo: newTaggedInfo,
                     objectName: newTaggedInfoName,
-                    _id: response.data.data._id
+                    _id: response.data.data._id,
+                    createdAt: (new Date()).toISOString()
                 })
                 setTagsData(tags)
                 model.tags = tags
@@ -221,7 +218,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
         <div className='dataHistoryWrapper'>
             {/* header */}
             <div className='header px-2'>
-                <h1 className='text-2xl font-medium'>Add Sample | Incident | Safety</h1>
+                <h1 className='text-2xl font-medium'>Add Sample | Incident</h1>
             </div>
             {/* header end */}
 
@@ -263,7 +260,6 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                             >
                                 <option value="" disabled>Select Type</option>
                                 {[
-                                    { value: "safety", label: "Safety" },
                                     { value: "incident", label: "Incident" },
                                     { value: "sampling", label: "Sampling" }
                                 ].map((item) => (
@@ -296,7 +292,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                 placeholder='Incident'
                                 size='input-sm'
                                 value={formData.incident}
-                                options={["Crack", "Spill"]}
+                                options={["Safety", "Crack", "Spill"]}
                             />
                         </div>}
                         {formData?.type === "sampling" && <div className='form-control mt-5'>
@@ -345,7 +341,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                     cols={10}
                                     onChange={handleInputChange}
                                     label='text'
-                                    placeholder='Please enter addition data here'
+                                    placeholder='Please enter additional data here'
                                     type='text'
                                     name='text'
                                     size='input-sm'

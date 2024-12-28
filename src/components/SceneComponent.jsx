@@ -343,6 +343,21 @@ export const onSceneReady = (scene, dispatch) => {
           updateSpotLight(pickResult, scene);
         }
 
+        // this is here just in case we need to make the discs appear
+        // vertically in the future, stopped working on this because
+        // it will involve calculating the angle of the camera as well
+        // so as to make the vertical disc face the camera,
+        // this will involve saving this state in db as well.
+        // so I'm ignoring this for now
+        // perhaps in the future we can as well use spheres as they do not
+        // have a front or back, if there is a way to make that as efficient as discs
+
+        // let isVertical = false
+
+        // if (pickResult.pickedMesh.getBoundingInfo().boundingBox.maximumWorld.y > pointCoordinates.y + 0.3) {
+        //   isVertical = true
+        // }
+
         if (pickResult.pickedMesh) {
           dispatch(
             dispatchSelectedMesh(
@@ -374,7 +389,7 @@ function addTagHoverEventHandler(tag, tagData) {
         "position: fixed; background: rgba(0, 0, 0, 0.75); color: white; padding: 5px; border-radius: 5px; pointer-events: none;";
       tagtip.innerHTML = `<p> ${tagData.objectName || "unnamed object"
         }<br/>
-        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : "safety"
+        <span class='text-xs'>${tagData?.type === "sampling" ? tagData?.sample : tagData?.type === "incident" ? "incident" : ""
         }: <span class='text-xs'>${tagData?.type === "sampling" ? tagData.presence : tagData?.type === "incident" ? tagData?.incident : ""
         }</span></span>
         <br/><span class='text-xs'>Date: ${formatDate(
@@ -495,8 +510,6 @@ function makeColorFromType(type) {
     case "sampling":
       return new BABYLON.Color3(0, 0.5, 0.5)
     case "incident":
-      return new BABYLON.Color3(0, 0, 0)
-    case "safety":
       return new BABYLON.Color3(1, 0, 0)
     default:
       return new BABYLON.Color3(1, 0, 0)
@@ -529,6 +542,10 @@ export function drawTag(scene, position, name = `${Date.now()}`, type) {
 }
 
 function displayTagsClonesHighUp() {
+  if (!saveCameraPositionAndDirection.inSunView) {
+    return
+  }
+
   const camera = window.scene.activeCamera;
 
   discs.forEach(disc => {
@@ -545,6 +562,9 @@ function displayTagsClonesHighUp() {
 }
 
 function removeTagsClone() {
+  if (!saveCameraPositionAndDirection.inSunView) {
+    return
+  }
   discsClone.forEach(disc => {
     disc.isVisible = false
     disc.dispose()
