@@ -9,6 +9,12 @@ import SampleChart from "../components/SampleChart";
 import LineChart from "../components/LineChart";
 import BarChart from "../components/BarChart";
 import { DashboardCard } from "../components/DashboardCard";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "../components/ui/tooltip";
 
 
 const url = "/user/dashboard";
@@ -124,6 +130,8 @@ const DashBoard = () => {
   }));
 
   return (
+      <TooltipProvider>
+
     <div className="flex flex-col flex-grow p-5 w-auto">
       {/* Navigation */}
       <div className="flex justify-center items-center mb-16">
@@ -149,171 +157,370 @@ const DashBoard = () => {
         <div className="flex flex-col gap-4 justify-center items-center w-full">
           {/* First Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-            <DashboardCard
-              title="Positivity Rate Year To Date"
-              bgColor="bg-[#333fc5]"
-              className="text-white"
-            >
-              <ChartBox
-                number={returnNumberOrZero(parseFloat(positivityRateYearToDate).toFixed(2))}
-                bg="text"
-              />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Positivity Rate Year To Date"
+                    bgColor="bg-[#333fc5]"
+                    className="text-white"
+                  >
+                    <ChartBox
+                      number={returnNumberOrZero(parseFloat(positivityRateYearToDate).toFixed(2))}
+                      bg="text"
+                    />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Positivity Rate (YTD)</p>
+                  <p className="text-gray-300 text-xs">Value: {returnNumberOrZero(parseFloat(positivityRateYearToDate).toFixed(2))}%</p>
+                  <p className="text-gray-300 text-xs">Overall positivity rate for samples collected this year</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard title="Positivity Rate This Month">
-              <ChartBox
-                number={returnNumberOrZero(parseFloat(positivityRateThisMonth).toFixed(2))}
-              />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard title="Positivity Rate This Month">
+                    <ChartBox
+                      number={returnNumberOrZero(parseFloat(positivityRateThisMonth).toFixed(2))}
+                    />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Monthly Positivity Rate</p>
+                  <p className="text-gray-300 text-xs">Value: {returnNumberOrZero(parseFloat(positivityRateThisMonth).toFixed(2))}%</p>
+                  <p className="text-gray-300 text-xs">Current month's sample positivity rate</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard
-              title="Positive Samples This Month"
-              bgColor="bg-[#746c6c]"
-              className="text-white"
-            >
-              <ChartBox
-                number={positiveTagsThisMonth}
-              />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Positive Samples This Month"
+                    bgColor="bg-[#746c6c]"
+                    className="text-white"
+                  >
+                    <ChartBox number={positiveTagsThisMonth} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Positive Samples</p>
+                  <p className="text-gray-300 text-xs">Count: {positiveTagsThisMonth}</p>
+                  <p className="text-gray-300 text-xs">Number of positive samples detected this month</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard
-              title="Total Samples This Month"
-              bgColor="bg-[#5EA33E]"
-              className="text-white"
-            >
-              <ChartBox
-                number={totalTagsThisMonth}
-              />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Total Samples This Month"
+                    bgColor="bg-[#5EA33E]"
+                    className="text-white"
+                  >
+                    <ChartBox number={totalTagsThisMonth} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Total Samples</p>
+                  <p className="text-gray-300 text-xs">Count: {totalTagsThisMonth}</p>
+                  <p className="text-gray-300 text-xs">Total number of samples collected this month</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Second Row */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 w-full">
-            <DashboardCard
-              title="Today's Facilities"
-              bgColor="bg-[#746c6c]"
-              className="text-white"
-              onClick={() => navigate("models")}
-              isClickable
-            >
-              <ChartBox {...dailyModels} />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Today's Facilities"
+                    bgColor="bg-[#746c6c]"
+                    className="text-white"
+                    onClick={() => navigate("models")}
+                    isClickable
+                  >
+                    <ChartBox {...dailyModels} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Today's Facilities</p>
+                  <p className="text-gray-300 text-xs">Count: {todaysModels}</p>
+                  <p className="text-gray-300 text-xs">Number of facilities processed today</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard
-              title="Total Facilities"
-              bgColor="bg-[#5EA33E]"
-              className="text-white"
-              onClick={() => navigate("models")}
-              isClickable
-            >
-              <ChartBox {...totalModel} />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Total Facilities"
+                    bgColor="bg-[#5EA33E]"
+                    className="text-white"
+                    onClick={() => navigate("models")}
+                    isClickable
+                  >
+                    <ChartBox {...totalModel} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Total Facilities</p>
+                  <p className="text-gray-300 text-xs">Count: {totalModels}</p>
+                  <p className="text-gray-300 text-xs">Total number of facilities in the system</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard
-              title="Samplers"
-              onClick={() => navigate("users")}
-              isClickable
-            >
-              <ChartBox {...taggers} />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Samplers"
+                    onClick={() => navigate("users")}
+                    isClickable
+                  >
+                    <ChartBox {...taggers} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Samplers</p>
+                  <p className="text-gray-300 text-xs">Count: {totalTaggers}</p>
+                  <p className="text-gray-300 text-xs">Total number of active samplers</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
 
-            <DashboardCard
-              title="Reviewers"
-              bgColor="bg-[#333fc5]"
-              className="text-white"
-              onClick={() => navigate("users")}
-              isClickable
-            >
-              <ChartBox {...reviewers} bg="text" />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard
+                    title="Reviewers"
+                    bgColor="bg-[#333fc5]"
+                    className="text-white"
+                    onClick={() => navigate("users")}
+                    isClickable
+                  >
+                    <ChartBox {...reviewers} bg="text" />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Reviewers</p>
+                  <p className="text-gray-300 text-xs">Count: {totalReviewers}</p>
+                  <p className="text-gray-300 text-xs">Total number of active reviewers</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
 
           {/* Pie Chart */}
           <div className="w-full">
-            <DashboardCard title="Location Distribution">
-              <PieChartBox data={data} />
-            </DashboardCard>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <div>
+                  <DashboardCard title="Location Distribution">
+                    <PieChartBox data={data} />
+                  </DashboardCard>
+                </div>
+              </TooltipTrigger>
+              <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+                <div className="flex flex-col gap-1">
+                  <p className="font-semibold text-sm">Location Distribution</p>
+                  <p className="text-gray-300 text-xs">Total Locations: {data.length}</p>
+                  <p className="text-gray-300 text-xs">Distribution of facilities across different locations</p>
+                </div>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </div>
       )}
 
-      {/* Sample Section */}
+   {/* Sample Section */}
       {activeItem === "Sample" && (
         <div className="space-y-4">
-          <DashboardCard title="Sample Charts">
-            <div className="h-[600px]">
-              <SampleChart barChartSampleType={barChartSampleType} />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Sample Charts">
+                  <div className="h-[600px]">
+                    <SampleChart barChartSampleType={barChartSampleType} />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Sample Overview</p>
+                <p className="text-gray-300 text-xs">Daily and monthly sample distribution</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          <DashboardCard title="Samples This Month">
-            <div className="h-[600px]">
-              <BarChart
-                barDataKey="count"
-                xAxisKey="_id"
-                barColor="#8884d8"
-                data={tagsThisMonth}
-              />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Samples This Month">
+                  <div className="h-[600px]">
+                    <BarChart
+                      barDataKey="count"
+                      xAxisKey="_id"
+                      barColor="#8884d8"
+                      data={tagsThisMonth}
+                    />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Current Month Samples</p>
+                <p className="text-gray-300 text-xs">Sample distribution for the current month</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          <DashboardCard title="Samples Last Month">
-            <div className="h-[600px]">
-              <BarChart
-                barDataKey="count"
-                xAxisKey="_id"
-                barColor="#8884d8"
-                data={tagsLastMonth}
-              />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Samples Last Month">
+                  <div className="h-[600px]">
+                    <BarChart
+                      barDataKey="count"
+                      xAxisKey="_id"
+                      barColor="#8884d8"
+                      data={tagsLastMonth}
+                    />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Last Month Samples</p>
+                <p className="text-gray-300 text-xs">Sample distribution for the previous month</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          <DashboardCard title="Samples Year to Date">
-            <div className="h-[600px]">
-              <BarChart
-                barDataKey="count"
-                xAxisKey="_id"
-                barColor="#8884d8"
-                data={tagsYearToDate}
-              />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Samples Year to Date">
+                  <div className="h-[600px]">
+                    <BarChart
+                      barDataKey="count"
+                      xAxisKey="_id"
+                      barColor="#8884d8"
+                      data={tagsYearToDate}
+                    />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Year to Date Samples</p>
+                <p className="text-gray-300 text-xs">Total sample distribution for the current year</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
 
-          <DashboardCard title="Positivity Rate Per Month">
-            <div className="h-[600px]">
-              <LineChart
-                lineDataKey="positivityRate"
-                xAxisKey="month"
-                lineColor="#000000"
-                data={positivityRatePerMonthYearToDate}
-              />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Positivity Rate Per Month">
+                  <div className="h-[600px]">
+                    <LineChart
+                      lineDataKey="positivityRate"
+                      xAxisKey="month"
+                      lineColor="#000000"
+                      data={positivityRatePerMonthYearToDate}
+                    />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Monthly Positivity Rates</p>
+                <p className="text-gray-300 text-xs">Trend of positivity rates across months</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </div>
       )}
 
       {/* Incident Section */}
       {activeItem === "Incident" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <DashboardCard title="Incident Overview">
-            <div className="h-[600px]">
-              <SampleChart barChartSampleType={barChartIncidentType} />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Incident Overview">
+                  <div className="h-[600px]">
+                    <SampleChart barChartSampleType={barChartIncidentType} />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Incident Overview</p>
+                <p className="text-gray-300 text-xs">Daily and monthly incident distribution</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </section>
       )}
 
       {/* Activity Section */}
       {activeItem === "Activity" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <DashboardCard title="Recently Uploaded Facility Sections">
-            <div className="h-[600px]">
-              <ModelList text="Recently Uploaded Facility Sections" users={recentModels} />
-            </div>
-          </DashboardCard>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <DashboardCard title="Recently Uploaded Facility Sections">
+                  <div className="h-[600px]">
+                    <ModelList text="Recently Uploaded Facility Sections" users={recentModels} />
+                  </div>
+                </DashboardCard>
+              </div>
+            </TooltipTrigger>
+            <TooltipContent className="bg-black text-white border border-gray-600 p-3 rounded-lg shadow-lg">
+              <div className="flex flex-col gap-1">
+                <p className="font-semibold text-sm">Recent Uploads</p>
+                <p className="text-gray-300 text-xs">List of recently uploaded facility sections</p>
+              </div>
+            </TooltipContent>
+          </Tooltip>
         </section>
       )}
     </div>
+      </TooltipProvider>
+
   );
 };
 

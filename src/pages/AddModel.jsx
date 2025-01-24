@@ -136,7 +136,7 @@ const AddModel = () => {
               fullWidth
               label="Select a location"
               placeholder="Select a location"
-              required
+              // required
               value={formData.location || ""}
               name="location"
             >
