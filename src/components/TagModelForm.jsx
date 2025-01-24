@@ -178,6 +178,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
             formDataForUpload.append('modelId', model?._id);
 
             const response = await customFetch.post('/tag/add', formDataForUpload);
+            console.log("Response after adding tag:", response)
 
             if (response.data?.status !== 'error') {
                 toast.success(`Tag added successfully`);

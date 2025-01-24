@@ -59,35 +59,17 @@ export const ModelCard = ({
         </div>
       </div>
 
-      {/* Actions Container */}
+       {/* Actions Container */}
       <div className="space-y-3 p-4">
-        {/* View Actions - Keeping the working dropdown structure */}
+        {/* View Actions */}
         <div className='flex w-[100%] items-center justify-between gap-2'>
-          <DropdownMenu>
-            <DropdownMenuTrigger className="w-full">
-              <Button
-                variant="outline"
-                className="w-full flex-row justify-between rounded-lg border-slate-200 hover:bg-slate-50"
-              >
-                <span className="flex items-center gap-2">
-                  <Eye className="h-4 w-4" />
-                  View
-                </span>
-                <ChevronUp className="h-4 w-4 opacity-50" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-[200px] z-50 bg-white shadow-lg">
-              <DropdownMenuItem asChild>
-                <Link
-                  to={`/view-model/${_id}`}
-                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
-                >
-                  <Eye className="h-4 w-4" /> View Facility Section
-                </Link>
-              </DropdownMenuItem>
-
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <Link
+            to={`/view-model/${_id}`}
+            className="flex items-center gap-2 w-full px-4 py-2 border rounded-lg border-slate-200"
+          >
+            <Eye className="h-4 w-4" />
+            <span>View</span>
+          </Link>
           <Button
             variant="ghost"
             size="icon"
@@ -97,6 +79,7 @@ export const ModelCard = ({
             <Edit className="h-4 w-4" />
           </Button>
         </div>
+
 
         {/* Sample Actions - Keeping the working dropdown structure */}
         <div className='flex w-[100%] items-center justify-between gap-2'>
