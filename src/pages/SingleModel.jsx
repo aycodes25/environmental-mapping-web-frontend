@@ -170,7 +170,8 @@ const SingleModel = () => {
           regex.test(item.locations?.toLowerCase()) ||
           regex.test(item.text?.toLowerCase()) ||
           regex.test(item.type?.toLowerCase()) ||
-          regex.test(item.slug?.toLowerCase())
+          regex.test(item.slug?.toLowerCase()) ||
+          regex.test(item.group?.toLowerCase())
         );
       });
 
