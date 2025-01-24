@@ -2,7 +2,7 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 // eslint-disable-next-line no-unused-vars
-import { Link, useLoaderData, useNavigate, useParams } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import '../styles/singleModel.css';
 import AccordionWrapper from './AccordionWrapper';
 import VideocamOutlinedIcon from '@mui/icons-material/VideocamOutlined';
@@ -44,6 +44,8 @@ export const loader =
 const SingleModel = () => {
   const { model } = useLoaderData();
   const { id } = useParams();
+  const [sp] = useSearchParams()
+  const tagType = sp.get("tagType")
   const dispatch = useDispatch();
   const setting = useSelector(memoize((state) => state.settingState.setting));
   const settingMode = () => {
@@ -111,9 +113,14 @@ const SingleModel = () => {
 
   useEffect(() => {
     if (model?.tags) {
-      setTagsData(model.tags);
+      if (tagType) {
+        setTagsData(model.tags.filter(tag => tag[tagType]))
+        model.tags = model.tags.filter(tag => tag[tagType])
+      } else {
+        setTagsData(model.tags);
+      }
     }
-  }, [model?.tags]);
+  }, []);
 
   const goBack = () => {
     navigate(-1);
@@ -244,14 +251,14 @@ const SingleModel = () => {
       startTime,
       endTime
     );
-    if (result.length && typeChoosed === 'sampling') {
+    if (result.length && (typeChoosed === 'sampling' || tagType === "sample")) {
       if (sampleChoosed.length) {
         const filterResult = result.filter((item) => item?.sample?.toLowerCase() === sampleChoosed.toLowerCase() && (item?.presence.toLowerCase() === resultChoosed.toLowerCase() || !resultChoosed));
         setTagsData(filterResult);
       } else {
         toast.error("please choose sample type, aborting filter apply");
       }
-    } else if (result.length && typeChoosed === 'incident') {
+    } else if (result.length && (typeChoosed === 'incident' || tagType == "incident")) {
       if (incidentChoosed.length) {
         const filterResult = result.filter((item) => item?.incident?.toLowerCase() === incidentChoosed.toLowerCase());
         setTagsData(filterResult);
@@ -340,16 +347,17 @@ const SingleModel = () => {
           <div className='dataWrapper'>
             <div>
               <div className='flex justify-between items-baseline px-2 py-2'>
-                <h3 className='cursor-pointer font-bold'
+                {["sample", "incident"].includes(tagType) && <><h3 className='cursor-pointer font-bold'
                   onClick={() => setActivePane('view-tags')}
                 >
                   view tags
                 </h3>
-                <h3 className='cursor-pointer font-bold'
-                  onClick={() => setActivePane('tag-model')}
-                >
-                  tag Facility Section
-                </h3>
+                  <h3 className='cursor-pointer font-bold'
+                    onClick={() => setActivePane('tag-model')}
+                  >
+                    tag facility section
+                  </h3>
+                </>}
                 <div className='menuWrapper'>
                   <div
                     className='menu h-10 w-10 cursor-pointer'
@@ -361,7 +369,7 @@ const SingleModel = () => {
               {activePane === "view-tags" && <div className='dataHistoryWrapper'>
                 {/* header */}
                 <div className='px-2 header'>
-                  <h1 className='text-2xl font-medium'>Sample History</h1>
+                  <h1 className='text-2xl font-medium'>Tag History</h1>
                 </div>
                 {/* header end */}
                 {/* input */}
@@ -533,7 +541,7 @@ const SingleModel = () => {
                           />
                         </div>
                       </div>
-                      <div className='fromWrapper'>
+                      {!["sample", "incident"].includes(tagType) && <div className='fromWrapper'>
                         <div className='w-full form-control'>
                           <InputLabel
                             className='w-full label'
@@ -559,8 +567,8 @@ const SingleModel = () => {
                             ))}
                           </select>
                         </div>
-                      </div>
-                      {typeChoosed === "incident" && <div className='fromWrapper'>
+                      </div>}
+                      {(typeChoosed === "incident" || tagType === "incident") && <div className='fromWrapper'>
                         <div className='w-full form-control'>
                           <InputLabel
                             className='w-full label'
@@ -581,7 +589,7 @@ const SingleModel = () => {
                         </div>
 
                       </div>}
-                      {typeChoosed === "sampling" && <div className='fromWrapper'>
+                      {(typeChoosed === "sampling" || tagType === "sample") && <div className='fromWrapper'>
                         <div className='w-full form-control'>
                           <InputLabel
                             className='w-full label'
@@ -603,7 +611,7 @@ const SingleModel = () => {
 
                       </div>}
 
-                      {typeChoosed === "sampling" && <div className='fromWrapper'>
+                      {(typeChoosed === "sampling" || tagType === "sample") && <div className='fromWrapper'>
                         <div className='form-control'>
                           <InputLabel
                             className='w-full label'
@@ -651,6 +659,7 @@ const SingleModel = () => {
                 model={model}
                 setTagsData={setTagsData}
                 tagsData={tagsData}
+                tagType={tagType}
               />}
             </div>
           </div>
