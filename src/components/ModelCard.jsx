@@ -81,31 +81,37 @@ export const ModelCard = ({
         </div>
 
 
-        {/* Sample Actions - Keeping the working dropdown structure */}
+              {/* Tag Dropdown */}
         <div className='flex w-[100%] items-center justify-between gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger className="w-full">
-              <Button
-                variant="outline"
-                className="w-full flex-row justify-between rounded-lg border-slate-200 hover:bg-slate-50"
-              >
+              <div className="w-full flex justify-between items-center px-4 py-2 border rounded-lg border-slate-200">
                 <span className="flex items-center gap-2">
                   <List className="h-4 w-4" />
-                  Sample
+                  Tag
                 </span>
                 <ChevronUp className="h-4 w-4 opacity-50" />
-              </Button>
+              </div>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-[200px] z-50 bg-white shadow-lg">
               <DropdownMenuItem asChild>
                 <Link
-                  to={`/view-model/${_id}`}
+                  to={`/view-model/${_id}?tagType=sample`}
                   className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
                 >
-                  Sample From Facility Section
+                  <List className="h-4 w-4" />
+                  Sample
                 </Link>
               </DropdownMenuItem>
-
+              <DropdownMenuItem asChild>
+                <Link
+                  to={`/view-model/${_id}?tagType=incident`}
+                  className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
+                >
+                  <Shield className="h-4 w-4" />
+                  Incident
+                </Link>
+              </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
           <Button
@@ -115,7 +121,7 @@ export const ModelCard = ({
               onDelete(_id)
               deleteFromDb(getRealFileUrl(file)).then(console.log)
             }}
-            className="w-2/12 text-destructive hover:bg-red-50"
+            className="w-2/12 text-destructive"
           >
             <Trash2 className="h-4 w-4" />
           </Button>
