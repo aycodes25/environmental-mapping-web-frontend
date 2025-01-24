@@ -81,7 +81,7 @@ const ReviewerDashBoard = () => {
               <img src='/img/search (2).png' alt='icon' />
             </div>
           </div>
-          <input type='text' name='search' placeholder='Search model' onClick={(e) => handleFilterModels(e.target.value)} />
+          <input type='text' name='search' placeholder='Search Facility Section' onClick={(e) => handleFilterModels(e.target.value)} />
           <div className='filter'>
             <div className='img'>
               <img src='/img/edit.png' alt='icon' />

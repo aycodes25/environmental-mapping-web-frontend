@@ -30,8 +30,8 @@ const BarChartBox = (props) => {
             value={selectedChartData}
             onChange={handleChartDataChange}
             className='rounded-md border px-2 py-1'>
-            <option value='dailyData'>Daily Models</option>
-            <option value='monthlyData'>Monthly Models</option>
+            <option value='dailyData'>Daily Facility Sections</option>
+            <option value='monthlyData'>Monthly Facility Sections</option>
           </select>
         </div>
       </div>

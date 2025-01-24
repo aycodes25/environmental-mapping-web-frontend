@@ -60,12 +60,12 @@ const GranularTaggingList = () => {
       },
       {
         accessorFn: (row) => row.modelId,
-        header: 'View Model',
+        header: 'View Facility Section',
         cell: (info) => (
           <button
             onClick={() => handleViewModel(info.getValue())}
             className='btn btn-outline btn-neutral btn-sm rounded-md border-0 bg-black text-white'>
-            View Model
+            View Facility Section
           </button>
         ),
       },
@@ -76,7 +76,7 @@ const GranularTaggingList = () => {
   return (
     <>
       <div className='w-full flex-col items-center justify-center gap-3'>
-          <div className="h-full p-5">
+        <div className="h-full p-5">
           <div className='AllModels'>
             <div className='searchBarContainer md:mx-10'>
               <div className='searchIconWrapper'>
@@ -84,7 +84,7 @@ const GranularTaggingList = () => {
                   <img src='/img/search (2).png' alt='icon' />
                 </div>
               </div>
-              <input type='text' name='search' placeholder='Search model' onClick={(e) => handleFilterGranularTags(e.target.value)} />
+              <input type='text' name='search' placeholder='Search Facility Section' onClick={(e) => handleFilterGranularTags(e.target.value)} />
               <div className='filter'>
                 <div className='img'>
                   <img src='/img/edit.png' alt='icon' />
@@ -100,7 +100,7 @@ const GranularTaggingList = () => {
           </section>
         </div>
       </div>
-        <AddModelSample showModal={showModal} setShowModal={setShowModal} model_data={activeRow} />
+      <AddModelSample showModal={showModal} setShowModal={setShowModal} model_data={activeRow} />
     </>
   );
 };

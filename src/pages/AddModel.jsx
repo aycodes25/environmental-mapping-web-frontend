@@ -105,12 +105,12 @@ const AddModel = () => {
         encType="multipart/form-data"
         className="flex flex-col justify-start items-center w-full h-screen"
       >
-        <h3 className="mb-4 text-3xl font-bold text-center">Add models</h3>
+        <h3 className="mb-4 text-3xl font-bold text-center">Add Facility Section</h3>
         <div className="flex flex-col gap-4 justify-center items-center w-full max-w-2xl">
           <input
             type="text"
             name="modelName"
-            placeholder="Model Name"
+            placeholder="Facility Section Name"
             className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
             onChange={handleInputChange}
             required
@@ -118,7 +118,7 @@ const AddModel = () => {
           <input
             type="text"
             name="description"
-            placeholder="Model Description"
+            placeholder="Facility Section Description"
             className="p-1 w-full h-11 rounded-md border border-gray-400 border-solid"
             onChange={handleInputChange}
             required
@@ -157,14 +157,14 @@ const AddModel = () => {
             <AiOutlineCloudUpload />
             <div className="text-center">
               <h3 className="text-lg font-bold">Choose a model to upload</h3>
-              <p>GLTF, GLB, DAE, OBJ, STL formats, up to 100MB</p>
+              <p>GLTF, GLB, OBJ, STL formats</p>
             </div>
             <label className="btn">
               <span>{modelName || "Browse Files"}</span>
               <input
                 type="file"
                 name="file"
-                accept=".gltf, .glb, .dae, .obj, .stl, .fbx"
+                accept=".gltf, .glb, .obj, .stl"
                 required
                 className="hidden"
                 onChange={handleInputChange}

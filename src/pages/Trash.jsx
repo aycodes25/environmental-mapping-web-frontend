@@ -77,7 +77,7 @@ const Trash = () => {
       if (response.data.status !== 'error') {
         setModelList(response.data.data);
       }
-      toast.success(response.data.message || 'model restored successfully');
+      toast.success(response.data.message || 'Facility Section restored successfully');
     } else {
       toast.error(response.data.message);
     }
@@ -94,7 +94,7 @@ const Trash = () => {
       if (response.data.status !== 'error') {
         setModelList(response.data.data);
       }
-      toast.success(response.data.message || 'model deleted successfully');
+      toast.success(response.data.message || 'Facility Section deleted successfully');
     } else {
       toast.error(response.data.message);
     }

@@ -66,7 +66,7 @@ const EditModel = () => {
         formDataForUpload
       );
       if (response.data?.status !== 'error') {
-        toast.success(`Model edited successfully`);
+        toast.success(`Facility Section edited successfully`);
         setImageName('');
       } else {
         toast.error(response.data?.message);
@@ -89,19 +89,19 @@ const EditModel = () => {
         onSubmit={handleEdit}>
         <div className='flex flex-col gap-4 justify-center items-center w-full max-w-2xl'>
           <div className='heading'>
-            <h1 className='text-3xl font-bold text-center'>Edit Model</h1>
+            <h1 className='text-3xl font-bold text-center'>Edit Facility Section</h1>
             <p className='mb-3 text-center font-[3400]'>
-              Please edit model details
+              Please edit Facility Section details
             </p>
           </div>
           <div className='flex flex-col justify-center items-start w-full'>
-            <p>Model name</p>
+            <p>Facility Section name</p>
             <input
               className='p-1 w-full h-11 rounded-md border border-gray-400 border-solid'
               type='text'
               name='modelName'
               value={formData.modelName}
-              placeholder='Enter model name'
+              placeholder='Enter Facility Section name'
               onChange={handleInputChange}
               required
             />
@@ -113,7 +113,7 @@ const EditModel = () => {
               className='p-1 w-full h-11 rounded-md border border-gray-400 border-solid'
               name='description'
               value={formData.description}
-              placeholder='Enter model description'
+              placeholder='Enter Facility Section Description'
               onChange={handleInputChange}
               required
             />

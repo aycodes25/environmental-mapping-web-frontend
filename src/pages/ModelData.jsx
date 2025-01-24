@@ -56,7 +56,7 @@ const ModelData = () => {
       <div className='h-screen w-[80%] bg-slate-400 p-2'></div>
       <div className='card flex h-screen w-[20%] flex-col justify-between bg-[#EEEEEE] px-4 py-5'>
         <div className='flex flex-col gap-2'>
-          <SectionTitle text='input model data' />
+          <SectionTitle text='input Facility Section data' />
           <div className='flex flex-col'>
             <FormInput
               onChange={(e) => handleChange(e)}

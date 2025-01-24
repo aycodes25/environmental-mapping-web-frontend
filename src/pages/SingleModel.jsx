@@ -347,7 +347,7 @@ const SingleModel = () => {
                 <h3 className='cursor-pointer font-bold'
                   onClick={() => setActivePane('tag-model')}
                 >
-                  tag model
+                  tag Facility Section
                 </h3>
                 <div className='menuWrapper'>
                   <div

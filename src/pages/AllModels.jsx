@@ -86,7 +86,7 @@ const AllModels = () => {
     (ids) => customFetch.post(`/model/soft-delete-models/`, { modelIds: ids }),
     {
       onSuccess: async () => {
-        toast.success('Model(s) deleted successfully');
+        toast.success('Facility Section(s) deleted successfully');
         await queryClient.invalidateQueries('model');
         const response = await queryClient.fetchQuery(['model'], modelQuery);
         if (response.data.status !== 'error') {
@@ -167,7 +167,7 @@ const AllModels = () => {
                 onClick={() => setConfirmDelete(true)}>
                 <RemoveIcon style={{ color: '#FFF' }} />
                 <p className='text-white max-md:truncate max-sm:text-sm'>
-                  Delete Selected model
+                  Delete Selected Facility Sections
                 </p>
               </Button>
             </div>
@@ -181,13 +181,13 @@ const AllModels = () => {
                     : '/login'
                   }`}>
                 <Button className='btn btn-success btn-sm mr-0'>
-                  <p className='max-sm:text-sm'>+ Add model</p>
+                  <p className='max-sm:text-sm'>+ Add Facility Section</p>
                 </Button>
               </Link>
               <Button
                 className='btn btn-success btn-sm mr-0'
                 onClick={() => setDeleteModel(true)}>
-                <p className='text-[red] max-sm:text-sm'>- Delete model</p>
+                <p className='text-[red] max-sm:text-sm'>- Delete Facility Section</p>
               </Button>
             </div>
           )}
@@ -203,7 +203,7 @@ const AllModels = () => {
             className='max-sm:text-sm'
             type='text'
             name='search'
-            placeholder='Search model'
+            placeholder='Search Facility Sections'
             onChange={(e) => handleFilterModels(e.target.value)}
           />
           <div className='filter'>
