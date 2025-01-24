@@ -19,7 +19,7 @@ import { dispatchSelectedMeshTags } from '../redux/actions/meshActions';
 import { toggleSetting } from '../redux/actions/settingActions';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
 
-const TagModelForm = ({ model, setTagsData, tagsData }) => {
+const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
     const dispatch = useDispatch();
     const setting = useSelector(memoize((state) => state.settingState.setting));
 
@@ -145,10 +145,12 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        if (!formData.type) {
-            toast.error("A Type is required")
-            return
+        if (tagType === "sample") {
+            formData.type = "sampling"
+        } else {
+            formData.type = "incident"
         }
+
         if (!newTaggedInfo) {
             toast.error("Please ensure you have clicked an object to tag, aborting")
             return
@@ -183,7 +185,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                 toast.success(`Tag added successfully`);
                 // drop tag visible
                 let tags = [...tagsData];
-                tags.push({
+                const newTag = {
                     ...formData,
                     taggedInfo: newTaggedInfo,
                     objectName: newTaggedInfoName,
@@ -191,9 +193,14 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                     slug: response.data.data.slug,
                     group: response.data.data.group || "",
                     createdAt: (new Date()).toISOString()
-                })
+                }
+                tags.push(newTag)
                 setTagsData(tags)
-                model.tags = tags
+                if (model.tags) {
+                    model.tags = [...model.tags, newTag]
+                } else {
+                    model.tags = tags
+                }
             } else {
                 toast.error(response.data?.message);
             }
@@ -227,7 +234,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
         <div className='dataHistoryWrapper'>
             {/* header */}
             <div className='header px-2'>
-                <h1 className='text-2xl font-medium'>Add Sample | Incident</h1>
+                <h1 className='text-2xl font-medium'>Add {tagType}</h1>
             </div>
             {/* header end */}
 
@@ -259,27 +266,8 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                             size='input-sm'
                             value={formData.locations}
                         />
-                        <div className='form-control'>
-                            <select
-                                onChange={handleInputChange}
-                                name="type"
-                                value={formData.type}
-                                required
-                                className="w-full p-2 border rounded"
-                            >
-                                <option value="" disabled>Select Type</option>
-                                {[
-                                    { value: "incident", label: "Incident" },
-                                    { value: "sampling", label: "Sampling" }
-                                ].map((item) => (
-                                    <option key={item.value} value={item.value}>
-                                        {item.label}
-                                    </option>
-                                ))}
-                            </select>
-                        </div>
 
-                        {formData?.type === "sampling" && <div className='form-control'>
+                        {tagType === "sample" && <div className='form-control'>
                             <FormInput
                                 onChange={handleInputChange}
                                 label='Type of sample'
@@ -292,7 +280,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                             />
                         </div>}
 
-                        {formData?.type === "incident" && <div className="form-control">
+                        {tagType === "incident" && <div className="form-control">
                             <FormInput
                                 onChange={handleInputChange}
                                 label='Incident'
@@ -304,7 +292,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                 options={["Safety", "Crack", "Spill"]}
                             />
                         </div>}
-                        {formData?.type === "sampling" && <div className='form-control mt-5'>
+                        {tagType === "sample" && <div className='form-control mt-5'>
                             <select
                                 onChange={handleInputChange}
                                 name="presence"
