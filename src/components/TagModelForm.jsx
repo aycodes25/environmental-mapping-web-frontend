@@ -38,6 +38,10 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
         navigate(-1);
     };
 
+    let tagsGroups = (tagsData || []).map(tag => tag.group?.toLowerCase().trim() || "")
+    tagsGroups = Array.from(new Set(tagsGroups.filter(group => group))) // filter out falsy groups
+
+
     async function fetchSamples() {
         await customFetch.get('/sample/samples').then(({ data }) => {
             if (data?.data) {
@@ -120,6 +124,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
         locations: '',
         presence: '',
         sample: '',
+        group: '',
         user: currentUser?._id,
         model: model?._id,
         text: '',
@@ -166,6 +171,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
             formDataForUpload.append('locations', formData.locations);
             formDataForUpload.append('sample', formData.sample);
             formDataForUpload.append('presence', formData.presence);
+            formDataForUpload.append('group', formData.group);
             formDataForUpload.append('text', formData.text);
             formDataForUpload.append('taggedInfo', newTaggedInfo);
             formDataForUpload.append('userId', currentUser?._id);
@@ -183,6 +189,8 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                     taggedInfo: newTaggedInfo,
                     objectName: newTaggedInfoName,
                     _id: response.data.data._id,
+                    slug: response.data.data.slug,
+                    group: response.data.data.group || "",
                     createdAt: (new Date()).toISOString()
                 })
                 setTagsData(tags)
@@ -202,6 +210,7 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                 user: user?._id,
                 model: model?._id,
                 text: '',
+                group: '',
                 objectName: newTaggedInfoName,
                 taggedInfo: newTaggedInfoPosition,
             });
@@ -315,6 +324,16 @@ const TagModelForm = ({ model, setTagsData, tagsData }) => {
                                 ))}
                             </select>
                         </div>}
+                        <FormInput
+                            onChange={handleInputChange}
+                            label='Group'
+                            type='text'
+                            name='group'
+                            placeholder='enter group'
+                            size='input-sm'
+                            value={formData.group}
+                            options={tagsGroups || []}
+                        />
                         {["sampling", "incident"].includes(formData.type) && <FormInput
                             onChange={handleInputChange}
                             label='Corrective Actions'

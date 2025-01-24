@@ -396,7 +396,8 @@ function addTagHoverEventHandler(tag, tagData) {
           tagData.createdAt
         )}</span><br/><span class='text-xs'>Time: ${formatTime(
           tagData.createdAt
-        )}</span></p>`;
+        )}</span></p>
+        ${tagData.group ? `<span class='text-xs'>Group: ${tagData.group}</span>` : ""}`;
       tagtip.style.display = "block";
       tagtip.style.left = event.pointerX + 10 + "px";
       tagtip.style.top = event.pointerY + 10 + "px";
