@@ -82,7 +82,7 @@ export const ModelCard = ({
                   to={`/view-model/${_id}`}
                   className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
                 >
-                  <Eye className="h-4 w-4" /> View Model
+                  <Eye className="h-4 w-4" /> View Facility Section
                 </Link>
               </DropdownMenuItem>
 
@@ -119,7 +119,7 @@ export const ModelCard = ({
                   to={`/view-model/${_id}`}
                   className="flex items-center gap-2 cursor-pointer hover:bg-[#021431] hover:text-white transition-colors"
                 >
-                  Sample From Model
+                  Sample From Facility Section
                 </Link>
               </DropdownMenuItem>
 

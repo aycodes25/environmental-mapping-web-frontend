@@ -306,9 +306,9 @@ const DashBoard = () => {
       {/* Activity Section */}
       {activeItem === "Activity" && (
         <section className="flex flex-col gap-4 justify-center items-center w-full h-full">
-          <DashboardCard title="Recent Upload Models">
+          <DashboardCard title="Recently Uploaded Facility Sections">
             <div className="h-[600px]">
-              <ModelList text="Recent Upload Models" users={recentModels} />
+              <ModelList text="Recently Uploaded Facility Sections" users={recentModels} />
             </div>
           </DashboardCard>
         </section>

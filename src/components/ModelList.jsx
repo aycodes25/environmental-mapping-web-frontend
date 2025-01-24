@@ -65,7 +65,7 @@ const ModelList = ({ text, users }) => {
               </div>
               <div className='flex w-[10%] justify-end'>
                 <Link to={`/view-model/${_id}`}>
-                  <Button className='text-sm capitalize'>View Model</Button>
+                  <Button className='text-sm capitalize'>View Facility Section</Button>
                 </Link>
               </div>
             </Card>

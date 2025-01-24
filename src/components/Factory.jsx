@@ -7,7 +7,7 @@ import { getRealFileUrl } from "../utils"
 const Factory = () => {
   return (
     <div className='items-around flex flex-col justify-evenly'>
-      <h1 className='mb-3 font-bold'>Recent Models</h1>
+      <h1 className='mb-3 font-bold'>Recent Facility Sections</h1>
       <div className='overflow-x-auto max-sm:w-full'>
         <div className='mb-4 flex h-48 items-center justify-evenly gap-1 max-md:w-[fit-content] max-md:justify-center'>
           {Users.map((user, index) => (
@@ -25,7 +25,7 @@ const Factory = () => {
               </div>
 
               <Button className='btn btn-neutral btn-sm rounded-full text-sm capitalize max-sm:truncate'>
-                View model
+                View Facility Section
               </Button>
             </Card>
           ))}
@@ -33,7 +33,7 @@ const Factory = () => {
       </div>
       <Button className='btn btn-outline btn-neutral w-full capitalize max-sm:truncate'>
         {' '}
-        View all model
+        View all Facility Sections
       </Button>
     </div>
   );

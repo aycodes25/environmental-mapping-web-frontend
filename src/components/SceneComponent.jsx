@@ -113,7 +113,7 @@ export function SceneComponent({
     loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene, model)
       .then(() => {
         setIsLoading(false);
-        toast.success("model is ready!");
+        toast.success("Facility Section is ready!");
         setupVideoRecording(scene);
       })
 
