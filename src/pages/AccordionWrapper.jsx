@@ -89,6 +89,10 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
                 <Typography className='text-sm'>{item?.objectName}</Typography>
               </Box>
               <Box className='flex flex-row flex-nowrap gap-2 justify-start items-center info'>
+                <Typography className='text-sm'>Group: </Typography>
+                <Typography className='text-sm'>{item?.group || ""}</Typography>
+              </Box>
+              <Box className='flex flex-row flex-nowrap gap-2 justify-start items-center info'>
                 <Typography className='text-sm'>Ref: </Typography>
                 <Typography className='text-sm'>{item?.slug}</Typography>
               </Box>
