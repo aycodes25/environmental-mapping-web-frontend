@@ -722,7 +722,9 @@ function importGLFileInScene(glFile, scene) {
           applyMeshOptimizations(mesh)
         })
       });
-      optimizeScene(scene)
+      setTimeout(() => {
+        optimizeScene(scene)
+      }, 1000 * 5);
       centerCameras(scene)
       resolve()
     });
