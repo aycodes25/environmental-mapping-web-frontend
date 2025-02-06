@@ -396,8 +396,9 @@ function addTagHoverEventHandler(tag, tagData) {
           tagData.createdAt
         )}</span><br/><span class='text-xs'>Time: ${formatTime(
           tagData.createdAt
-        )}</span></p>
-        ${tagData.group ? `<span class='text-xs'>Group: ${tagData.group}</span>` : ""}`;
+        )}</span><br/>
+        ${tagData.slug ? `<span class='text-xs'>Ref: ${tagData.slug}</span><br/>` : ""}
+        ${tagData.group ? `<span class='text-xs'>Group: ${tagData.group}</span></p>` : "</p>"}`;
       tagtip.style.display = "block";
       tagtip.style.left = event.pointerX + 10 + "px";
       tagtip.style.top = event.pointerY + 10 + "px";
@@ -625,14 +626,6 @@ export function deconstructMesh(mesh, scene) {
   }
 }
 
-function optimizeScene(scene) {
-  // this improved perf significantly with some caveats
-  // look here https://doc.babylonjs.com/features/featuresDeepDive/scene/optimize_your_scene#aggressive-mode
-  scene.performancePriority = BABYLON.ScenePerformancePriority.Aggressive
-  scene.autoClear = true
-  scene.skipPointerMovePicking = false
-}
-
 function updateCameraPosition(scene) {
   currCameraPosition = scene.activeCamera.position
   window.currCameraPosition = currCameraPosition   // to-do: use redux
@@ -649,15 +642,16 @@ function applyMeshOptimizations(mesh) {
   mesh.isPickable = true // because .performancePriority == BABYLON.ScenePerformancePriority.Aggressive
 }
 
-function applyOpRecursivelyOnSubmeshes(mesh, op) {
-  if (mesh.__visited__) return
+function applyOpRecursivelyOnSubmeshes(mesh, op, key = "__visited__") {
+  if (key.length && mesh[key]) return
   // maybe meshes could contain parent meshes as submeshes?
   // so this is a hack to prevent cyclical recursion
   // now this implies applyOpRecursivelyOnSubmeshes can only be called
-  // only once in one place
-  mesh.__visited__ = true
+  // only once in one place with same key, to call this again we need
+  // use a different key, to ignore totally, just pass an empty string
+  mesh[key] = true
   op(mesh)
-  mesh.subMeshes?.forEach(m => applyOpRecursivelyOnSubmeshes(m, op))
+  mesh.subMeshes?.forEach(m => applyOpRecursivelyOnSubmeshes(m, op, key))
 }
 
 function applyOcclusionAlgo(mesh) {
@@ -722,9 +716,6 @@ function importGLFileInScene(glFile, scene) {
           applyMeshOptimizations(mesh)
         })
       });
-      setTimeout(() => {
-        optimizeScene(scene)
-      }, 1000 * 5);
       centerCameras(scene)
       resolve()
     });
