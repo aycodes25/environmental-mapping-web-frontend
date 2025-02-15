@@ -3,7 +3,7 @@ name: deploy
 on:
   push:
     branches:
-      - master  # Change to the default branch name in your repository
+      - main  # Change to the default branch name in your repository
   workflow_dispatch:
 
 env:
