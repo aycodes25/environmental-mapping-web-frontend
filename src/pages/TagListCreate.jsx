@@ -186,7 +186,7 @@ const TagListCreate = () => {
           {/*threejs animation wrapper start  */}
           <div className='threejsWrapper h-screen'>
             <div className='threejsAnimationWrapper h-screen w-screen'>
-              <ModelViewBabylon MODEL_URL={model.file} tags={model?.tags} model={model} />
+              <ModelViewBabylon MODEL_URL={model.file} tags={model?.tags} model={model} setTagsData={() => { }} />
             </div>
             <div className='navigation'>
               <div onClick={goBack}>
