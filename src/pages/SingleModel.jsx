@@ -307,7 +307,7 @@ const SingleModel = () => {
         {/*threejs animation wrapper start  */}
         <div className='h-screen threejsWrapper'>
           <div className='w-screen h-screen threejsAnimationWrapper'>
-            <ModelViewBabylon MODEL_URL={model.file} tags={tagsData} model={model} />
+            <ModelViewBabylon MODEL_URL={model.file} tags={tagsData} model={model} setTagsData={setTagsData} />
           </div>
           <div className='navigation'>
             <div onClick={goBack}>
