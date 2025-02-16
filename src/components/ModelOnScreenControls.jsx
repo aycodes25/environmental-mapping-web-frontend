@@ -70,6 +70,8 @@ function ModelOnScreenControls() {
                         </Button>
                         <div className="separator"></div>
                         <Button id='heatmapButton' className='text-center' >Heat Map</Button>
+                        <div className="separator"></div>
+                        <Button id='twoDview' className='text-center' >View 2d</Button>
                     </div>
                     <div className="compassContainer relative flex flex-row justify-center items-baseline">
                         <div><img src="/img/Group 26986.png" alt="" className="w-[160px] h-[90px]" /></div>

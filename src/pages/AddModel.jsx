@@ -14,12 +14,14 @@ const AddModel = () => {
   const [locations, setLocations] = useState();
   const [imageName, setImageName] = useState("");
   const [modelName, setModelName] = useState("");
+  const [twoD, set2d] = useState("")
   const [formData, setFormData] = useState({
     modelName: "",
     description: "",
     location: "",
     file: null,
     coverPicture: null,
+    twoD: null
   });
   const user = useSelector((state) => state.userState.user);
   const localUser = getUserFromLocalStorage();
@@ -47,6 +49,9 @@ const AddModel = () => {
     if (name === "coverPicture") {
       setImageName(files[0].name);
     }
+    if (name === "twoD") {
+      set2d(files[0].name);
+    }
     setFormData({
       ...formData,
       [name]: files ? files[0] : value,
@@ -62,12 +67,14 @@ const AddModel = () => {
         toast.error("please provide a model file")
         return
       }
+      
       formDataForUpload.append("modelName", formData.modelName);
       formDataForUpload.append("description", formData.description);
       formDataForUpload.append("location", formData.location);
       formDataForUpload.append("model", formData.file);
       formDataForUpload.append("size", formData.file.size);
       formDataForUpload.append("image", formData.coverPicture);
+      formDataForUpload.append("twoD", formData.twoD);
       formDataForUpload.append("userId", currentUser?._id);
 
       const response = await customFetch.post(
@@ -82,9 +89,11 @@ const AddModel = () => {
           location: "",
           file: null,
           coverPicture: null,
+          twoD: null
         });
         setModelName("");
         setImageName("");
+        set2d("")
       } else {
         toast.error(response.data?.message);
       }
@@ -156,7 +165,7 @@ const AddModel = () => {
           <div className="flex w-full flex-col items-center gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4">
             <AiOutlineCloudUpload />
             <div className="text-center">
-              <h3 className="text-lg font-bold">Choose a model to upload</h3>
+              <h3 className="text-lg font-bold">Choose a facility section to upload</h3>
               <p>GLTF, GLB, OBJ, STL formats</p>
             </div>
             <label className="btn">
@@ -166,6 +175,27 @@ const AddModel = () => {
                 name="file"
                 accept=".gltf, .glb, .obj, .stl"
                 required
+                className="hidden"
+                onChange={handleInputChange}
+              />
+            </label>
+          </div>
+          <div className="flex w-full flex-col items-center gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4">
+            <div className="img">
+              <AiOutlineCloudUpload />
+            </div>
+            <div className="text-center">
+              <h3 className="text-lg font-bold">
+                Choose a 2d Image
+              </h3>
+              <p>JPEG, PNG</p>
+            </div>
+            <label className="btn">
+              <span>{twoD || "Browse Files"}</span>
+              <input
+                type="file"
+                name="twoD"
+                accept=".jpg, .jpeg, .png, .webp"
                 className="hidden"
                 onChange={handleInputChange}
               />

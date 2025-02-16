@@ -154,9 +154,18 @@ export function SceneComponent({
       }
     }
 
+    const handle2dBtnClick = (e) => {
+      let twoDimageUrl = model.twoD
+      displayImage(getRealFileUrl(twoDimageUrl))
+    }
+
     const heatmapButton = document.getElementById("heatmapButton");
     heatmapButton.removeEventListener("click", handleHeatMapClick);
     heatmapButton.addEventListener("click", handleHeatMapClick);
+
+    const twoDviewBtn = document.getElementById("twoDview");
+    twoDviewBtn.removeEventListener("click", handle2dBtnClick);
+    twoDviewBtn.addEventListener("click", handle2dBtnClick);
 
     const screenshotButton = document.getElementById("screenshotButton");
     screenshotButton.addEventListener("click", () => {
@@ -323,6 +332,72 @@ export function SceneComponent({
     </>
   );
 }
+
+const displayImage = (imageUrl) => {
+  // Check if modal already exists
+  if (document.getElementById("custom-image-modal")) return;
+
+  // Create modal container
+  const modal = document.createElement("div");
+  modal.id = "custom-image-modal";
+  modal.style.cssText = `
+    position: fixed; top: 0; left: 0; width: 100vw; height: 100vh;
+    background: rgba(0, 0, 0, 0.8); display: flex; justify-content: center; align-items: center;
+    backdrop-filter: blur(10px); z-index: 1000; opacity: 0; transition: opacity 0.3s ease-in-out;
+  `;
+
+  // Create image container for better control
+  const imgContainer = document.createElement("div");
+  imgContainer.style.cssText = `
+    width: 90vw; height: 90vh; display: flex; justify-content: center; align-items: center;
+    overflow: hidden; border-radius: 10px; box-shadow: 0 8px 16px rgba(255, 255, 255, 0.3);
+  `;
+
+  // Create image element
+  const img = document.createElement("img");
+  img.src = imageUrl;
+  img.alt = "Preview Image";
+  img.style.cssText = `
+    width: 100%; height: 100%; object-fit: cover; border-radius: 10px;
+    transition: transform 0.3s ease-in-out;
+  `;
+
+  // Create close button
+  const closeBtn = document.createElement("button");
+  closeBtn.innerHTML = "&#10006;"; // Unicode for 'X'
+  closeBtn.style.cssText = `
+    position: absolute; top: 20px; right: 30px; font-size: 24px; 
+    background: none; color: white; border: none; cursor: pointer;
+    transition: transform 0.2s ease-in-out;
+  `;
+  closeBtn.addEventListener("mouseenter", () => (closeBtn.style.transform = "scale(1.2)"));
+  closeBtn.addEventListener("mouseleave", () => (closeBtn.style.transform = "scale(1)"));
+
+  // Close function
+  const closeModal = () => {
+    modal.style.opacity = "0";
+    setTimeout(() => modal.remove(), 300);
+  };
+
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal(); // Close when clicking outside the image
+  });
+
+  // Append elements and add to document
+  imgContainer.appendChild(img);
+  modal.appendChild(imgContainer);
+  modal.appendChild(closeBtn);
+  document.body.appendChild(modal);
+
+  // Trigger fade-in animation
+  setTimeout(() => {
+    modal.style.opacity = "1";
+    img.style.transform = "scale(1)";
+  }, 10);
+};
+
+
 
 export function splitFileUrl(fileUrl) {
   const urlSplit = fileUrl.split("/")
