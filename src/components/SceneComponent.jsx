@@ -115,13 +115,12 @@ export function SceneComponent({
     }
     window.scene = scene // make global
     const canvas = document.getElementById("renderCanvas");
-    const baseUrlWithSlash = baseUrl.endsWith("/") ? baseUrl : baseUrl + "/";
 
     const light = new HemisphericLight("light", new Vector3(1, 1, 0), scene);
     light.intensity = controls.contrast;
 
     // this also saves the loaded file in indexedDb
-    loadSceneFromGlb(getRealFileUrl(baseUrlWithSlash + filenameWithExtension), scene, model)
+    loadSceneFromGlb(getRealFileUrl(model.file), scene, model)
       .then(() => {
         setIsLoading(false);
         toast.success("Facility Section is ready!");
@@ -776,35 +775,44 @@ function loadSceneFromGlb(url, scene, model) {
         return importGLFileInScene(glFile, scene)
       } else {
         console.log("fetching model from server")
-        return fetch(url)
-          .then((response) => response.blob())
-          .then((blob) => {
-
-            if (model.size && blob.size !== model.size) {
-              // retry ank keep count
-              let currentRetries = Number(localStorage.getItem("retriesCount") || 0)
-              if (currentRetries >= 3) {
-                toast.error("model load max retries reached, please check your network or reupload this model")
-                localStorage.setItem("retriesCount", "0")
-                return setTimeout(() => {
-                  window.location.href = "/"
-                }, 5000);
-              }
-              localStorage.setItem("retriesCount", `${currentRetries + 1}`)
-              window.location.reload()
-              return
-            }
-            localStorage.setItem("retriesCount", "0")
-            const glFile = new File([blob], fileName, {
-              // type: "model/gltf-binary"
-            });
-
-            storeBlobInDb(url, blob)
-
-            return importGLFileInScene(glFile, scene)
-          });
+        return downloadModel(url, model, scene, fileName)
       }
     })
+    .catch(e => {
+      console.error(e)
+      console.log("fetching model from server after error")
+      return downloadModel(url, model, scene, fileName)
+    })
+}
+
+async function downloadModel(url, model, scene, fileName) {
+  return fetch(url)
+    .then((response) => response.blob())
+    .then((blob) => {
+
+      if (model.size && blob.size !== model.size) {
+        // retry ank keep count
+        let currentRetries = Number(localStorage.getItem("retriesCount") || 0)
+        if (currentRetries >= 3) {
+          toast.error("model load max retries reached, please check your network or reupload this model")
+          localStorage.setItem("retriesCount", "0")
+          return setTimeout(() => {
+            window.location.href = "/"
+          }, 5000);
+        }
+        localStorage.setItem("retriesCount", `${currentRetries + 1}`)
+        window.location.reload()
+        return
+      }
+      localStorage.setItem("retriesCount", "0")
+      const glFile = new File([blob], fileName, {
+        // type: "model/gltf-binary"
+      });
+
+      storeBlobInDb(url, blob)
+
+      return importGLFileInScene(glFile, scene)
+    });
 }
 
 function importGLFileInScene(glFile, scene) {

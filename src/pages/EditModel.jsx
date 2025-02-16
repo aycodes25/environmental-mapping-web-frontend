@@ -161,7 +161,7 @@ const EditModel = () => {
               <p>JPEG, PNG</p>
             </div>
             <label className='btn'>
-              <span>{imageName || 'Browse Files'}</span>
+              <span>{twoD || 'Browse Files'}</span>
               <input
                 type='file'
                 name='twoD'

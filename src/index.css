@@ -4927,11 +4927,11 @@ body {
   --tw-enter-translate-y: initial;
 }
 
-.fade-in-0 {
+.fade-in {
   --tw-enter-opacity: 0;
 }
 
-.fade-in {
+.fade-in-0 {
   --tw-enter-opacity: 0;
 }
 
