@@ -15,11 +15,13 @@ const EditModel = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [locations, setLocations] = useState();
   const [imageName, setImageName] = useState('');
+  const [twoD, set2d] = useState("")
   const [formData, setFormData] = useState({
     modelName: model.modelName,
     description: model.description,
     location: model.location?._id,
     coverPicture: model.coverPicture,
+    twoD: model.twoD
   });
   const user = useSelector((state) => state.userState.user);
   const localUser = getUserFromLocalStorage();
@@ -45,6 +47,9 @@ const EditModel = () => {
     if (name === 'coverPicture') {
       setImageName(files[0].name);
     }
+    if (name === "twoD") {
+      set2d(files[0].name);
+    }
     setFormData({
       ...formData,
       [name]: files ? files[0] : value,
@@ -60,6 +65,7 @@ const EditModel = () => {
       formDataForUpload.append('description', formData.description);
       formDataForUpload.append('location', formData.location);
       formDataForUpload.append('image', formData.coverPicture);
+      formDataForUpload.append('twoD', formData.twoD);
       formDataForUpload.append('userId', currentUser?._id);
       const response = await customFetch.post(
         `/model/update-model/${id}`,
@@ -142,6 +148,29 @@ const EditModel = () => {
                   ))}
               </Select>
             </FormControl>
+          </div>
+          <div
+            className={`flex flex-col items-center w-full gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4`}>
+            <div className='img'>
+              <AiOutlineCloudUpload />
+            </div>
+            <div className='text-center'>
+              <h3 className='text-lg font-bold'>
+                Choose 2d image to upload
+              </h3>
+              <p>JPEG, PNG</p>
+            </div>
+            <label className='btn'>
+              <span>{imageName || 'Browse Files'}</span>
+              <input
+                type='file'
+                name='twoD'
+                accept='.jpg, .jpeg, .png, .webp'
+                className='hidden'
+                onChange={handleInputChange}
+              // required
+              />
+            </label>
           </div>
           <div
             className={`flex flex-col items-center w-full gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4`}>
