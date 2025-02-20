@@ -93,7 +93,6 @@ const Location = () => {
 
   const columns = [
     { accessorKey: 'name', header: 'Factory Name' },
-    { accessorKey: 'location', header: 'Factory Location' },
     {
       accessorKey: 'image',
       header: 'Image',
@@ -130,7 +129,7 @@ const Location = () => {
           <Button
             className='mr-0 btn btn-success btn-sm'
             onClick={() => setShowModal(true)}>
-            + Add Location
+            + Add Facility
           </Button>
         </div>
         <div className='mx-auto w-full searchBarContainer'>
@@ -140,7 +139,7 @@ const Location = () => {
           <input
             className='flex flex-row flex-grow'
             type='text'
-            placeholder='Search locations'
+            placeholder='Search facility'
             onChange={(e) => handleFilterLocations(e.target.value)}
           />
           <div className='filter'>
