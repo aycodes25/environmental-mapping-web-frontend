@@ -5,6 +5,7 @@ import '../styles/menu.css';
 import { useSelector } from 'react-redux';
 import { memoize } from 'proxy-memoize';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
 
 // eslint-disable-next-line react-refresh/only-export-components
 
@@ -21,9 +22,9 @@ const NavLinks = () => {
         }`,
       text: 'Dashboard',
     },
-    { id: 2, url: 'models', text: 'Facilities' },
+    { id: 2, url: 'models', text: 'Facility Sections' },
     { id: 3, url: 'users', text: 'Users' },
-    { id: 4, url: 'location', text: 'Locations' },
+    { id: 4, url: 'location', text: 'Facility' },
     // { id: 5, url: 'form-features', text: 'Form Features' },
     { id: 6, url: 'report', text: 'Report' },
     { id: 7, url: 'trash', text: 'Recycle Bin' },
@@ -35,18 +36,30 @@ const NavLinks = () => {
   }
 
   return (
-    <>
+    <TooltipProvider>
       {links.map((link, index) => {
         const { url, text } = link;
         return (
           <li key={index}>
-            <NavLink className='listItem' activeclassname='active' end to={url}>
-              {text}
-            </NavLink>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <NavLink 
+                  className='listItem overflow-hidden text-ellipsis truncate max-w-[150px] block' 
+                  activeclassname='active' 
+                  end 
+                  to={url}
+                >
+                  {text}
+                </NavLink>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>{text}</p>
+              </TooltipContent>
+            </Tooltip>
           </li>
         );
       })}
-    </>
+    </TooltipProvider>
   );
 };
 

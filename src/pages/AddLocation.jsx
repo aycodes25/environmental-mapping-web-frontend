@@ -17,7 +17,6 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
   const [imageName, setImageName] = useState('');
   const [formData, setFormData] = useState({
     name: '',
-    location: '',
     user: currentUser._id,
     image: '',
   });
@@ -39,7 +38,6 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
     try {
       const formDataForUpload = new FormData();
       formDataForUpload.append('name', formData.name);
-      formDataForUpload.append('location', formData.location);
       formDataForUpload.append('user', currentUser._id);
       formDataForUpload.append('image', formData.image);
 
@@ -49,7 +47,7 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
       );
       if (response.data?.status !== 'error') {
         fetchData();
-        toast.success(`Location added successfully`);
+        toast.success(`Facility added successfully`);
         setShowModal(true);
         for (let key in formData) {
           formData[key] = ""
@@ -61,7 +59,7 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
       }
     } catch (error) {
       const errorMessage =
-        error?.response?.data?.msg || 'Error adding location';
+        error?.response?.data?.msg || 'Error adding Facility';
       toast.error(errorMessage);
     } finally {
       setIsSubmitting(false);
@@ -86,29 +84,17 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
             <div className='flex flex-col items-center justify-center'>
               <CiLocationOn className='h-10 w-10' />
               <h3 className='mb-4 text-center text-2xl font-bold'>
-                Add Location
+                Add Facility
               </h3>
             </div>
             <div className='flex flex-col gap-y-5'>
               <div className='flex flex-col gap-2'>
-                <label className='font-semibold'>Factory Name</label>
+                <label className='font-semibold'>Facility Name</label>
                 <input
                   type='text'
                   name='name'
                   value={formData.name}
-                  placeholder='Parckard United Factory'
-                  className='input input-bordered'
-                  onChange={handleChange}
-                  required
-                />
-              </div>
-              <div className='flex flex-col gap-2'>
-                <label className='font-semibold'>Factory Location</label>
-                <input
-                  type='text'
-                  name='location'
-                  value={formData.location}
-                  placeholder=' Glacier National Park, Montana'
+                  placeholder='Parckard United Facility'
                   className='input input-bordered'
                   onChange={handleChange}
                   required
