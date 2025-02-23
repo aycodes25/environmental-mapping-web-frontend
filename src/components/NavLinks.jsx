@@ -32,7 +32,11 @@ const NavLinks = () => {
 
   if (currentUser.role !== "superAdmin") {
     // remove users and location links as only superAdmin can have access to those
-    links = links.filter(link => !["users", "location"].includes(link.url))
+    links = links.filter(link => !["users", "location", "trash"].includes(link.url))
+  }
+
+  if (currentUser.role === "reviewer") {
+    links = [{ id: 1, url: 'report', text: 'Report' },]
   }
 
   return (
@@ -43,10 +47,10 @@ const NavLinks = () => {
           <li key={index}>
             <Tooltip>
               <TooltipTrigger asChild>
-                <NavLink 
-                  className='listItem overflow-hidden text-ellipsis truncate max-w-[150px] block' 
-                  activeclassname='active' 
-                  end 
+                <NavLink
+                  className='listItem overflow-hidden text-ellipsis truncate max-w-[150px] block'
+                  activeclassname='active'
+                  end
                   to={url}
                 >
                   {text}

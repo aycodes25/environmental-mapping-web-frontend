@@ -5,6 +5,7 @@ import React, { Suspense } from 'react';
 import { QueryClient } from '@tanstack/react-query';
 import Loadable from '../../components/Loadable';
 import { loader as singleModelLoader } from '../../pages/SingleModel';
+import { ReportLoader } from '../../pages/Report';
 import { modelloader } from '../../pages/ReviewerDashboad';
 import { singleUserLoader } from '../../pages/EditUser';
 
@@ -16,6 +17,8 @@ const EditUser = Loadable(React.lazy(() => import('../../pages/EditUser')));
 const UserProfile = Loadable(React.lazy(() => import('../../pages/UserProfile')));
 const ViewSafety = Loadable(React.lazy(() => import('../../pages/ViewSafety')));
 const ViewIncidences = Loadable(React.lazy(() => import('../../pages/ViewIncidences')));
+const Report = Loadable(React.lazy(() => import('../../pages/Report')));
+
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,12 +29,12 @@ const queryClient = new QueryClient({
 });
 
 const reviewersRoutes = [
-  {
-    index: true,
-    element: <ReviewerDashBoard />,
-    loader: modelloader(queryClient),
-    errorElement: <ErrorElement />,
-  },
+  // {
+  //   index: true,
+  //   element: <ReviewerDashBoard />,
+  //   loader: modelloader(queryClient),
+  //   errorElement: <ErrorElement />,
+  // },
   {
     path: 'edit-user/:id',
     element: <EditUser />,
@@ -60,6 +63,12 @@ const reviewersRoutes = [
     path: 'view-safety/:id',
     element: <ViewSafety />,
     loader: singleModelLoader(),
+    errorElement: <ErrorElement />,
+  },
+  {
+    path: 'report',
+    element: <Report />,
+    loader: ReportLoader(),
     errorElement: <ErrorElement />,
   },
 ];

@@ -103,7 +103,7 @@ function simulateKeyDown(key, code, keyCode) {
     renderCanvas.dispatchEvent(event);
     setTimeout(() => {
         simulateKeyUp(key, code, keyCode)
-    }, 10);
+    }, 0);
 }
 
 function simulateKeyUp(key, code, keyCode) {

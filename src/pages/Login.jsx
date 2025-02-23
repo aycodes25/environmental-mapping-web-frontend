@@ -24,8 +24,6 @@ import { Checkbox } from "../components/ui/checkbox";
 
 
 
-
-
 const Login = () => {
   const user = useSelector((state) => state.userState.user);
   const localUser = getUserFromLocalStorage();
@@ -51,7 +49,7 @@ const Login = () => {
         rerouteUrl = "/sampler"
         break
       case "reviewer":
-        rerouteUrl = "/reviewer"
+        rerouteUrl = "/reviewer/report"
         break
     }
     navigate(rerouteUrl)

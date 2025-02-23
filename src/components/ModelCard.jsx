@@ -11,6 +11,8 @@ import {
 import { Link } from "react-router-dom";
 import { getRealFileUrl } from "../utils";
 import { deleteFromDb } from "./SceneComponent";
+import { useSelector } from "react-redux";
+import { getUserFromLocalStorage } from "@/redux/reducers/userReducer";
 
 
 export const ModelCard = ({
@@ -22,6 +24,10 @@ export const ModelCard = ({
   userRole
 }) => {
   const { _id, coverPicture, modelName, file } = model;
+
+  const user = useSelector((state) => state.userState.user);
+  const localUser = getUserFromLocalStorage();
+  const currentUser = localUser || user;
 
   return (
     <Card className="group w-80 h-auto max-md:w-full overflow-hidden rounded-xl bg-white shadow-md transition-all duration-300 hover:shadow-lg">
@@ -59,9 +65,10 @@ export const ModelCard = ({
         </div>
       </div>
 
-       {/* Actions Container */}
+      {/* Actions Container */}
       <div className="space-y-3 p-4">
         {/* View Actions */}
+
         <div className='flex w-[100%] items-center justify-between gap-2'>
           <Link
             to={`/view-model/${_id}`}
@@ -70,18 +77,22 @@ export const ModelCard = ({
             <Eye className="h-4 w-4" />
             <span>View</span>
           </Link>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => onEdit(_id)}
-            className="w-2/12 hover:bg-slate-100"
-          >
-            <Edit className="h-4 w-4" />
-          </Button>
+          {
+            ['admin', 'superAdmin'].includes(currentUser.role) ?
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => onEdit(_id)}
+                className="w-2/12 hover:bg-slate-100"
+              >
+                <Edit className="h-4 w-4" />
+              </Button>
+              : null
+          }
         </div>
 
 
-              {/* Tag Dropdown */}
+        {/* Tag Dropdown */}
         <div className='flex w-[100%] items-center justify-between gap-2'>
           <DropdownMenu>
             <DropdownMenuTrigger className="w-full">
@@ -114,17 +125,21 @@ export const ModelCard = ({
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => {
-              onDelete(_id)
-              deleteFromDb(getRealFileUrl(file)).then(console.log)
-            }}
-            className="w-2/12 text-destructive"
-          >
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          {
+            ['admin', 'superAdmin'].includes(currentUser.role) ?
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => {
+                  onDelete(_id)
+                  deleteFromDb(getRealFileUrl(file)).then(console.log)
+                }}
+                className="w-2/12 text-destructive"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+              : null
+          }
         </div>
       </div>
     </Card>

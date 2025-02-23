@@ -33,10 +33,10 @@ const RootLayout = () => {
   const currentUser = localUser || user;
   if (currentUser?.role === 'superAdmin' || currentUser?.role === 'admin') {
     targetRoute = '/admin';
-  } else if (['sampler','tagger'].includes(currentUser?.role)) {
+  } else if (['sampler', 'tagger'].includes(currentUser?.role)) {
     targetRoute = '/tagger';
   } else if (currentUser?.role === 'reviewer') {
-    targetRoute = '/reviewer';
+    targetRoute = '/reviewer/report';
   } else {
     return <Navigate to='/login' replace />;
   }

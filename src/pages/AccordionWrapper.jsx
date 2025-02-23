@@ -152,7 +152,7 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
               <EvidenceImage
                 showModal={open}
                 setShowModal={setOpen}
-                images={item?.evidence}
+                images={item?.evidence || ""}
                 name={item?.objectName}
               />
             </AccordionDetails>

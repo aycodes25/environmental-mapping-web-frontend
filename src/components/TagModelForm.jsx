@@ -193,6 +193,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
                     _id: response.data.data._id,
                     slug: response.data.data.slug,
                     group: response.data.data.group || "",
+                    evidence: response.data.data.evidence || "",
                     createdAt: (new Date()).toISOString()
                 }
                 tags.push(newTag)
