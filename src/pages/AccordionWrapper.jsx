@@ -13,6 +13,8 @@ import { customFetch, formatDate, formatTime } from '../utils';
 import { toast } from 'react-toastify';
 import EvidenceImage from './EvidenceImage';
 import { resetCameraLocation } from '../components/SceneComponent';
+import { useSelector } from 'react-redux';
+import { getUserFromLocalStorage } from '@/redux/reducers/userReducer';
 
 const AccordionWrapper = ({ data, setTagsData, model }) => {
   const [expanded, setExpanded] = useState("");
@@ -20,6 +22,10 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
   const handleChange = (panel) => (event, isExpanded) => {
     setExpanded(isExpanded ? panel : "");
   };
+
+  const user = useSelector((state) => state.userState.user);
+  const localUser = getUserFromLocalStorage();
+  const currentUser = localUser || user;
 
   const handleOpen = (e) => {
     e.preventDefault(), setOpen(true);
@@ -142,13 +148,17 @@ const AccordionWrapper = ({ data, setTagsData, model }) => {
               >
                 <Typography className='text-sm'>Go to tag location </Typography>
               </Box>
-              <Box className='flex gap-2 justify-end items-center info'>
-                <div
-                  className='cursor-pointer hover:text-slate-400'
-                  onClick={() => handleDelete(id)}>
-                  <DeleteForeverIcon className='cursor-pointer hover:text-slate-400' />
-                </div>
-              </Box>
+              {
+                ['admin', 'superAdmin', 'tagger'].includes(currentUser.role) ?
+                  <Box className='flex gap-2 justify-end items-center info'>
+                    <div
+                      className='cursor-pointer hover:text-slate-400'
+                      onClick={() => handleDelete(id)}>
+                      <DeleteForeverIcon className='cursor-pointer hover:text-slate-400' />
+                    </div>
+                  </Box>
+                  : null
+              }
               <EvidenceImage
                 showModal={open}
                 setShowModal={setOpen}

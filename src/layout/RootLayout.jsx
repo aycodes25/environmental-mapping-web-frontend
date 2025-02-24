@@ -36,7 +36,7 @@ const RootLayout = () => {
   } else if (['sampler', 'tagger'].includes(currentUser?.role)) {
     targetRoute = '/tagger';
   } else if (currentUser?.role === 'reviewer') {
-    targetRoute = '/reviewer/report';
+    targetRoute = '/reviewer';
   } else {
     return <Navigate to='/login' replace />;
   }

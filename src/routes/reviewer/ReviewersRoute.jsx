@@ -29,12 +29,12 @@ const queryClient = new QueryClient({
 });
 
 const reviewersRoutes = [
-  // {
-  //   index: true,
-  //   element: <ReviewerDashBoard />,
-  //   loader: modelloader(queryClient),
-  //   errorElement: <ErrorElement />,
-  // },
+  {
+    index: true,
+    element: <ReviewerDashBoard />,
+    loader: modelloader(queryClient),
+    errorElement: <ErrorElement />,
+  },
   {
     path: 'edit-user/:id',
     element: <EditUser />,

@@ -99,7 +99,7 @@ export const ModelCard = ({
               <div className="w-full flex justify-between items-center px-4 py-2 border rounded-lg border-slate-200">
                 <span className="flex items-center gap-2">
                   <List className="h-4 w-4" />
-                  Tag
+                  Sample
                 </span>
                 <ChevronUp className="h-4 w-4 opacity-50" />
               </div>

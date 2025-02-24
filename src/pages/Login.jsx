@@ -49,7 +49,7 @@ const Login = () => {
         rerouteUrl = "/sampler"
         break
       case "reviewer":
-        rerouteUrl = "/reviewer/report"
+        rerouteUrl = "/reviewer"
         break
     }
     navigate(rerouteUrl)

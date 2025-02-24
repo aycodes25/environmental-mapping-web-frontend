@@ -172,24 +172,26 @@ const AllModels = () => {
               </Button>
             </div>
           ) : (
-            <div className='mr-5 flex items-center justify-end gap-4'>
-              <Link
-                to={`${['admin', 'superAdmin'].includes(currentUser.role)
-                  ? '/admin/models/add-model'
-                  : currentUser.role === 'sampler'
-                    ? '/sampler/models/add-model'
-                    : '/login'
-                  }`}>
-                <Button className='btn btn-success btn-sm mr-0'>
-                  <p className='max-sm:text-sm'>+ Add Facility Section</p>
+            ['admin', 'superAdmin'].includes(currentUser.role) ?
+              <div className='mr-5 flex items-center justify-end gap-4'>
+                <Link
+                  to={`${['admin', 'superAdmin'].includes(currentUser.role)
+                    ? '/admin/models/add-model'
+                    : currentUser.role === 'sampler'
+                      ? '/sampler/models/add-model'
+                      : '/login'
+                    }`}>
+                  <Button className='btn btn-success btn-sm mr-0'>
+                    <p className='max-sm:text-sm'>+ Add Facility Section</p>
+                  </Button>
+                </Link>
+                <Button
+                  className='btn btn-success btn-sm mr-0'
+                  onClick={() => setDeleteModel(true)}>
+                  <p className='text-[red] max-sm:text-sm'>- Delete Facility Section</p>
                 </Button>
-              </Link>
-              <Button
-                className='btn btn-success btn-sm mr-0'
-                onClick={() => setDeleteModel(true)}>
-                <p className='text-[red] max-sm:text-sm'>- Delete Facility Section</p>
-              </Button>
-            </div>
+              </div>
+              : null
           )}
         </div>
 

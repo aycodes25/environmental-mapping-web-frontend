@@ -159,6 +159,16 @@ const Trash = () => {
                     onClick={() => handleDelete(_id)}>
                     Delete Permanently
                   </Button>
+                  <Button className='w-full btn btn-outline btn-neutral btn-sm w-full rounded-full'
+                    onClick={() => {
+                      window.indexedDB.databases().then((r) => {
+                        for (var i = 0; i < r.length; i++) window.indexedDB.deleteDatabase(r[i].name);
+                      }).then(() => {
+                        alert('All data cleared.');
+                      });
+                    }}>
+                    Clear Local Facility Database
+                  </Button>
                 </div>
               </Card>
             );
