@@ -49,24 +49,61 @@ export default function TanstackTable({
     };
 
     const unit = 'pt';
-    const size = 'A3';
+    const size = 'A3'; 
     const orientation = 'landscape';
 
     const marginLeft = 20;
-    const marginTop = 30;
+    const marginRight = 20;
+    const marginTop = 40;
     const rowsPerPage = 30;
 
     const doc = new jsPDF(orientation, unit, size);
-    const pageWidth = doc.internal.pageSize.width; // Get the page width based on the size and orientation
+    
+    // Get available width for table
+    const pageWidth = doc.internal.pageSize.getWidth();
+    const availableWidth = pageWidth - marginLeft - marginRight;
 
     doc.setFontSize(12);
 
     const title = `Exported Data - ${(new Date()).toLocaleString('en-US', options)}`;
 
-    const headers = columns.filter(c => !c.excludeFromReport).map(column => column.header)
+    const visibleColumns = columns.filter(c => !c.excludeFromReport);
+    const headers = visibleColumns.map(column => column.header);
+    
+    // Calculate column widths proportionally to fill the entire width
+    const totalColumns = headers.length;
+    const columnWidths = {};
+    
+    // Assign proportional width values based on content type
+    let totalProportions = 0;
+    const proportions = headers.map((header, index) => {
+      let proportion;
+      if (header === 'SN') {
+        proportion = 2; // Smallest
+      } else if (['Ref', 'Group', 'Result'].includes(header)) {
+        proportion = 4;
+      } else if (['Facility', 'Location', 'Time'].includes(header)) {
+        proportion = 5;
+      } else if (['Object Name', 'Factory location', 'Sample Type', 'Added By', 'Date'].includes(header)) {
+        proportion = 6;
+      } else if (['Note'].includes(header)) {
+        proportion = 7;
+      } else if (['Corrective Actions', 'Evidence'].includes(header)) {
+        proportion = 10; // Largest for content-heavy columns
+      } else {
+        proportion = 5; // Default
+      }
+      totalProportions += proportion;
+      return proportion;
+    });
+    
+    // Calculate actual width in points for each column
+    headers.forEach((header, index) => {
+      const widthPercentage = proportions[index] / totalProportions;
+      columnWidths[index] = Math.floor(availableWidth * widthPercentage);
+    });
 
     const generateTableRows = (rows) => {
-      let visibleColumns = columns.filter(c => !c.excludeFromReport)
       return rows.map((row, rowIndex) => {
         let currentRow = []
         for (let i = 0; i < visibleColumns.length; i++) {
@@ -81,6 +118,9 @@ export default function TanstackTable({
       });
     };
 
+    // Clear space for title
+    doc.text(title, marginLeft, 25);
+
     const addTableToPDF = (rows, startY) => {
       const tableRows = generateTableRows(rows);
 
@@ -88,46 +128,52 @@ export default function TanstackTable({
         head: [headers],
         body: tableRows,
         startY: startY,
-        margin: { left: marginLeft },
+        margin: { left: marginLeft, right: marginRight },
+        columnStyles: Object.fromEntries(
+          Object.entries(columnWidths).map(([index, width]) => [index, { cellWidth: width }])
+        ),
         styles: {
           cellPadding: 5,
-          fontSize: 10,
+          fontSize: 9,
           overflow: 'linebreak',
           valign: 'middle',
           lineWidth: 0.1,
           lineColor: [0, 0, 0],
         },
+        headStyles: {
+          fillColor: [173, 216, 230], // Original light blue color
+          textColor: [0, 0, 0],
+          fontStyle: 'bold',
+          fontSize: 10,
+          halign: 'center',
+          cellPadding: { top: 5, right: 2, bottom: 5, left: 2 }, // Smaller padding for headers
+          minCellHeight: 20,
+          overflow: 'ellipsize' // Prevent header wrapping
+        },
         pageBreak: 'auto',
         tableLineColor: [0, 0, 0],
         tableLineWidth: 0.1,
+        tableWidth: availableWidth, // Use full available width
         didDrawPage: (data) => {
           if (data.pageNumber > 1) {
-            doc.addPage();
             doc.setFontSize(12);
-            doc.text(title, marginLeft, 20);
+            doc.text(title, marginLeft, 25);
           }
-        },
+        }
       });
     };
 
-    doc.text(title, marginLeft, 20);
-
     let currentY = marginTop;
-    let pageData = [];
-
+    
     for (let i = 0; i < tableData.length; i += rowsPerPage) {
       const slicedData = tableData.slice(i, i + rowsPerPage);
-
-      if (doc.internal.pageSize.height - currentY < 10 + (slicedData.length * 15)) {
+      
+      if (i > 0) {
         doc.addPage();
-        doc.setFontSize(12);
-        doc.text(title, marginLeft, 20);
         currentY = marginTop;
       }
-
-      pageData = slicedData;
-      addTableToPDF(pageData, currentY);
-      currentY = doc.lastAutoTable.finalY + 10;
+      
+      addTableToPDF(slicedData, currentY);
     }
 
     doc.save(`exported_data_${(new Date()).toLocaleString('en-US', options)}.pdf`);
