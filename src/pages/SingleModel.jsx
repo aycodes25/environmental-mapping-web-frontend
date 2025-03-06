@@ -29,6 +29,8 @@ import { toggleSetting } from '../redux/actions/settingActions';
 import { InputLabel, MenuItem, Select } from '@mui/material';
 import TagModelForm from '../components/TagModelForm';
 import { FormInput } from '../components';
+import ObjectGroups from '@/components/ObjectGroups';
+import { getUserFromLocalStorage } from '@/redux/reducers/userReducer';
 
 export const loader =
   () =>
@@ -73,7 +75,12 @@ const SingleModel = () => {
   const [incidentChoosed, setIncidentChoosed] = useState('');
   const [resultChoosed, setResultChoosed] = useState('');
   const [activePane, setActivePane] = useState('view-tags');
+  const [objectGroups, setObjectGroups] = useState([])
   const navigate = useNavigate();
+
+  const user = useSelector((state) => state.userState.user);
+  const localUser = getUserFromLocalStorage();
+  const currentUser = localUser || user;
 
   async function fetchSamples() {
     await customFetch.get('/sample/samples').then(({ data }) => {
@@ -99,9 +106,18 @@ const SingleModel = () => {
     });
   }
 
+  async function fetchObjectGroups() {
+    await customFetch.get(`/model/${id}/object-group`).then(({ data }) => {
+      if (data) {
+        setObjectGroups(data)
+      }
+    });
+  }
+
   useEffect(() => {
     fetchSamples();
     fetchIncidents();
+    fetchObjectGroups()
   }, []);
 
   useEffect(() => {
@@ -347,17 +363,27 @@ const SingleModel = () => {
           <div className='dataWrapper'>
             <div>
               <div className='flex justify-between items-baseline px-2 py-2'>
-                {["sample", "incident"].includes(tagType) && <><h3 className='cursor-pointer font-bold'
-                  onClick={() => setActivePane('view-tags')}
-                >
-                  view tags
-                </h3>
-                  <h3 className='cursor-pointer font-bold'
-                    onClick={() => setActivePane('tag-model')}
+                <div className='w-full flex flex-col gap-2 align-center justify-center border-b border-gray-400'>
+                  <h3 className={`cursor-pointer font-bold ${activePane === 'view-tags' && "bg-green-500 rounded-t-md text-white"}`}
+                    onClick={() => setActivePane('view-tags')}
                   >
-                    tag facility section
+                    view tags
                   </h3>
-                </>}
+                  {["sample", "incident"].includes(tagType) ?
+                    <h3 className={`cursor-pointer font-bold ${activePane === 'tag-model' && "bg-green-500 rounded-t-md text-white"}`}
+                      onClick={() => setActivePane('tag-model')}
+                    >
+                      tag facility section
+                    </h3>
+                    : null
+                  }
+                  <h3 className={`cursor-pointer font-bold ${activePane === "object-groups" && "bg-green-500 rounded-t-md text-white"}`}
+                    onClick={() => setActivePane('object-groups')}
+                  >
+                    Object Groups
+                  </h3>
+                  <div className='mt-1'></div>
+                </div>
                 <div className='menuWrapper'>
                   <div
                     className='menu h-10 w-10 cursor-pointer'
@@ -488,14 +514,15 @@ const SingleModel = () => {
                       onClick={() => exportToCsv()}>
                       <button className='w-full'>Export Data</button>
                     </div>
-                    <div className='w-full btnContainer'>
-                      <button
-                        className='w-full'
-                        style={{ background: '#6e0101' }}
-                        onClick={promptDelete}>
-                        Delete All Samples
-                      </button>
-                    </div>
+                    {['admin', 'superAdmin', 'tagger'].includes(currentUser.role) ?
+                      <div className='w-full btnContainer'>
+                        <button
+                          className='w-full'
+                          style={{ background: '#6e0101' }}
+                          onClick={promptDelete}>
+                          Delete All Samples
+                        </button>
+                      </div> : null}
                   </div>
                 )}
                 {/* all info container end*/}
@@ -660,6 +687,12 @@ const SingleModel = () => {
                 setTagsData={setTagsData}
                 tagsData={tagsData}
                 tagType={tagType}
+              />}
+              {activePane === "object-groups" && <ObjectGroups
+                objectGroups={objectGroups}
+                setObjectGroups={setObjectGroups}
+                modelId={model._id}
+                fetchObjectGroups={fetchObjectGroups}
               />}
             </div>
           </div>
