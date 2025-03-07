@@ -6,6 +6,8 @@ import { useSelector } from 'react-redux';
 import { memoize } from 'proxy-memoize';
 import { getUserFromLocalStorage } from '../redux/reducers/userReducer';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from './ui/tooltip';
+import { useQuery } from '@tanstack/react-query';
+import { customFetch } from '../utils';
 
 // eslint-disable-next-line react-refresh/only-export-components
 
@@ -13,6 +15,21 @@ const NavLinks = () => {
   const user = useSelector(memoize((state) => state.userState.user));
   const localUser = getUserFromLocalStorage();
   const currentUser = localUser || user;
+  
+  // We can keep the query to check if we have any completed models
+  const { data: completedModelsData } = useQuery({
+    queryKey: ['completedModels'],
+    queryFn: async () => {
+      const response = await customFetch('/model/get-models');
+      if (response.data.status !== 'error') {
+        return (response.data.data || []).filter(item => item.isComplete);
+      }
+      return [];
+    }
+  });
+  
+  const completedModelsCount = completedModelsData?.length || 0;
+  
   let links = [
     {
       id: 1,
@@ -29,6 +46,15 @@ const NavLinks = () => {
     { id: 6, url: 'report', text: 'Report' },
     { id: 7, url: 'trash', text: 'Recycle Bin' },
   ];
+
+  // Add the Completed Models link if there are any completed models
+  if (completedModelsCount > 0) {
+    links.push({ 
+      id: 8, 
+      url: 'models?type=completed', 
+      text: 'Completed Facility Sections' 
+    });
+  }
 
   if (currentUser.role !== "superAdmin") {
     // remove users and location links as only superAdmin can have access to those

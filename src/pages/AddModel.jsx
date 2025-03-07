@@ -21,7 +21,8 @@ const AddModel = () => {
     location: "",
     file: null,
     coverPicture: null,
-    twoD: null
+    twoD: null,
+    isComplete: false
   });
   const user = useSelector((state) => state.userState.user);
   const localUser = getUserFromLocalStorage();
@@ -42,7 +43,7 @@ const AddModel = () => {
     fetchLocations();
   }, []);
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     if (name === "file") {
       setModelName(files[0].name);
     }
@@ -54,7 +55,7 @@ const AddModel = () => {
     }
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value,
+      [name]: type === "checkbox" ? checked : files ? files[0] : value,
     });
   };
 
@@ -75,6 +76,7 @@ const AddModel = () => {
       formDataForUpload.append("size", formData.file.size);
       formDataForUpload.append("image", formData.coverPicture);
       formDataForUpload.append("twoD", formData.twoD);
+      formDataForUpload.append("isComplete", formData.isComplete);
       formDataForUpload.append("userId", currentUser?._id);
 
       const response = await customFetch.post(
@@ -89,7 +91,8 @@ const AddModel = () => {
           location: "",
           file: null,
           coverPicture: null,
-          twoD: null
+          twoD: null,
+          isComplete: false
         });
         setModelName("");
         setImageName("");
@@ -222,7 +225,19 @@ const AddModel = () => {
               />
             </label>
           </div>
-
+          <div className="flex items-center gap-2 w-full mb-3">
+            <input
+              type="checkbox"
+              name="isComplete"
+              id="isComplete"
+              checked={formData.isComplete}
+              onChange={handleInputChange}
+              className="w-4 h-4"
+            />
+            <label htmlFor="isComplete" className="text-sm font-medium">
+              Mark as completed facility section
+            </label>
+          </div>
           <button
             className="my-3 w-full btn btn-neutral"
             type="submit"

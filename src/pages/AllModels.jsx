@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import React, { useEffect, useMemo, useState } from 'react';
-import { Link, useLoaderData, useNavigate } from 'react-router-dom';
+import { Link, useLoaderData, useNavigate, useSearchParams } from 'react-router-dom';
 import RemoveIcon from '@mui/icons-material/Remove';
 import { FaTrash, FaEdit } from 'react-icons/fa';
 import { useSelector } from 'react-redux';
@@ -27,11 +27,8 @@ const modelQuery = {
 };
 
 export const loader = (queryClient) => async () => {
-  // hack
   const response = await queryClient.ensureQueryData(modelQuery);
-
-  // let demo = { _id: "model2.glb", coverPicture: "", modelName: "model 2" }
-  // const response = {data: {status: "success", data: [demo]}}
+  
   let model = [];
   if (response.data.status !== 'error') {
     model = response.data.data || [];
@@ -43,6 +40,14 @@ export const loader = (queryClient) => async () => {
 
 const AllModels = () => {
   const { model } = useLoaderData();
+  const [searchParams] = useSearchParams();
+  const isCompletedView = searchParams.get('type') === 'completed';
+  
+  // Filter based on the URL query parameter
+  const filteredModels = useMemo(() => {
+    return model.filter(item => isCompletedView ? item.isComplete : !item.isComplete);
+  }, [model, isCompletedView]);
+  
   const navigate = useNavigate();
   const queryClient = useQueryClient();
   const [modelList, setModelList] = useState([]);
@@ -52,11 +57,15 @@ const AllModels = () => {
   const [itemOffset, setItemOffset] = useState(0);
   const itemsPerPage = 6;
   const endOffset = itemOffset + itemsPerPage;
+  
+  // Use filteredModels instead of model
   const currentItems = useMemo(
-    () => model.slice(itemOffset, endOffset),
-    [endOffset, itemOffset, model]
+    () => filteredModels.slice(itemOffset, endOffset),
+    [endOffset, itemOffset, filteredModels]
   );
-  const pageCount = Math.ceil(model.length / itemsPerPage);
+  
+  // Use filteredModels for pagination
+  const pageCount = Math.ceil(filteredModels.length / itemsPerPage);
 
   const handlePageClick = (event) => {
     setItemOffset(event.selected);
@@ -67,19 +76,19 @@ const AllModels = () => {
   const currentUser = localUser || user;
 
   const fetchData = async () => {
-    // hack
     const response = await customFetch(url);
-    // let demo = { _id: "model2.glb", coverPicture: "", modelName: "model 2" }
-    // const response = {data: {status: "success", data: [demo]}}
     if (response.data.status !== 'error') {
-      setModelList(response.data.data);
+      const allModels = response.data.data || [];
+      // Filter based on the current view
+      setModelList(allModels.filter(item => isCompletedView ? item.isComplete : !item.isComplete));
     } else {
       toast.error(response.data.message);
     }
   };
+
   useEffect(() => {
     fetchData();
-  }, []);
+  }, [isCompletedView]); // Re-fetch when the view changes
 
   const mutation = useMutation(
     // hack - post method?
@@ -138,12 +147,12 @@ const AllModels = () => {
   const handleFilterModels = useCallback(
     (search) => {
       const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
-      const searchResult = model.filter((item) => {
+      const searchResult = filteredModels.filter((item) => {
         return regex.test(item.modelName.toLowerCase());
       });
       setModelList(searchResult);
     },
-    [model, setModelList]
+    [filteredModels, setModelList]
   );
 
   return (
@@ -172,15 +181,14 @@ const AllModels = () => {
               </Button>
             </div>
           ) : (
-            ['admin', 'superAdmin'].includes(currentUser.role) ?
+            !isCompletedView && ['admin', 'superAdmin'].includes(currentUser.role) ? (
               <div className='mr-5 flex items-center justify-end gap-4'>
-                <Link
-                  to={`${['admin', 'superAdmin'].includes(currentUser.role)
-                    ? '/admin/models/add-model'
-                    : currentUser.role === 'sampler'
-                      ? '/sampler/models/add-model'
-                      : '/login'
-                    }`}>
+                <Link to={`${['admin', 'superAdmin'].includes(currentUser.role)
+                  ? '/admin/models/add-model'
+                  : currentUser.role === 'sampler'
+                    ? '/sampler/models/add-model'
+                    : '/login'
+                  }`}>
                   <Button className='btn btn-success btn-sm mr-0'>
                     <p className='max-sm:text-sm'>+ Add Facility Section</p>
                   </Button>
@@ -191,7 +199,7 @@ const AllModels = () => {
                   <p className='text-[red] max-sm:text-sm'>- Delete Facility Section</p>
                 </Button>
               </div>
-              : null
+            ) : null
           )}
         </div>
 
