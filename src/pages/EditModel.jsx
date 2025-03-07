@@ -21,7 +21,8 @@ const EditModel = () => {
     description: model.description,
     location: model.location?._id,
     coverPicture: model.coverPicture,
-    twoD: model.twoD
+    twoD: model.twoD,
+    isComplete: model.isComplete || false
   });
   const user = useSelector((state) => state.userState.user);
   const localUser = getUserFromLocalStorage();
@@ -43,7 +44,7 @@ const EditModel = () => {
   }, []);
 
   const handleInputChange = (e) => {
-    const { name, value, files } = e.target;
+    const { name, value, files, type, checked } = e.target;
     if (name === 'coverPicture') {
       setImageName(files[0].name);
     }
@@ -52,7 +53,7 @@ const EditModel = () => {
     }
     setFormData({
       ...formData,
-      [name]: files ? files[0] : value,
+      [name]: type === 'checkbox' ? checked : files ? files[0] : value,
     });
   };
 
@@ -66,6 +67,7 @@ const EditModel = () => {
       formDataForUpload.append('location', formData.location);
       formDataForUpload.append('image', formData.coverPicture);
       formDataForUpload.append('twoD', formData.twoD);
+      formDataForUpload.append('isComplete', formData.isComplete);
       formDataForUpload.append('userId', currentUser?._id);
       const response = await customFetch.post(
         `/model/update-model/${id}`,
@@ -193,6 +195,19 @@ const EditModel = () => {
                 onChange={handleInputChange}
               // required
               />
+            </label>
+          </div>
+          <div className="flex items-center gap-2 w-full mb-3">
+            <input
+              type="checkbox"
+              name="isComplete"
+              id="isComplete"
+              checked={formData.isComplete}
+              onChange={handleInputChange}
+              className="w-4 h-4"
+            />
+            <label htmlFor="isComplete" className="text-sm font-medium">
+              Mark as complete facility
             </label>
           </div>
           <div className='mt-4 w-full'>
