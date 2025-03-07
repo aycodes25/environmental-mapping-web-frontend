@@ -235,7 +235,7 @@ const AddModel = () => {
               className="w-4 h-4"
             />
             <label htmlFor="isComplete" className="text-sm font-medium">
-              Mark as completed facility section
+              Mark as complete facility
             </label>
           </div>
           <button

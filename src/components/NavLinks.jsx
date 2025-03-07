@@ -52,7 +52,7 @@ const NavLinks = () => {
     links.push({ 
       id: 8, 
       url: 'models?type=completed', 
-      text: 'Completed Facility Sections' 
+      text: 'Complete Facility' 
     });
   }
 
