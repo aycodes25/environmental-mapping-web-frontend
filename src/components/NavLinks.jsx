@@ -15,7 +15,7 @@ const NavLinks = () => {
   const user = useSelector(memoize((state) => state.userState.user));
   const localUser = getUserFromLocalStorage();
   const currentUser = localUser || user;
-  
+
   // We can keep the query to check if we have any completed models
   const { data: completedModelsData } = useQuery({
     queryKey: ['completedModels'],
@@ -27,9 +27,9 @@ const NavLinks = () => {
       return [];
     }
   });
-  
+
   const completedModelsCount = completedModelsData?.length || 0;
-  
+
   let links = [
     {
       id: 1,
@@ -49,10 +49,10 @@ const NavLinks = () => {
 
   // Add the Completed Models link if there are any completed models
   if (completedModelsCount > 0) {
-    links.push({ 
-      id: 8, 
-      url: 'models?type=completed', 
-      text: 'Complete Facility' 
+    links.push({
+      id: 8,
+      url: 'models/?type=completed',
+      text: 'Complete Facility'
     });
   }
 
