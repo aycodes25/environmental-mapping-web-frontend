@@ -5,7 +5,7 @@ import '../styles/DashBoard.css';
 import { Link } from 'react-router-dom';
 import { formatDate, formatTime, getRealFileUrl } from '../utils';
 
-const ModelList = ({ text, users }) => {
+const ModelList = ({ text, users = [] }) => {
   const [viewAll, setViewAll] = useState(false);
 
   return (
@@ -19,7 +19,7 @@ const ModelList = ({ text, users }) => {
         </p>
       </div>
       <div>
-        {users.slice(0, viewAll ? users.length : 6).map((item, i) => {
+        {users?.slice(0, viewAll ? users.length : 6).map((item, i) => {
           const { _id, coverPicture, createdAt, user, location } = item;
           return (
             <Card

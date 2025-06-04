@@ -5,7 +5,9 @@ import BarChart from './BarChart';
 
 const SampleBarChart = ({ barChartSampleType }) => {
   const [selectedData, setSelectedData] = useState('dailyData');
-  const keysArray = Object.keys(barChartSampleType?.data[selectedData])[0];
+  const keysArray = barChartSampleType?.data && barChartSampleType.data[selectedData]
+    ? Object.keys(barChartSampleType.data[selectedData])[0]
+    : '';
   const [selectedSampleType, setSelectedSampleType] = useState(keysArray);
   const getDayOfWeekName = (dayNumber) => {
     const daysOfWeek = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
@@ -39,15 +41,18 @@ const SampleBarChart = ({ barChartSampleType }) => {
   };
 
   const isDaily = selectedData === 'dailyData';
-  const data = barChartSampleType?.data[selectedData][selectedSampleType]?.map(
-    (item, i) => ({
-      ...item,
-      label: isDaily
-        ? getDayOfWeekName(item.dayOfWeek)
-        : getMonthName(item.month),
-      key: isDaily ? `day_${item.dayOfWeek}_${i}` : `month_${item.month}_${i}`,
-    })
-  );
+  const data =
+    barChartSampleType?.data &&
+    barChartSampleType.data[selectedData] &&
+    barChartSampleType.data[selectedData][selectedSampleType]
+      ? barChartSampleType.data[selectedData][selectedSampleType].map((item, i) => ({
+          ...item,
+          label: isDaily
+            ? getDayOfWeekName(item.dayOfWeek)
+            : getMonthName(item.month),
+          key: isDaily ? `day_${item.dayOfWeek}_${i}` : `month_${item.month}_${i}`,
+        }))
+      : [];
 
   return (
     <div className='flex flex-col flex-grow gap-5 justify-start items-start p-2 w-full h-auto'>
@@ -61,13 +66,16 @@ const SampleBarChart = ({ barChartSampleType }) => {
             value={selectedSampleType}
             className='px-2 py-1 rounded-md border'
             onChange={handleSampleTypeChange}>
-            {Object.keys(barChartSampleType?.data[selectedData]).map(
-              (type, i) => (
-                <option key={i} value={type} className='capitalize'>
-                  {type}
-                </option>
+            {barChartSampleType?.data[selectedData] &&
+              Object.keys(barChartSampleType.data[selectedData]).map(
+                (type, i) => (
+                  <option key={i} value={type} className='capitalize'>
+                    {type}
+                  </option>
+                )
               )
-            )}
+            }
+            
           </select>
           <select
             id='data'
