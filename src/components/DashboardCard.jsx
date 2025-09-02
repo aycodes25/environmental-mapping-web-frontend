@@ -1,21 +1,21 @@
 // components/DashboardCard.jsx
 import { Card, CardHeader, CardTitle, CardContent } from "./ui/card";
 
-export const DashboardCard = ({ 
-  title, 
-  children, 
-  className = "", 
-  bgColor = "bg-white",
-  onClick,
-  isClickable = false 
+export const DashboardCard = ({
+	title,
+	children,
+	className = "",
+	bgColor = "bg-white",
+	onClick,
+	isClickable = false,
 }) => {
-  return (
-    <div className="w-full">
-      <Card 
-        className={`
+	return (
+		<div className="w-full">
+			<Card
+				className={`
           ${className} 
           ${bgColor} 
-          ${isClickable ? 'cursor-pointer' : ''} 
+          ${isClickable ? "cursor-pointer" : ""} 
           transition-all 
           duration-300 
           hover:shadow-xl
@@ -24,10 +24,11 @@ export const DashboardCard = ({
           overflow-hidden
           group
         `}
-        onClick={onClick}
-      >
-        {/* Gradient overlay */}
-        <div className={`
+				onClick={onClick}
+			>
+				{/* Gradient overlay */}
+				<div
+					className={`
           absolute 
           inset-0 
           bg-gradient-to-r 
@@ -38,22 +39,21 @@ export const DashboardCard = ({
           group-hover:translate-x-[100%] 
           transition-transform 
           duration-1000
-        `} />
+          pointer-events-none
+        `}
+				/>
 
-        <CardHeader>
-          <CardTitle className="text-lg font-medium">
-            {title}
-          </CardTitle>
-        </CardHeader>
+				<CardHeader>
+					<CardTitle className="text-lg font-medium">{title}</CardTitle>
+				</CardHeader>
 
-        <CardContent>
-          <div className="opacity-100">
-            {children}
-          </div>
-        </CardContent>
+				<CardContent>
+					<div className="opacity-100 relative z-10">{children}</div>
+				</CardContent>
 
-        {/* Hover effect border */}
-        <div className={`
+				{/* Hover effect border */}
+				<div
+					className={`
           absolute 
           inset-0 
           border-2 
@@ -62,8 +62,10 @@ export const DashboardCard = ({
           rounded-lg 
           transition-all 
           duration-300
-        `}/>
-      </Card>
-    </div>
-  );
+          pointer-events-none
+        `}
+				/>
+			</Card>
+		</div>
+	);
 };
