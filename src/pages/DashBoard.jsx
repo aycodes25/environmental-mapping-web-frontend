@@ -452,7 +452,7 @@ const DashBoard = () => {
 												barDataKey="count"
 												xAxisKey="_id"
 												barColor="#8884d8"
-												data={tagsThisMonth}
+												data={[{ count: tagsThisMonth }]}
 											/>
 										</div>
 									</DashboardCard>
@@ -479,7 +479,7 @@ const DashBoard = () => {
 												barDataKey="count"
 												xAxisKey="_id"
 												barColor="#8884d8"
-												data={tagsLastMonth}
+												data={[{ count: tagsLastMonth }]}
 											/>
 										</div>
 									</DashboardCard>
@@ -506,7 +506,7 @@ const DashBoard = () => {
 												barDataKey="count"
 												xAxisKey="_id"
 												barColor="#8884d8"
-												data={tagsYearToDate}
+												data={[{ count: tagsYearToDate }]}
 											/>
 										</div>
 									</DashboardCard>
@@ -533,7 +533,14 @@ const DashBoard = () => {
 												lineDataKey="positivityRate"
 												xAxisKey="month"
 												lineColor="#000000"
-												data={positivityRatePerMonthYearToDate}
+												data={positivityRatePerMonthYearToDate?.map(
+													(rate) => ({
+														...rate,
+														positivityRate:
+															(rate.positivityRate || 0) * 100,
+														month: getMonthName(rate.month),
+													})
+												)}
 											/>
 										</div>
 									</DashboardCard>
@@ -619,6 +626,29 @@ const DashBoard = () => {
 function returnNumberOrZero(value) {
 	if (typeof Number(value) === "number" && value !== "NaN") return value;
 	return 0;
+}
+
+function getMonthName(monthNumber) {
+	const months = [
+		"January",
+		"February",
+		"March",
+		"April",
+		"May",
+		"June",
+		"July",
+		"August",
+		"September",
+		"October",
+		"November",
+		"December",
+	];
+
+	if (typeof monthNumber !== "number") {
+		return "Invalid input. Please provide a number between 1 and 12.";
+	}
+
+	return months[(monthNumber - 1) % (months.length - 1)];
 }
 
 export default DashBoard;

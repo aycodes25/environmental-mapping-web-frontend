@@ -347,7 +347,8 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 											"Investigational",
 											"Construction",
 											"Vector",
-											"PEC/PIC",
+											"PEC",
+											"PIC",
 											"Other",
 										].map((o) => (
 											<option key={o} value={o}>

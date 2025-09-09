@@ -544,10 +544,17 @@ function addTagHoverEventHandler(tag, tagData) {
 					: tagData?.type === "incident"
 					? tagData?.incident
 					: ""
-			}</span></span>
-        <br/><span class='text-xs'>Date: ${formatDate(
-				tagData.createdAt
-			)}</span><br/><span class='text-xs'>Time: ${formatTime(
+			}
+        <br/>
+				 ${
+						tagData.sampleDetails
+							? `<span class='text-xs'>Ref: ${tagData.sampleDetails}</span><br/>`
+							: ""
+					}
+							 ${tagData.zone ? `<span class='text-xs'>Ref: ${tagData.zone}</span><br/>` : ""}
+				<span class='text-xs'>Date: ${formatDate(
+					tagData.createdAt
+				)}</span><br/><span class='text-xs'>Time: ${formatTime(
 				tagData.createdAt
 			)}</span><br/>
         ${
