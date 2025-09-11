@@ -1019,43 +1019,65 @@ function extractPositionCoordinates(position) {
 	z = position.z || position._z;
 	return { x, y, z };
 }
-
-function getBlobFromDb(url) {
+function openDb() {
 	return new Promise((resolve, reject) => {
+		// open (or create) database "models" with version 1
 		const request = indexedDB.open("models", 1);
 
-		request.onsuccess = function (event) {
+		// runs the first time or when version changes
+		request.onupgradeneeded = function (event) {
 			const db = event.target.result;
-			const transaction = db.transaction(["glb"], "readwrite");
-			const store = transaction.objectStore("glb");
-
-			const objectStoreRequest = store.get(url);
-			objectStoreRequest.onsuccess = (e) => {
-				if (!objectStoreRequest.result)
-					return reject({ error: "no record in db for " + url });
-				resolve(objectStoreRequest.result.blob);
-			};
-
-			objectStoreRequest.onerror = (e) => {
-				reject({ error: "failed to retrieve data for " + url });
-			};
+			// create object store "glb" if it doesn’t exist
+			if (!db.objectStoreNames.contains("glb")) {
+				db.createObjectStore("glb", { keyPath: "url" });
+			}
 		};
 
-		request.onerror = (event) => {
-			reject({ error: "Failed to open database", event: event });
+		// DB opened successfully
+		request.onsuccess = function (event) {
+			resolve(event.target.result);
+		};
+
+		// failed to open DB
+		request.onerror = function (event) {
+			reject(event);
 		};
 	});
 }
 
-function storeBlobInDb(url, blob) {
-	return new Promise((resolve, reject) => {
-		const request = indexedDB.open("models", 1);
+function getBlobFromDb(url) {
+	return openDb().then((db) => {
+		return new Promise((resolve, reject) => {
+			// open transaction in readonly mode
+			const transaction = db.transaction(["glb"], "readonly");
+			const store = transaction.objectStore("glb");
 
-		request.onsuccess = function (event) {
-			const db = event.target.result;
+			// try to get the record by url
+			const objectStoreRequest = store.get(url);
+			objectStoreRequest.onsuccess = () => {
+				if (!objectStoreRequest.result) {
+					// nothing found in DB
+					return reject({ error: "no record in db for " + url });
+				}
+				// return stored blob
+				resolve(objectStoreRequest.result.blob);
+			};
+
+			objectStoreRequest.onerror = () => {
+				reject({ error: "failed to retrieve data for " + url });
+			};
+		});
+	});
+}
+
+function storeBlobInDb(url, blob) {
+	return openDb().then((db) => {
+		return new Promise((resolve, reject) => {
+			// open transaction in readwrite mode
 			const transaction = db.transaction(["glb"], "readwrite");
 			const store = transaction.objectStore("glb");
 
+			// insert or update record
 			const objectStoreRequest = store.put({ url, blob });
 			objectStoreRequest.onsuccess = () => {
 				resolve({ success: "data stored for " + url });
@@ -1064,11 +1086,7 @@ function storeBlobInDb(url, blob) {
 			objectStoreRequest.onerror = () => {
 				reject({ error: "failed to store data for " + url });
 			};
-		};
-
-		request.onerror = (event) => {
-			reject({ error: "Failed to open database", event: event });
-		};
+		});
 	});
 }
 
