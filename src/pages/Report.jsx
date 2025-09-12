@@ -124,14 +124,18 @@ const Report = () => {
 			cell: (info) => info.getValue(),
 		},
 		{
-			accessorFn: (row) => row?.zone ?? "no data",
+			accessorFn: (row) =>
+				!row?.zone || row?.zone === "undefined" ? "Not Set" : row?.zone,
 			header: "Zone",
-			cell: (info) => info.getValue() || "no data",
+			cell: (info) => info.getValue(),
 		},
 		{
-			accessorFn: (row) => row?.sampleDetails ?? "no data",
+			accessorFn: (row) =>
+				!row?.sampleDetails || row?.sampleDetails === "undefined"
+					? "Not Set"
+					: row?.sampleDetails,
 			header: "Sample Details",
-			cell: (info) => info.getValue() || "no data",
+			cell: (info) => info.getValue(),
 		},
 		{
 			accessorKey: "presence",
