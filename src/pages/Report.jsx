@@ -124,14 +124,14 @@ const Report = () => {
 			cell: (info) => info.getValue(),
 		},
 		{
-			accessorFn: (row) => row?.zone || "",
+			accessorFn: (row) => row?.zone ?? "no data",
 			header: "Zone",
-			cell: (info) => info.getValue(),
+			cell: (info) => info.getValue() || "no data",
 		},
 		{
-			accessorFn: (row) => row?.sampleDetails || "",
+			accessorFn: (row) => row?.sampleDetails ?? "no data",
 			header: "Sample Details",
-			cell: (info) => info.getValue(),
+			cell: (info) => info.getValue() || "no data",
 		},
 		{
 			accessorKey: "presence",
@@ -225,16 +225,7 @@ const Report = () => {
 				header: "Incident Details",
 				cell: (info) => info.getValue(),
 			},
-			{
-				accessorFn: (row) => row?.zone || "",
-				header: "Zone",
-				cell: (info) => info.getValue(),
-			},
-			{
-				accessorFn: (row) => row?.sampleDetails || "",
-				header: "Sample Details",
-				cell: (info) => info.getValue(),
-			},
+			// Zone and Sample Details removed for Incident table per requirements
 			{
 				accessorKey: "action",
 				header: "Corrective Actions",
