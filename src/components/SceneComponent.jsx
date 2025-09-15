@@ -717,8 +717,8 @@ function makeColorFromType(type) {
 }
 
 function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
-	// Reduced radius for tagging spots to improve visibility without clutter
-	const TAG_DISC_RADIUS = 0.12;
+	// small radius to make it appear as a tiny dot
+	const TAG_DISC_RADIUS = 0.03;
 	const disc = BABYLON.MeshBuilder.CreateDisc(
 		`${name || Date.now()}`,
 		{ radius: TAG_DISC_RADIUS, tessellation: 48 },
