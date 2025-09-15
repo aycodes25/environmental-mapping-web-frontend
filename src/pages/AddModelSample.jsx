@@ -144,15 +144,6 @@ const AddModelSample = ({ showModal, setShowModal, model_data }) => {
 			formDataForUpload.append("locations", formData.locations);
 			formDataForUpload.append("sample", formData.sample);
 			formDataForUpload.append("presence", formData.presence);
-			// Ensure sampling-only fields have sensible defaults when not provided
-			if (formData.type === "sampling") {
-				// Backend should receive explicit "no data" instead of empty/undefined
-				formDataForUpload.append("zone", formData.zone || "no data");
-				formDataForUpload.append(
-					"sampleDetails",
-					formData.sampleDetails || "no data"
-				);
-			}
 			formDataForUpload.append("text", formData.text);
 			formDataForUpload.append("taggedInfo", model_data.taggedInfo);
 			formDataForUpload.append("userId", currentUser?._id);
