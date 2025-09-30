@@ -302,9 +302,7 @@ export default function TanstackTable({
 							<DatePicker
 								className="text-xs"
 								value={startDate}
-								onChange={(e) =>
-									setStartDate(e ? e.toDate?.() || e : null)
-								}
+								onChange={(e) => setStartDate(e)}
 							/>
 						</div>
 						<div className="w-40">
@@ -312,9 +310,7 @@ export default function TanstackTable({
 							<DatePicker
 								className="text-xs"
 								value={endDate}
-								onChange={(e) =>
-									setEndDate(e ? e.toDate?.() || e : null)
-								}
+								onChange={(e) => setEndDate(e)}
 							/>
 						</div>
 					</div>
