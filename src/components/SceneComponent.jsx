@@ -134,6 +134,7 @@ export function SceneComponent({
 			let camera1 = scene.getCameraByName("camera1");
 			if (saveCameraPositionAndDirection.inSunView) {
 				returnToNormalView();
+				reactCanvas.current?.focus();
 			} else {
 				saveCameraPositionAndDirection.inSunView = true;
 				saveCameraPositionAndDirection.position = camera1.position.clone();
@@ -148,6 +149,7 @@ export function SceneComponent({
 				centerCameras(scene, true);
 				displayTagsClonesHighUp();
 				setArrowGuideVisibility(scene, false);
+				reactCanvas.current?.focus();
 			}
 		};
 
@@ -331,7 +333,8 @@ export function SceneComponent({
 				window.scene,
 				tagInfo.tagPosition,
 				`${tag.name || Date.now()}`,
-				tag.type
+				tag.type,
+				tag.presence === "positive"
 			);
 			addTagHoverEventHandler(disc, tag);
 			disc.tagInfo = tag;
@@ -702,12 +705,13 @@ export function hideDisc(disc) {
 	}
 }
 
-function makeColorFromType(type) {
+function makeColorFromType(type, isPositive) {
 	if (!type) {
 		return new BABYLON.Color3(1, 0, 0);
 	}
 	switch (type) {
 		case "sampling":
+			if (isPositive) return new BABYLON.Color3(1, 0, 0);
 			return new BABYLON.Color3(0, 0.5, 0.5);
 		case "incident":
 			return new BABYLON.Color3(1, 0, 0);
@@ -716,7 +720,14 @@ function makeColorFromType(type) {
 	}
 }
 
-function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
+function createDiscAtPosition(
+	name,
+	position,
+	scene,
+	isTag = false,
+	type = "",
+	isPositive = false
+) {
 	// small radius to make it appear as a tiny dot
 	const TAG_DISC_RADIUS = 0.03;
 	const disc = BABYLON.MeshBuilder.CreateDisc(
@@ -727,7 +738,7 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
 	disc.__isTag = true;
 	const material = new BABYLON.StandardMaterial(name, scene);
 	if (isTag) {
-		material.diffuseColor = makeColorFromType(type); // red color
+		material.diffuseColor = makeColorFromType(type, isPositive);
 	} else {
 		material.diffuseColor = new BABYLON.Color3(0, 0, 1); // Blue color
 	}
@@ -742,10 +753,16 @@ function createDiscAtPosition(name, position, scene, isTag = false, type = "") {
 	return disc;
 }
 
-export function drawTag(scene, position, name = `${Date.now()}`, type) {
+export function drawTag(
+	scene,
+	position,
+	name = `${Date.now()}`,
+	type,
+	isPositive
+) {
 	if (!position) return;
 	if (!scene) return;
-	return createDiscAtPosition(name, position, scene, true, type);
+	return createDiscAtPosition(name, position, scene, true, type, isPositive);
 }
 
 function displayTagsClonesHighUp() {
@@ -765,6 +782,7 @@ function displayTagsClonesHighUp() {
 		discClone.position.x = discClone.position.x + diffX / 2;
 		discClone.position.y = discClone.position.y + diffY / 2;
 		discClone.position.z = discClone.position.z + diffZ / 2;
+		discClone.scaling.scaleInPlace(10);
 		discsClone.push(discClone);
 	});
 }

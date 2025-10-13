@@ -49,7 +49,7 @@ const AllModels = () => {
 
 	// Filter based on the URL query parameter
 	const filteredModels = useMemo(() => {
-		return model.filter((item) =>
+		return model?.filter((item) =>
 			isCompletedView ? item.isComplete : !item.isComplete
 		);
 	}, [model, isCompletedView]);
@@ -65,24 +65,24 @@ const AllModels = () => {
 	const endOffset = itemOffset + itemsPerPage;
 
 	const currentItems = useMemo(
-		() => modelList.slice(itemOffset, endOffset),
+		() => modelList?.slice(itemOffset, endOffset),
 		[endOffset, itemOffset, modelList]
 	);
 
-	const pageCount = Math.ceil(modelList.length / itemsPerPage);
+	const pageCount = Math.ceil((modelList?.length ?? 1) / itemsPerPage);
 
 	const handlePageClick = (event) => {
 		const newOffset = event.selected * itemsPerPage;
 		setItemOffset(newOffset);
 	};
 
-	const user = useSelector(memoize((state) => state.userState.user));
+	const user = useSelector(memoize((state) => state?.userState?.user));
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
 
 	const fetchData = async () => {
 		const response = await customFetch(url);
-		if (response.data.status !== "error") {
+		if (response?.data?.status !== "error") {
 			const allModels = response.data.data || [];
 			// Filter based on the current view
 			setModelList(
@@ -133,8 +133,6 @@ const AllModels = () => {
 			}
 		});
 	};
-
-
 
 	const handleDeleteAModel = (id) => {
 		setConfirmDelete(false);
