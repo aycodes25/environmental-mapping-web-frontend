@@ -49,7 +49,7 @@ const AllModels = () => {
 
 	// Filter based on the URL query parameter
 	const filteredModels = useMemo(() => {
-		return model.filter((item) =>
+		return model?.filter((item) =>
 			isCompletedView ? item.isComplete : !item.isComplete
 		);
 	}, [model, isCompletedView]);
@@ -64,26 +64,25 @@ const AllModels = () => {
 	const itemsPerPage = 6;
 	const endOffset = itemOffset + itemsPerPage;
 
-	// Use filteredModels instead of model
 	const currentItems = useMemo(
-		() => filteredModels.slice(itemOffset, endOffset),
-		[endOffset, itemOffset, filteredModels]
+		() => modelList?.slice(itemOffset, endOffset),
+		[endOffset, itemOffset, modelList]
 	);
 
-	// Use filteredModels for pagination
-	const pageCount = Math.ceil(filteredModels.length / itemsPerPage);
+	const pageCount = Math.ceil((modelList?.length ?? 1) / itemsPerPage);
 
 	const handlePageClick = (event) => {
-		setItemOffset(event.selected);
+		const newOffset = event.selected * itemsPerPage;
+		setItemOffset(newOffset);
 	};
 
-	const user = useSelector(memoize((state) => state.userState.user));
+	const user = useSelector(memoize((state) => state?.userState?.user));
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
 
 	const fetchData = async () => {
 		const response = await customFetch(url);
-		if (response.data.status !== "error") {
+		if (response?.data?.status !== "error") {
 			const allModels = response.data.data || [];
 			// Filter based on the current view
 			setModelList(
@@ -135,10 +134,6 @@ const AllModels = () => {
 		});
 	};
 
-	useEffect(() => {
-		setModelList(currentItems);
-	}, [currentItems]);
-
 	const handleDeleteAModel = (id) => {
 		setConfirmDelete(false);
 		setDeleteModel(false);
@@ -165,6 +160,7 @@ const AllModels = () => {
 				return regex.test(item.modelName.toLowerCase());
 			});
 			setModelList(searchResult);
+			setItemOffset(0);
 		},
 		[filteredModels, setModelList]
 	);
@@ -251,7 +247,7 @@ const AllModels = () => {
 					</div>
 				</div>
 				<div className="flex flex-wrap justify-start gap-6 p-6">
-					{modelList?.map((item, index) => (
+					{currentItems?.map((item, index) => (
 						<div
 							key={index}
 							className="w-[calc(33.33%-1rem)] min-w-[300px]"
@@ -295,7 +291,7 @@ const AllModels = () => {
 						onPageChange={handlePageClick}
 						containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
 						activeclassname="m-1 rounded-full bg-black p-0 text-white"
-						forcePage={itemOffset}
+						forcePage={itemOffset / itemsPerPage}
 					/>
 				</div>
 				{confirmDelete && (
