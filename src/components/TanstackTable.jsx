@@ -17,6 +17,7 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CustomScrollbar from "./CustomScrollbar";
 import jsPDF from "jspdf";
 import "jspdf-autotable";
+import { Checkbox } from "./ui/checkbox";
 
 // eslint-disable-next-line react/prop-types
 export default function TanstackTable({
@@ -34,6 +35,7 @@ export default function TanstackTable({
 		pageIndex: 0,
 		pageSize: 10,
 	});
+	const [rowSelection, setRowSelection] = useState({});
 	const tableRef = useRef();
 
 	const handleExportPDF = useCallback(() => {
@@ -203,7 +205,10 @@ export default function TanstackTable({
 		state: {
 			sorting,
 			pagination,
+			rowSelection,
 		},
+		enableRowSelection: true,
+		onRowSelectionChange: setRowSelection,
 		onPaginationChange: setPagination,
 		onSortingChange: (e) => setSorting(e),
 		getCoreRowModel: getCoreRowModel(),
@@ -354,6 +359,15 @@ export default function TanstackTable({
 											className="border-b hover:bg-gray-100"
 											{...props}
 										>
+											{/* Checkbox column */}
+											<td className="px-4 py-2 w-12">
+												<Checkbox
+													checked={row.getIsSelected()}
+													onCheckedChange={(value) =>
+														row.toggleSelected(!!value)
+													}
+												/>
+											</td>
 											{row.getVisibleCells().map((cell) => (
 												<td key={cell.id} className="px-4 py-2">
 													{flexRender(
@@ -368,19 +382,26 @@ export default function TanstackTable({
 							}}
 							fixedHeaderContent={() => {
 								return table.getHeaderGroups().map((headerGroup) => (
-									<tr
-										key={headerGroup.id}
-										style={{ background: "lightgray", margin: 0 }}
-									>
+									<tr key={headerGroup.id} className="bg-primary">
+										{/* Checkbox header */}
+										<th className="px-4 py-2 text-white font-semibold w-12">
+											<Checkbox
+												checked={table.getIsAllRowsSelected()}
+												indeterminate={table.getIsSomeRowsSelected()}
+												onCheckedChange={(value) =>
+													table.toggleAllRowsSelected(!!value)
+												}
+												className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+											/>
+										</th>
 										{headerGroup.headers.map((header, index) => {
 											return (
 												<th
-													className="bg-gray-200 px-4 py-2"
+													className="px-4 py-2 text-white font-semibold"
 													key={index}
 													colSpan={header.colSpan}
 													style={{
 														width: header.getSize(),
-														borderBottom: "1px solid lightgray",
 													}}
 												>
 													{header.isPlaceholder ? null : (
