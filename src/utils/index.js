@@ -28,7 +28,10 @@ export const customFetch = axios.create({
 
 customFetch.interceptors.request.use((config) => {
   // Dynamically set the Authorization header before each request
-  config.headers.Authorization = `Bearer ${getPasswordToken()}`;
+  const token = getPasswordToken();
+  if (token && token !== 'null' && token !== 'undefined') {
+    config.headers.Authorization = `Bearer ${token}`;
+  }
   return config;
 });
 

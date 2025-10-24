@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { FaEye, FaEyeSlash } from "react-icons/fa";
 import AuthLayout from "./AuthLayout";
+import axios from "axios";
 
 // Reuse existing app utils and redux actions to preserve behavior
 import { customFetch } from "../../utils";
@@ -39,6 +40,9 @@ const Login = () => {
 			case "admin":
 				rerouteUrl = "/admin";
 				break;
+			case "tagger":
+				rerouteUrl = "/tagger";
+				break;
 			case "sampler":
 				rerouteUrl = "/sampler";
 				break;
@@ -58,11 +62,22 @@ const Login = () => {
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setIsSubmitting(true);
+
+		console.log("Login attempt with:", { email, password });
+
 		try {
-			const response = await customFetch.post("/user/login", {
-				email,
-				password,
+			// Try with direct axios call to bypass customFetch issues
+			const response = await axios.post("http://localhost:8000/api/user/login", {
+				email: email.trim(),
+				password: password.trim(),
+			}, {
+				headers: {
+					'Content-Type': 'application/json',
+				},
+				timeout: 10000
 			});
+
+			console.log("Login response:", response.data);
 
 			const userData =
 				response.data.status !== "error" ? response.data : null;
@@ -71,11 +86,14 @@ const Login = () => {
 				toast.success("logged in successfully");
 				setIsLoggedin(true);
 			} else {
+				console.log("Login error:", response.data.message);
 				toast.error(`${response.data.message}`);
 			}
 		} catch (err) {
+			console.error("Login catch error:", err);
+			console.error("Error response:", err?.response?.data);
 			const errorMessage =
-				err?.response?.data?.msg || "Wrong login details or Network error";
+				err?.response?.data?.message || "Wrong login details or Network error";
 			toast.error(errorMessage);
 			return null;
 		} finally {
@@ -98,7 +116,7 @@ const Login = () => {
 						<div className="space-y-4">
 							<FloatingInput
 								id="email"
-								label="Type Username"
+								label="Type Email"
 								type="email"
 								value={email}
 								onChange={(e) => setEmail(e.target.value)}
