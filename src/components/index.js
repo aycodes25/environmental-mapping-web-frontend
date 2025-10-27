@@ -16,3 +16,4 @@ export { default as FormSelect } from "./FormSelect";
 export { default as OtpInput } from "./OtpInput";
 export { default as Table } from "./Table";
 export { default as LocationTable } from "./LocationTable";
+export { default as FullDashboard } from "./admin-dashboard/full-dashboard";

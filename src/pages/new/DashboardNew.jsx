@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { customFetch } from "../../utils";
 import { toast } from "react-toastify";
 import DashboardOverview from "./DashboardOverview";
+import { FullDashboard } from "../../components";
 
 const url = "/user/dashboard";
 
@@ -31,6 +32,7 @@ const DashboardNew = () => {
 	return (
 		<div className="flex flex-col flex-grow w-auto">
 			<DashboardOverview dashboardData={dashboardData} />
+			<FullDashboard />
 		</div>
 	);
 };
