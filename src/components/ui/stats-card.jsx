@@ -28,15 +28,16 @@ const StatsCard = ({
 		.join(" ");
 
 	const CardContent = () => (
-		<div className="bg-white rounded-3xl p-6 shadow-sm border border-gray-100 w-full max-w-md">
-			<div className="flex items-start justify-between mb-6">
+		<div className="bg-white rounded-2xl p-4 w-[262px] shadow-md flex flex-col gap-5">
+			{/* Top Section: Title & More Icon */}
+			<div className="flex justify-between items-center">
 				<div className="flex items-center gap-3">
-					<div className={`${iconBgColor} p-3 rounded-2xl`}>
-						<WebIcon icon={icon} className={`w-6 h-6 ${iconColor}`} />
+					<div className={`bg-purple-100 p-2 rounded-full`}>
+						<WebIcon icon={icon} className={`w-5 h-5 ${iconColor}`} />
 					</div>
 					<h3 className="text-bold text-primary font-normal">{title}</h3>
 				</div>
-				<button className="text-gray-400 hover:text-gray-600">
+				<button className="text-black hover:text-gray-700">
 					<svg width="24" height="24" viewBox="0 0 24 24" fill="none">
 						<circle cx="12" cy="6" r="1.5" fill="currentColor" />
 						<circle cx="12" cy="12" r="1.5" fill="currentColor" />
@@ -45,9 +46,11 @@ const StatsCard = ({
 				</button>
 			</div>
 
-			<div className="flex items-end justify-between">
-				<div>
-					<div className="heading-medium font-normal text-primary mb-2">
+			{/* Middle & Bottom Section */}
+			<div className="flex justify-between items-end">
+				{/* Left Side: Count and Trend */}
+				<div className="flex flex-col gap-5">
+					<div className="heading-large-x font-bold text-primary">
 						{count}
 					</div>
 					<div className="flex items-center gap-1 text-sm">
@@ -65,18 +68,43 @@ const StatsCard = ({
 							/>
 						</svg>
 						<span className={`font-medium ${trendColor}`}>{trend}</span>
-						<span className="text-small text-primary whitespace-nowrap">
+						<span className="text-regular text-primary whitespace-nowrap">
 							{trendLabel}
 						</span>
 					</div>
 				</div>
 
-				<div className="relative w-48 h-20">
+				{/* Right Side: Chart */}
+				<div className="relative w-28 h-16">
 					<svg
 						viewBox="0 0 100 100"
 						className="w-full h-full"
 						preserveAspectRatio="none"
 					>
+						<defs>
+							<linearGradient
+								id="chartGradient"
+								x1="0"
+								y1="0"
+								x2="0"
+								y2="1"
+							>
+								<stop
+									offset="0%"
+									stopColor="#ef4444"
+									stopOpacity="0.4"
+								/>
+								<stop
+									offset="100%"
+									stopColor="#ef4444"
+									stopOpacity="0"
+								/>
+							</linearGradient>
+						</defs>
+						<path
+							d={`M0,100 ${points} L100,100 Z`}
+							fill="url(#chartGradient)"
+						/>
 						<polyline
 							points={points}
 							fill="none"
@@ -87,7 +115,7 @@ const StatsCard = ({
 						/>
 						<circle
 							cx={
-								chartData.length > 0
+								chartData.length > 1
 									? ((chartData.length - 1) / (chartData.length - 1)) *
 									  100
 									: 100
@@ -110,7 +138,7 @@ const StatsCard = ({
 
 	if (isClickable && onClick) {
 		return (
-			<button onClick={onClick} className="w-full">
+			<button onClick={onClick} className="text-left">
 				<CardContent />
 			</button>
 		);
