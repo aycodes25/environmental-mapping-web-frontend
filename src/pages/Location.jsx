@@ -1,168 +1,260 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useCallback, useEffect, useState } from 'react';
-import { IoSearchSharp } from 'react-icons/io5';
-import '../styles/AllUsers.css';
-import AddLocation from './AddLocation';
-import EditLocation from './EditLocation';
-import { customFetch, getRealFileUrl as getRealFileUrl } from '../utils';
-import { toast } from 'react-toastify';
-import { useLoaderData } from 'react-router-dom';
-import { Button } from '@mui/material';
-import { useQueryClient } from '@tanstack/react-query';
-import TanstackTableTwo from '../components/TanstackTableTwo';
-const baseURL = import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8000";
+import React, { useCallback, useEffect, useState } from "react";
+import AddLocation from "./AddLocation";
+import EditLocation from "./EditLocation";
+import { customFetch, getRealFileUrl } from "../utils";
+import { toast } from "react-toastify";
+import { useLoaderData } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
+import TanstackTable from "../components/TanstackTable";
+import LocationOverview from "./new/LocationOverview";
+import WebIcon from "../components/custom/WebIcons";
+import { MoreVertical } from "lucide-react";
+import { Button } from "@mui/material";
 
-const url = '/location/locations';
+const url = "/location/locations";
 
 const modelQuery = {
-  queryKey: ['locations'],
-  queryFn: () => customFetch(url),
+	queryKey: ["locations"],
+	queryFn: () => customFetch(url),
 };
 
 export const LocationLoader = (queryClient) => async () => {
-  const response = await queryClient.ensureQueryData(modelQuery);
-  let locations = [];
-  if (response.data.status !== 'error') {
-    locations = response.data.data;
-  } else {
-    toast.error(response.data.message);
-  }
-  return { locations };
+	const response = await queryClient.ensureQueryData(modelQuery);
+	let locations = [];
+	if (response.data.status !== "error") {
+		locations = response.data.data;
+	} else {
+		toast.error(response.data.message);
+	}
+	return { locations };
 };
 
 const Location = () => {
-  const { locations } = useLoaderData();
-  const [data, setData] = useState(locations);
-  const queryClient = useQueryClient();
-  const [showModal, setShowModal] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [activeRow, setActiveRow] = useState({});
+	const { locations } = useLoaderData();
+	const [data, setData] = useState(locations);
+	const queryClient = useQueryClient();
+	const [showModal, setShowModal] = useState(false);
+	const [showEdit, setShowEdit] = useState(false);
+	const [activeRow, setActiveRow] = useState({});
+	const [searchText, setSearchText] = useState("");
 
-  useEffect(() => {
-    setData(locations);
-  }, [locations]);
+	useEffect(() => {
+		setData(locations);
+	}, [locations]);
 
-  const handleFilterLocations = useCallback(
-    (search) => {
-      const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
+	const handleFilterLocations = useCallback(
+		(search) => {
+			setSearchText(search);
+			if (!search.length) {
+				setData(locations || []);
+				return;
+			}
+			const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
 
-      const searchResult = locations.filter((item) => {
-        return (
-          regex.test(item.locations?.toLowerCase()) ||
-          regex.test(item.name?.toLowerCase())
-        );
-      });
+			const searchResult = (locations || []).filter((item) => {
+				return (
+					regex.test(item.locations?.toLowerCase()) ||
+					regex.test(item.name?.toLowerCase())
+				);
+			});
 
-      setData(searchResult);
-    },
-    [locations]
-  );
+			setData(searchResult);
+		},
+		[locations]
+	);
 
-  const handleDelete = async (id) => {
-    const response = await customFetch.delete(
-      `/location/location-delete/${id}`
-    );
-    if (response.data.status !== 'error') {
-      await queryClient.invalidateQueries('locations');
-      const response = await customFetch(url);
-      if (response.data.status !== 'error') {
-        setData(response.data.data);
-        toast.success(
-          response.data.message && 'locations deleted successfully'
-        );
-      }
-    } else {
-      toast.error(response.data.message);
-    }
-  };
+	const handleDelete = async (id) => {
+		if (window.confirm("Are you sure you want to delete this location?")) {
+			const response = await customFetch.delete(
+				`/location/location-delete/${id}`
+			);
+			if (response.data.status !== "error") {
+				await queryClient.invalidateQueries("locations");
+				const response = await customFetch(url);
+				if (response.data.status !== "error") {
+					setData(response.data.data);
+					toast.success("Location deleted successfully");
+				}
+			} else {
+				toast.error(response.data.message);
+			}
+		}
+	};
 
-  const fetchData = async () => {
-    const response = await customFetch(url);
-    if (response.data.status !== 'error') {
-      setData(response.data.data);
-    } else {
-      toast.error(response.data.message);
-    }
-  };
+	const fetchData = async () => {
+		const response = await customFetch(url);
+		if (response.data.status !== "error") {
+			setData(response.data.data);
+		} else {
+			toast.error(response.data.message);
+		}
+	};
 
-  const handleEdit = (id) => {
-    const result = locations.filter((row) => row._id === id)[0];
-    setActiveRow(result);
-    setShowEdit(!showEdit);
-  };
+	const handleEdit = (id) => {
+		const result = locations.filter((row) => row._id === id)[0];
+		setActiveRow(result);
+		setShowEdit(true);
+	};
 
-  const columns = [
-    { accessorKey: 'name', header: 'Factory Name' },
-    {
-      accessorKey: 'image',
-      header: 'Image',
-      cell: (info) => (
-        <img className='w-20 h-20 rounded-full' src={
-          getRealFileUrl(info.getValue())
-        } />
-      ),
-    },
-    {
-      accessorFn: (row) => row._id,
-      header: 'Action',
-      cell: (info) => (
-        <div className='flex flex-row gap-2 justify-start items-center'>
-          <button
-            onClick={() => handleEdit(info.getValue())}
-            className='btn btn-outline btn-neutral btn-sm'>
-            Edit
-          </button>
-          <button
-            onClick={() => handleDelete(info.getValue())}
-            className='btn btn-outline btn-neutral btn-sm'>
-            Delete
-          </button>
-        </div>
-      ),
-    },
-  ];
+	const locationData = {
+		totalLocations: locations?.length || 0,
+		activeLocations: locations?.length || 0,
+		totalFacilities: locations?.length || 0,
+	};
 
-  return (
-    <>
-      <div className='flex flex-col gap-4 px-10 py-5 h-full AllUsers'>
-        <div className='flex justify-end'>
-          <Button
-            className='mr-0 btn btn-success btn-sm'
-            onClick={() => setShowModal(true)}>
-            + Add Facility
-          </Button>
-        </div>
-        <div className='mx-auto w-full searchBarContainer'>
-          <div className='px-3 searchIconWrapper'>
-            <IoSearchSharp className='img searchImg' color='#858585' />
-          </div>
-          <input
-            className='flex flex-row flex-grow'
-            type='text'
-            placeholder='Search facility'
-            onChange={(e) => handleFilterLocations(e.target.value)}
-          />
-          <div className='filter'>
-            <p>Search</p>
-          </div>
-        </div>
-        <div className='flex flex-col gap-2 w-full'>
-          {data && <TanstackTableTwo columns={columns} tableData={data} />}
-        </div>
-      </div>
-      <AddLocation
-        showModal={showModal}
-        setShowModal={setShowModal}
-        fetchData={fetchData}
-      />
-      <EditLocation
-        showModal={showEdit}
-        setShowModal={setShowEdit}
-        data={activeRow}
-        fetchData={fetchData}
-      />
-    </>
-  );
+	const columns = [
+		{ accessorKey: "name", header: "Factory Name" },
+		{
+			accessorKey: "image",
+			header: "Image",
+			cell: (info) => {
+				const imageUrl = info.getValue();
+				if (!imageUrl) return "";
+				return (
+					<img
+						className="w-20 h-20 rounded-full object-cover"
+						src={getRealFileUrl(imageUrl)}
+						alt="Facility"
+					/>
+				);
+			},
+		},
+		{
+			accessorFn: (row) => "",
+			header: "Options",
+			cell: (info) => {
+				return (
+					<OptionsDropdown
+						info={info}
+						handleEdit={handleEdit}
+						handleDelete={handleDelete}
+					/>
+				);
+			},
+		},
+	];
+
+	return (
+		<>
+			<div className="flex overflow-auto flex-col flex-grow w-auto h-screen">
+				{/* Location Overview Section */}
+				<LocationOverview locationData={locationData} />
+
+				{/* Location Filters and Table Section */}
+				<div className="flex flex-col flex-grow p-5">
+					{/* Location Title and Action Row */}
+					<div className="flex items-center justify-between mb-6">
+						{/* Location Title */}
+						<h2 className="text-2xl font-bold text-primary">Locations</h2>
+
+						{/* Add Facility Button */}
+						<Button
+							className="btn btn-success btn-sm"
+							onClick={() => setShowModal(true)}
+						>
+							+ Add Facility
+						</Button>
+					</div>
+
+					{/* Search Bar Row */}
+					<div className="flex items-center justify-end mb-6">
+						<div className="flex items-center gap-3">
+							{/* Search Bar */}
+							<div className="relative">
+								<input
+									type="text"
+									placeholder="Search facility..."
+									value={searchText}
+									onChange={(e) =>
+										handleFilterLocations(e.target.value)
+									}
+									className="px-4 py-1 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
+									style={{ width: "469px", height: "24px" }}
+								/>
+								<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
+									<WebIcon
+										icon="search"
+										className="w-4 h-4 text-gray-400"
+									/>
+								</div>
+							</div>
+						</div>
+					</div>
+
+					{/* Table Section */}
+					<section className="flex justify-center items-center">
+						{data && <TanstackTable columns={columns} tableData={data} />}
+					</section>
+				</div>
+			</div>
+
+			<AddLocation
+				showModal={showModal}
+				setShowModal={setShowModal}
+				fetchData={fetchData}
+			/>
+			<EditLocation
+				showModal={showEdit}
+				setShowModal={setShowEdit}
+				data={activeRow}
+				fetchData={fetchData}
+			/>
+		</>
+	);
 };
+
+// Options Dropdown Component
+function OptionsDropdown({ info, handleEdit, handleDelete }) {
+	const [isOpen, setIsOpen] = useState(false);
+
+	const handleEditClick = () => {
+		setIsOpen(false);
+		handleEdit(info.cell.row.original._id);
+	};
+
+	const handleDeleteClick = () => {
+		setIsOpen(false);
+		handleDelete(info.cell.row.original._id);
+	};
+
+	return (
+		<div className="relative">
+			<button
+				onClick={() => setIsOpen(!isOpen)}
+				className="p-1 hover:bg-gray-100 rounded transition-colors"
+			>
+				<MoreVertical className="w-4 h-4 text-gray-600" />
+			</button>
+
+			{isOpen && (
+				<div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px]">
+					<div className="py-1">
+						<button
+							onClick={handleEditClick}
+							className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+						>
+							Edit Location
+						</button>
+						<button
+							onClick={handleDeleteClick}
+							className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+						>
+							Delete Location
+						</button>
+					</div>
+				</div>
+			)}
+
+			{/* Click outside to close dropdown */}
+			{isOpen && (
+				<div
+					className="fixed inset-0 z-40"
+					onClick={() => setIsOpen(false)}
+				/>
+			)}
+		</div>
+	);
+}
 
 export default Location;

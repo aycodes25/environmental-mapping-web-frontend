@@ -2,16 +2,15 @@ import React from "react";
 import { useNavigate } from "react-router-dom";
 import OverviewSection from "../../components/ui/overview-section";
 
-const DashboardOverview = ({ dashboardData }) => {
+const ReportOverview = ({ reportData }) => {
 	const navigate = useNavigate();
 
 	const {
-		totalTagsThisMonth = 0,
-		totalModels = 0,
-		totalReviewers = 0,
-		totalTaggers = 0,
-		todaysModels = 0,
-	} = dashboardData;
+		totalReports = 0,
+		sampleReports = 0,
+		incidentReports = 0,
+		approvedReports = 0,
+	} = reportData;
 
 	// Mock chart data for trend visualization
 	const generateMockChartData = (baseValue) => {
@@ -22,60 +21,61 @@ const DashboardOverview = ({ dashboardData }) => {
 		return data;
 	};
 
+	// Report-specific stats cards
 	const statsCards = [
 		{
-			icon: "activity",
-			title: "Total Samples",
-			count: totalTagsThisMonth,
-			trend: "+1",
-			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTagsThisMonth),
-			iconBgColor: "bg-purple-100",
-			iconColor: "text-purple-600",
-			trendColor: "text-red-500",
-		},
-		{
-			icon: "facility",
-			title: "Total Facilities",
-			count: totalModels,
+			icon: "clipboard", // Using your WebIcon system
+			title: "Total Reports",
+			count: totalReports,
 			trend: "+34",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalModels),
+			chartData: generateMockChartData(totalReports),
+			iconBgColor: "bg-purple-100",
+			iconColor: "text-purple-600",
+			trendColor: "text-green-500",
+		},
+		{
+			icon: "activity",
+			title: "Sample Reports",
+			count: sampleReports,
+			trend: "+0",
+			trendLabel: "to last month",
+			chartData: generateMockChartData(sampleReports),
 			iconBgColor: "bg-blue-100",
 			iconColor: "text-blue-600",
-			trendColor: "text-green-500",
-			onClick: () => navigate("models"),
+			trendColor: "text-red-500",
+			onClick: () => navigate("reports?type=sample"),
 			isClickable: true,
 		},
 		{
-			icon: "activity",
-			title: "Total Reviewers",
-			count: totalReviewers,
+			icon: "report",
+			title: "Incident Reports",
+			count: incidentReports,
 			trend: "+200",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalReviewers),
+			chartData: generateMockChartData(incidentReports),
 			iconBgColor: "bg-green-100",
 			iconColor: "text-green-600",
 			trendColor: "text-green-500",
-			onClick: () => navigate("users"),
+			onClick: () => navigate("reports?type=incident"),
 			isClickable: true,
 		},
 		{
-			icon: "activity",
-			title: "Total Samplers",
-			count: totalTaggers,
-			trend: "+0",
+			icon: "check_clipboard",
+			title: "Approved Reports",
+			count: approvedReports,
+			trend: "+1",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTaggers),
+			chartData: generateMockChartData(approvedReports),
 			iconBgColor: "bg-orange-100",
 			iconColor: "text-orange-600",
 			trendColor: "text-red-500",
-			onClick: () => navigate("users"),
+			onClick: () => navigate("reports?status=approved"),
 			isClickable: true,
 		},
 	];
 
-	// Filter configuration - calendar icon is now hardcoded in overview-section
+	// Standard filter configuration - consistent across all pages
 	const filters = [
 		{
 			label: "Start Date",
@@ -96,12 +96,12 @@ const DashboardOverview = ({ dashboardData }) => {
 
 	return (
 		<OverviewSection
-			title="Welcome back!"
-			welcomeMessage="Here's a quick look at your recent activity and ongoing tasks."
+			title="Report Overview"
+			welcomeMessage="Take a look at all the reports that you have submitted so far."
 			filters={filters}
 			statsCards={statsCards}
 		/>
 	);
 };
 
-export default DashboardOverview;
+export default ReportOverview;
