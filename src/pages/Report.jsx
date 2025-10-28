@@ -14,6 +14,7 @@ import TanstackTable from "../components/TanstackTable";
 import Modal from "../components/ui/modal";
 import ReportOverview from "./new/ReportOverview";
 import WebIcon from "../components/custom/WebIcons";
+import SearchInput from "../components/ui/search-input";
 import {
 	Select,
 	SelectContent,
@@ -646,22 +647,11 @@ const Report = () => {
 				<div className="flex items-center justify-end mb-6">
 					<div className="flex items-center gap-3">
 						{/* Search Bar */}
-						<div className="relative">
-							<input
-								type="text"
-								placeholder="Search by name, status, class...."
-								value={searchText}
-								onChange={(e) => handleFilterTags(e.target.value)}
-								className="px-4 py-1 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-								style={{ width: "469px", height: "24px" }}
-							/>
-							<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-								<WebIcon
-									icon="search"
-									className="w-4 h-4 text-gray-400"
-								/>
-							</div>
-						</div>
+						<SearchInput
+							value={searchText}
+							onChange={(v) => handleFilterTags(v)}
+							placeholder="Search by name, status, class...."
+						/>
 
 						{/* Action Buttons */}
 						<div className="flex items-center gap-2">

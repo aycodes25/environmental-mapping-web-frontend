@@ -9,6 +9,10 @@ export const WebIcons = {
 	tag: "/icons/web_icons/tag.svg",
 	printer: "/icons/web_icons/printer.svg",
 	download: "/icons/web_icons/download.svg",
+	MapPin: "/icons/web_icons/map-pin.svg",
+	Trash: "/icons/web_icons/trash-2.svg",
+	Trash3: "/icons/web_icons/trash-3.svg",
+	Cloud: "/icons/web_icons/upload-cloud.svg",
 	// Sidebar/Nav icons from public/icons/nav_icons/
 	activity: "/icons/nav_icons/activity.svg",
 	facility: "/icons/nav_icons/facility_icon.svg",

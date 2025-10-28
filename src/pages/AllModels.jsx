@@ -13,15 +13,18 @@ import { memoize } from "proxy-memoize";
 import { customFetch, getRealFileUrl } from "../utils";
 import { toast } from "react-toastify";
 import { Button, Card } from "@mui/material";
+import { Button as ShButton } from "../components/ui/button";
 import ReactPaginate from "react-paginate";
 import { useCallback } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-// import ModalCard component
+// import ModalCard component.
 import { ModelCard } from "../components/ModelCard";
 import { deleteFromDb } from "@/components/SceneComponent";
+import ModelsOverview from "./new/ModelsOverview";
+import SearchInput from "../components/ui/search-input";
 
 const url = "/model/get-models";
 
@@ -57,6 +60,7 @@ const AllModels = () => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [modelList, setModelList] = useState([]);
+	const [searchText, setSearchText] = useState("");
 	const [deleteModel, setDeleteModel] = useState(false);
 	const [modelToDelList, setModelToDelList] = useState([]);
 	const [confirmDelete, setConfirmDelete] = useState(false);
@@ -160,9 +164,14 @@ const AllModels = () => {
 
 	const handleFilterModels = useCallback(
 		(search) => {
-			const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
+			const term = (search || "").toLowerCase();
+			if (!term.length) {
+				setModelList(filteredModels);
+				return;
+			}
+			const regex = new RegExp(`.*${term}.*`, "i");
 			const searchResult = filteredModels.filter((item) => {
-				return regex.test(item.modelName.toLowerCase());
+				return regex.test((item.modelName || "").toLowerCase());
 			});
 			setModelList(searchResult);
 		},
@@ -171,7 +180,41 @@ const AllModels = () => {
 
 	return (
 		<div className="AllModels box-border w-full py-5">
-			<main className="w-full">
+			{/* Models Overview Section */}
+			<ModelsOverview
+				data={{
+					totalModels: model?.length || 0,
+					completedModels: model?.filter((m) => m.isComplete)?.length || 0,
+					activeModels: model?.filter((m) => !m.isComplete)?.length || 0,
+					deletedModels: 0,
+				}}
+			/>
+
+			<main className="w-full mt-14">
+				{/* Toggle row */}
+				<div className="mb-4 w-full px-1 lg:px-3 xl:px-5 flex items-center gap-3">
+					<button
+						onClick={() => navigate("/admin/models")}
+						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${
+							!isCompletedView
+								? "bg-primary text-white border-primary"
+								: "bg-white text-gray-600 border-gray-300"
+						}`}
+					>
+						All Facilities
+					</button>
+					<button
+						onClick={() => navigate("/admin/models?type=completed")}
+						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${
+							isCompletedView
+								? "bg-primary text-white border-primary"
+								: "bg-white text-gray-600 border-gray-300"
+						}`}
+					>
+						Completed Facilities
+					</button>
+				</div>
+
 				<div className="modelControl mb-3 w-full items-center justify-end px-1 lg:px-3 xl:px-5">
 					{deleteModel ? (
 						<div className="deleteModeWrapper flex flex-row items-center justify-between">
@@ -200,54 +243,48 @@ const AllModels = () => {
 								</p>
 							</Button>
 						</div>
-					) : !isCompletedView &&
-					  ["admin", "superAdmin"].includes(currentUser.role) ? (
-						<div className="mr-5 flex items-center justify-end gap-4">
-							<Link
-								to={`${
-									["admin", "superAdmin"].includes(currentUser.role)
-										? "/admin/models/add-model"
-										: currentUser.role === "sampler"
-										? "/sampler/models/add-model"
-										: "/login"
-								}`}
-							>
-								<Button className="btn btn-success btn-sm mr-0">
-									<p className="max-sm:text-sm">
-										+ Add Facility Section
-									</p>
-								</Button>
-							</Link>
-							<Button
-								className="btn btn-success btn-sm mr-0"
-								onClick={() => setDeleteModel(true)}
-							>
-								<p className="text-[red] max-sm:text-sm">
-									- Delete Facility Section
-								</p>
-							</Button>
-						</div>
 					) : null}
 				</div>
 
-				<div className="searchBarContainer mx-3 w-[94%]">
-					<div className="searchIconWrapper">
-						<div className="img searchImg ml-2">
-							<img src="/img/search (2).png" alt="icon" />
-						</div>
-					</div>
-					<input
-						className="max-sm:text-sm"
-						type="text"
-						name="search"
-						placeholder="Search Facility Sections"
-						onChange={(e) => handleFilterModels(e.target.value)}
+				{/* Search and actions row */}
+				<div className="mx-3 w-[94%] flex items-center justify-between gap-4">
+					<SearchInput
+						value={searchText}
+						onChange={(v) => {
+							setSearchText(v);
+							handleFilterModels(v);
+						}}
+						placeholder="Search by Facility, Status, Location..."
 					/>
-					<div className="filter">
-						<div className="img">
-							<img className="max-sm:w-10" src="/img/edit.png" alt="" />
-						</div>
-						<p className="max-sm:text-sm">Search</p>
+					<div className="flex items-center gap-3">
+						{!deleteModel &&
+							["admin", "superAdmin"].includes(currentUser.role) && (
+								<>
+									<Link
+										to={`${
+											["admin", "superAdmin"].includes(
+												currentUser.role
+											)
+												? "/admin/models/add-model"
+												: currentUser.role === "sampler"
+												? "/sampler/models/add-model"
+												: "/login"
+										}`}
+									>
+										<ShButton className="w-[206px] h-[48px] rounded-[20px] bg-primary text-white border border-primary shadow-none">
+											<p className="max-sm:text-sm">
+												Add Facility Model
+											</p>
+										</ShButton>
+									</Link>
+									<ShButton
+										onClick={() => setDeleteModel(true)}
+										className="w-[206px] h-[48px] rounded-[20px] bg-white text-primary border border-primary shadow-none"
+									>
+										<p className="max-sm:text-sm">Delete Multiple</p>
+									</ShButton>
+								</>
+							)}
 					</div>
 				</div>
 				<div className="flex flex-wrap justify-start gap-6 p-6">

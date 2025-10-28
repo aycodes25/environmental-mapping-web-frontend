@@ -29,6 +29,7 @@ export default {
 				dark: "var(--emp-color-dark)",
 				lightPrimary: "var(--emp-color-light-primary)",
 				lightSecondary: "var(--emp-color-light-secondary)",
+				secondaryAlt2: "var(--emp-color-secondary-alt-2)",
 				lightTertiary: "var(--emp-color-light-tertiary)",
 
 				// Status colors
