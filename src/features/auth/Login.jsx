@@ -87,15 +87,18 @@ const Login = () => {
 		<AuthLayout>
 			<div className="flex items-center justify-center gap-0">
 				{/* Login Card - standalone */}
-				<div className="w-[668px] max-w-full bg-white rounded-[28px] shadow-xl p-8 min-h-[525px]">
-					<div className="space-y-2 text-center">
+				<div className="w-[668px] max-w-full bg-white rounded-[28px] shadow-xl p-8 min-h-[525px] flex flex-col justify-between">
+					<div className="space-y-2 text-center mb-8">
 						<h1 className="heading-regular font-extrabold tracking-tight text-primary">
 							Nice to have you here!
 						</h1>
 					</div>
 
-					<form className="space-y-6 mt-6" onSubmit={handleSubmit}>
-						<div className="space-y-4">
+					<form
+						className="flex-1 flex flex-col justify-between"
+						onSubmit={handleSubmit}
+					>
+						<div className="space-y-8">
 							<FloatingInput
 								id="email"
 								label="Type Username"
@@ -127,43 +130,47 @@ const Login = () => {
 									)}
 								</button>
 							</div>
-							<p className="text-xs text-gray-500 mt-1">
+							<p className="text-xs text-gray-500 mt-1 mb-2">
 								Password must not contain your name and must be 8
 								characters long
 							</p>
-						</div>
 
-						<div className="flex items-center justify-between">
-							<div className="flex items-center space-x-2">
-								<CustomCheckbox id="remember" />
-								<label
-									htmlFor="remember"
-									className="text-small font-medium text-primary select-none"
+							<div className="flex items-center justify-between mt-0">
+								<div className="flex items-center space-x-2">
+									<CustomCheckbox id="remember" />
+									<label
+										htmlFor="remember"
+										className="text-small font-medium text-primary select-none"
+									>
+										Keep me Logged In
+									</label>
+								</div>
+								<Link
+									to="/forgot-password"
+									className="text-small font-medium text-secondaryAlt hover:text-secondary-alt transition-colors"
 								>
-									Keep me Logged In
-								</label>
+									Forgot Password?
+								</Link>
 							</div>
-							<Link
-								to="/forgot-password"
-								className="text-small font-medium text-secondaryAlt hover:text-secondary-alt transition-colors"
-							>
-								Forgot Password?
-							</Link>
 						</div>
 
 						<Button
 							type="submit"
-							className="w-full h-12 text-base font-semibold bg-primary hover:bg-secondaryAlt text-white transition-colors rounded-2xl"
+							className="w-full h-12 text-regular font-semibold bg-primary hover:bg-secondaryAlt text-white transition-colors rounded-2xl"
 							disabled={isSubmitting}
 							onClick={handleSubmit}
 						>
 							{isSubmitting ? (
 								<div className="flex items-center justify-center space-x-2">
 									<div className="w-4 h-4 border-2 border-white border-t-transparent cursor-pointer rounded-full animate-spin" />
-									<span className="text-white">Signing in...</span>
+									<span className="text-regular font-semibold text-white">
+										Signing in...
+									</span>
 								</div>
 							) : (
-								<span className="text-white">Login</span>
+								<span className="text-regular font-semibold text-white">
+									Login
+								</span>
 							)}
 						</Button>
 					</form>

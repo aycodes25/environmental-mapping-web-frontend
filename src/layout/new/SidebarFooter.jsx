@@ -25,6 +25,13 @@ const SidebarFooter = ({ collapsed }) => {
 		}
 	};
 
+	const handleProfileClick = () => {
+		const baseRole = ["admin", "superAdmin"].includes(currentUser.role)
+			? "admin"
+			: currentUser.role;
+		navigate(`/${baseRole}/single-user/${currentUser._id}`);
+	};
+
 	const footerIcons = [
 		{ id: "activity", icon: "activity" },
 		{ id: "settings", icon: "settings" },
@@ -54,7 +61,11 @@ const SidebarFooter = ({ collapsed }) => {
 				></div>
 
 				{/* Profile Image */}
-				<div className="relative z-10 w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0">
+				<div
+					className="relative z-10 w-8 h-8 rounded-full overflow-hidden ring-2 ring-white/10 flex-shrink-0 cursor-pointer"
+					onClick={handleProfileClick}
+					aria-label="View profile"
+				>
 					<img
 						src={currentUser?.imageUrl || "/img/avatar_male.png"}
 						alt="Profile"

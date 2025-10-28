@@ -104,7 +104,7 @@ export const ModelCard = ({
 											console.log
 										);
 									}}
-									className="text-destructive"
+									className="hover:bg-slate-100"
 								>
 									<WebIcon icon="Trash" className="w-4 h-4" />
 								</Button>
