@@ -9,6 +9,8 @@ export const WebIcons = {
 	tag: "/icons/web_icons/tag.svg",
 	printer: "/icons/web_icons/printer.svg",
 	download: "/icons/web_icons/download.svg",
+	delete: "/icons/web_icons/delete.svg",
+	delete_circle_red: "/icons/web_icons/delete-circle-red.svg",
 	chevron_down: "/icons/web_icons/chevron-down.svg",
 	trend_up_green: "/icons/web_icons/trend-up-green.svg",
 	// Sidebar/Nav icons from public/icons/nav_icons/
@@ -21,4 +23,7 @@ export const WebIcons = {
 	search: "/icons/web_icons/search.svg",
 	clock: "/icons/web_icons/clock.svg",
 	notification: "/icons/web_icons/notification.svg",
+	deletcapMain: "/icons/web_icons/deletcapMain.svg",
+	checkcirclemain: "/icons/web_icons/check-circle-main.svg",
+	
 };

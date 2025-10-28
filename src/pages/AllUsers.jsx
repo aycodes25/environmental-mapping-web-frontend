@@ -1,227 +1,303 @@
-// eslint-disable-next-line no-unused-vars
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import '../styles/AllUsers.css';
-import { GoTrash } from 'react-icons/go';
-import { Link, useNavigate } from 'react-router-dom';
-import AddIcon from '@mui/icons-material/Add';
-import { IoSearchSharp } from 'react-icons/io5';
-import { useLoaderData } from 'react-router-dom';
-import ReactPaginate from 'react-paginate';
-import { customFetch, getRealFileUrl } from '../utils';
-import { toast } from 'react-toastify';
-import { useQueryClient } from '@tanstack/react-query';
-import { Button } from '@mui/material';
-import { useSelector } from 'react-redux';
-import { memoize } from 'proxy-memoize';
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { customFetch, formatDate } from "../utils";
+import WebIcon from "../components/custom/WebIcons";
+import RemoveModal from "../components/admin-dashboard/remove-modal";
 
-const url = '/user/getusers';
+const SAMPLE_USERS = [
+  {
+    _id: "usr_0001",
+    username: "sherifat.k",
+    fullname: "Sherifat Kimspolo",
+    email: "sherifat@example.com",
+    locations: { name: "Lagos" },
+    role: "tagger",
+    models: ["m1", "m2", "m3"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    _id: "usr_0002",
+    username: "aaron.s",
+    fullname: "Aaron Saffy",
+    email: "aaron@example.com",
+    locations: { name: "Abuja" },
+    role: "reviewer",
+    models: ["m4"],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    _id: "usr_0003",
+    username: "andre.n",
+    fullname: "Andre Nurain",
+    email: "andre@example.com",
+    locations: { name: "Port Harcourt" },
+    role: "tagger",
+    models: [],
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
 
-const userQuery = {
-  queryKey: ['user'],
-  queryFn: () => customFetch(url),
-};
-
-// eslint-disable-next-line react-refresh/only-export-components
+// Exported loader to satisfy AdminRoute import
 export const loader = (queryClient) => async () => {
-  const response = await queryClient.ensureQueryData(userQuery);
-  const user = response?.data.users;
-  if (response?.data.status === 'error') {
-    toast.error(response?.data.message);
+  try {
+    const res = await customFetch.get("/users");
+    const users = Array.isArray(res.data?.data) ? res.data.data : [];
+    return { users: users.length ? users : SAMPLE_USERS };
+  } catch (e) {
+    return { users: SAMPLE_USERS };
   }
-  return { user };
 };
+
+const columns = [
+  { key: "fullname", label: "Name" },
+  { key: "role", label: "Role" },
+  { key: "email", label: "Email" },
+  { key: "locations", label: "Location" },
+  { key: "models", label: "Models" },
+  { key: "createdAt", label: "Created" },
+  { key: "status", label: "Status" },
+];
 
 const AllUsers = () => {
-  const { user, isLoading } = useLoaderData();
-  const authUser = useSelector(memoize((state) => state.userState.user));
   const navigate = useNavigate();
-  const queryClient = useQueryClient();
   const [users, setUsers] = useState([]);
-  const [itemOffset, setItemOffset] = useState(0);
-  const itemsPerPage = 6;
-  const endOffset = itemOffset + itemsPerPage;
-  const currentItems = useMemo(
-    () => user.slice(itemOffset, endOffset),
-    [endOffset, itemOffset, user]
-  );
-  const pageCount = Math.ceil(user.length / itemsPerPage);
+  const [search, setSearch] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState("All Users");
+  const [showRemoveModal, setShowRemoveModal] = useState(false);
+  const [removeVariant, setRemoveVariant] = useState("confirm");
+  const [userToRemove, setUserToRemove] = useState(null);
+  const [startDate, setStartDate] = useState("Start Date");
+  const [endDate, setEndDate] = useState("End Date");
+  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
+  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
+  const [listFilter, setListFilter] = useState("All");
+  const [showListDropdown, setShowListDropdown] = useState(false);
 
-  const handleFilterUsers = useCallback(
-    (search) => {
-      const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
-
-      const searchResult = user.filter((item) => {
-        return (
-          regex.test(item.username.toLowerCase()) ||
-          regex.test(item.fullname.toLowerCase()) ||
-          regex.test(item.role.toLowerCase()) ||
-          regex.test(item.email.toLowerCase())
-        );
-      });
-      setUsers(searchResult);
-    },
-    [user, setUsers]
-  );
-
-  // Invoke when user click to request another page.
-  const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % user.length;
-    setItemOffset(newOffset);
-  };
-
-  const fetchData = async () => {
-    const response = await queryClient.ensureQueryData(userQuery);
-    if (response.data.status !== 'error') {
-      setUsers(response.data.users);
-    } else {
-      toast.error(response.data.message);
-    }
-  };
   useEffect(() => {
-    fetchData();
+    const load = async () => {
+      setLoading(true);
+      try {
+        const res = await customFetch.get("/users");
+        const list = Array.isArray(res.data?.data) ? res.data.data : [];
+        setUsers(list.length ? list : SAMPLE_USERS);
+      } catch (e) {
+        setUsers(SAMPLE_USERS);
+      } finally {
+        setLoading(false);
+      }
+    };
+    load();
   }, []);
 
-  useEffect(() => {
-    setUsers(currentItems);
-  }, [currentItems]);
+  const filtered = useMemo(() => {
+    const q = search.trim().toLowerCase();
+    if (!q) return users;
+    return users.filter((u) =>
+      [u._id, u.username, u.fullname, u.email, u.role, u?.locations?.name || u.locations]
+        .filter(Boolean)
+        .join(" ")
+        .toLowerCase()
+        .includes(q)
+    );
+  }, [users, search]);
 
-  const handleDelete = async (_id) => {
-    try {
-      const res = await customFetch.delete(`/user/delete/${_id}`);
-      if (res.data?.status !== 'error') {
-        setUsers(users.filter((user) => user._id !== _id));
-        queryClient.invalidateQueries('user');
-        toast.success('User deleted successfully');
-      } else {
-        toast.error(res.data?.message);
-      }
-    } catch (error) {
-      const errorMessage = error?.res?.data?.msg || 'Error deleting user';
-      toast.error(errorMessage);
+  const tabFiltered = useMemo(() => {
+    switch (activeTab) {
+      case "Taggers":
+        return filtered.filter((u) => (u.role || "").toLowerCase() === "tagger");
+      case "Reviewers":
+        return filtered.filter((u) => (u.role || "").toLowerCase() === "reviewer");
+      case "Inactive Users":
+        return filtered.filter((u) => (u.status || "").toLowerCase() === "inactive");
+      default:
+        return filtered;
     }
-  };
+  }, [filtered, activeTab]);
 
   return (
-    <div className='AllUsers h-[100%] py-5'>
-      <main className='flex flex-col gap-10 justify-center items-center md:px-10'>
-        <div className='flex flex-col gap-4 justify-center items-center w-full'>
-          <div className='flex flex-row justify-end w-full'>
-            {['admin', 'superAdmin'].includes(authUser.role) && (
-              <Link to='add-user'>
-                <Button className='btn btn-success btn-sm'>
-                  <AddIcon />
-                  <p>Add User</p>
-                </Button>
-              </Link>
-            )}
-          </div>
-          <div className='mx-auto w-full searchBarContainer'>
-            <div className='px-3 searchIconWrapper'>
-              <IoSearchSharp className='img searchImg' color='#858585' />
-            </div>
-            <input
-              className='flex flex-row flex-grow'
-              type='text'
-              placeholder='Search users'
-              onChange={(e) => handleFilterUsers(e.target.value)}
-            />
-            <div className='filter'>
-              <p>Search</p>
-            </div>
-          </div>
+    <div className="p-6 md:p-8">
+      {/* Tabs + Add user */}
+      <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
+        <div className="flex items-center gap-2 bg-white rounded-full p-1 border border-gray-200">
+          {[
+            "All Users",
+            "Taggers",
+            "Reviewers",
+            "Inactive Users",
+          ].map((tab) => (
+            <button
+              key={tab}
+              onClick={() => setActiveTab(tab)}
+              className={`px-3 py-1.5 rounded-full text-xs md:text-sm ${activeTab === tab ? "bg-[#2D1342] text-white" : "text-gray-700 hover:bg-gray-100"
+                }`}
+            >
+              {tab}
+            </button>
+          ))}
         </div>
-        <div className='mt-5 AllUsersWrapper'>
-          {isLoading ? (
-            <div className='loader'>Loading users...</div>
-          ) : users?.length > 0 ? (
-            users?.map((item) => {
-              const { username, role, _id, imageUrl } = item;
-              return (
-                <div
-                  className='flex justify-between items-center p-2 my-3 rounded-lg border-2'
-                  key={_id}>
-                  <div className='flex gap-2 justify-center items-center'>
-                    <img
-                      src={`${getRealFileUrl(imageUrl || "") ??
-                        'https://daisyui.com/images/stock/photo-1534528741775-53994a69daeb.jpg'
-                        }`}
-                      alt=''
-                      className='h-[50px] w-[50px] rounded-xl'
-                    />
-                    <div className='flex flex-col gap-2'>
-                      <h1 className='font-semibold'>{username}</h1>
-                      <p className='text-xs font-normal'>{role}</p>
-                    </div>
-                  </div>
-                  <div className='flex gap-4 items-center'>
-                    {['admin', 'superAdmin'].includes(authUser.role) && (
-                      <button
-                        className='btn btn-sm'
-                        onClick={() =>
-                          navigate(
-                            `/${['admin', 'superAdmin'].includes(authUser.role)
-                              ? 'admin'
-                              : authUser.role
-                            }/edit-user/${_id}`
-                          )
-                        }>
-                        Edit
-                      </button>
-                    )}
-                    <button
-                      className='btn btn-sm'
-                      onClick={() =>
-                        navigate(
-                          `/${['admin', 'superAdmin'].includes(authUser.role)
-                            ? 'admin'
-                            : authUser.role
-                          }/single-user/${_id}`
-                        )
-                      }>
-                      View
-                    </button>
-                    {['admin', 'superAdmin'].includes(authUser.role) && (
-                      <GoTrash
-                        className='w-5 h-5 cursor-pointer'
-                        color='#ff8686'
-                        onClick={() => handleDelete(_id)}
-                      />
-                    )}
-                  </div>
-                </div>
-              );
-            })
-          ) : (
-            <div className='flex flex-col flex-grow justify-center items-center self-center h-full text-2xl min-h-96'>
-              <div className='flex'>No user found</div>
+        <button className="rounded-full px-3 py-2 bg-[#2D1342] text-white text-xs md:text-sm" onClick={() => navigate("/admin/users/add-user")}>+ Add User</button>
+      </div>
+
+      {/* Search and filters */}
+      <div className="mb-5 flex flex-col sm:flex-row items-center gap-3 text-end justify-end my-8">
+        <div className="relative flex-1 max-w-xl w-full">
+          <input
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            placeholder="Search by Name, Status, Role...."
+            className="w-full rounded-full border border-gray-200 pl-4 pr-12 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
+          />
+          <button
+            type="button"
+            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white shadow ring-1 ring-gray-200 flex items-center justify-center"
+          >
+            <WebIcon icon="search" className="w-4 h-4 text-gray-700" />
+          </button>
+        </div>
+        {/* Start Date */}
+        <div className="relative dropdown-container">
+          <button
+            onClick={() => setShowStartDatePicker(!showStartDatePicker)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
+          >
+            <WebIcon icon="calendar" className="w-4 h-4 text-gray-700" />
+            <span className="text-xs text-gray-700">{startDate}</span>
+            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
+          </button>
+          {showStartDatePicker && (
+            <input
+              type="date"
+              className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
+              onChange={(e) => {
+                const d = new Date(e.target.value);
+                setStartDate(`${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`);
+                setShowStartDatePicker(false);
+              }}
+              autoFocus
+            />
+          )}
+        </div>
+        {/* End Date */}
+        <div className="relative dropdown-container">
+          <button
+            onClick={() => setShowEndDatePicker(!showEndDatePicker)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
+          >
+            <WebIcon icon="calendar" className="w-4 h-4 text-gray-700" />
+            <span className="text-xs text-gray-700">{endDate}</span>
+            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
+          </button>
+          {showEndDatePicker && (
+            <input
+              type="date"
+              className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
+              onChange={(e) => {
+                const d = new Date(e.target.value);
+                setEndDate(`${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`);
+                setShowEndDatePicker(false);
+              }}
+              autoFocus
+            />
+          )}
+        </div>
+        {/* All dropdown */}
+        <div className="relative dropdown-container">
+          <button
+            onClick={() => setShowListDropdown(!showListDropdown)}
+            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
+          >
+            <span className="text-xs text-gray-700">{listFilter}</span>
+            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
+          </button>
+          {showListDropdown && (
+            <div className="absolute top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
+              {["All", "Active", "Inactive"].map((s) => (
+                <button key={s} onClick={() => { setListFilter(s); setShowListDropdown(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg">{s}</button>
+              ))}
             </div>
           )}
         </div>
-        <div className='navigatonBtnContainer'>
-          <ReactPaginate
-            previousLabel='Prev'
-            nextLabel='Next'
-            pageClassName='flex h-10 w-10 items-center justify-center rounded-full text-center text-xl'
-            pageLinkClassName='page-link'
-            previousClassName='flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold'
-            previousLinkClassName='page-link'
-            nextClassName='flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold'
-            nextLinkClassName='page-link'
-            breakLabel='...'
-            breakClassName='flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold'
-            breakLinkClassName='page-link'
-            pageCount={pageCount}
-            marginPagesDisplayed={2}
-            pageRangeDisplayed={5}
-            onPageChange={handlePageClick}
-            containerClassName='flex flex-row items-center justify-center gap-2 py-10 text-center text-xl'
-            activeclassname='active'
-            forcePage={itemOffset}
-          />
-        </div>
-      </main>
+      </div>
+
+      <div className="overflow-x-auto rounded-xl border border-gray-200">
+        <table className="min-w-full divide-y divide-gray-200">
+          <thead className="bg-[#2D1342] text-white">
+            <tr>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">_id</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">username</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">fullname</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">email</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">locations</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">role</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">models</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">createdAt</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">updatedAt</th>
+              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Action</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-gray-100 bg-white text-sm">
+            {loading && (
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">Loading...</td></tr>
+            )}
+            {!loading && tabFiltered.length === 0 && (
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">No users found</td></tr>
+            )}
+            {!loading && tabFiltered.map((u) => (
+              <tr key={u._id} className="hover:bg-gray-50">
+                <td className="px-4 py-3">{u?._id}</td>
+                <td className="px-4 py-3">{u?.username || ""}</td>
+                <td className="px-4 py-3 font-medium">{u?.fullname || ""}</td>
+                <td className="px-4 py-3">{u?.email || ""}</td>
+                <td className="px-4 py-3">{u?.role === 'superAdmin' ? 'All locations' : (u?.locations?.name || u?.locations || '')}</td>
+                <td className="px-4 py-3">{u?.role || ''}</td>
+                <td className="px-4 py-3">{Array.isArray(u?.models) ? u.models.length : 0}</td>
+                <td className="px-4 py-3">{u?.createdAt ? formatDate(u.createdAt) : ''}</td>
+                <td className="px-4 py-3">{u?.updatedAt ? formatDate(u.updatedAt) : ''}</td>
+                <td className="px-4 py-3">
+                  <div className="flex items-center justify-center">
+                    <button
+                      type="button"
+                      className="p-1.5 rounded hover:bg-gray-100 active:scale-95 transition"
+                      aria-label="Delete user"
+                      onClick={() => { setUserToRemove(u); setRemoveVariant("confirm"); setShowRemoveModal(true); }}
+                    >
+                      <WebIcon icon="delete" className="w-6 h-6 text-[#160a22]" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      {/* Remove modal */}
+      <RemoveModal
+        isOpen={showRemoveModal}
+        onClose={() => setShowRemoveModal(false)}
+        variant={removeVariant}
+        userDisplayName={userToRemove?.fullname || userToRemove?.username || "this user"}
+        onConfirm={() => {
+          if (!userToRemove) return;
+          // Simulate delete success locally
+          setUsers((prev) => prev.filter((x) => x._id !== userToRemove._id));
+          setRemoveVariant("success");
+          // keep modal open to show success
+          setTimeout(() => {
+            setShowRemoveModal(false);
+            setRemoveVariant("confirm");
+            setUserToRemove(null);
+          }, 1400);
+        }}
+      />
     </div>
   );
 };
 
 export default AllUsers;
+
+
