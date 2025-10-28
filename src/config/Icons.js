@@ -9,6 +9,8 @@ export const WebIcons = {
 	tag: "/icons/web_icons/tag.svg",
 	printer: "/icons/web_icons/printer.svg",
 	download: "/icons/web_icons/download.svg",
+	chevron_down: "/icons/web_icons/chevron-down.svg",
+	trend_up_green: "/icons/web_icons/trend-up-green.svg",
 	// Sidebar/Nav icons from public/icons/nav_icons/
 	activity: "/icons/nav_icons/activity.svg",
 	facility: "/icons/nav_icons/facility_icon.svg",

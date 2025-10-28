@@ -60,10 +60,10 @@ export default function TanstackTable({ tableData, columns }) {
 					</div>
 				) : (
 					<>
-						<TableVirtuoso
+							<TableVirtuoso
 							id="virtuoso-table"
 							style={{
-								height: "700px",
+								height: "520px",
 								boxShadow: "none",
 								border: 0,
 								width: "100%",
@@ -167,31 +167,31 @@ export default function TanstackTable({ tableData, columns }) {
 									</tr>
 								));
 							}}
-						/>
-						<div className="flex w-full items-center justify-center gap-2">
+							/>
+							<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
-								className="rounded border p-1"
+									className="rounded border px-2 py-1"
 								onClick={() => table.setPageIndex(0)}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<<"}
 							</button>
 							<button
-								className="rounded border p-1"
+									className="rounded border px-2 py-1"
 								onClick={() => table.previousPage()}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<"}
 							</button>
 							<button
-								className="rounded border p-1"
+									className="rounded border px-2 py-1"
 								onClick={() => table.nextPage()}
 								disabled={!table.getCanNextPage()}
 							>
 								{">"}
 							</button>
 							<button
-								className="rounded border p-1"
+									className="rounded border px-2 py-1"
 								onClick={() =>
 									table.setPageIndex(table.getPageCount() - 1)
 								}
@@ -199,15 +199,15 @@ export default function TanstackTable({ tableData, columns }) {
 							>
 								{">>"}
 							</button>
-							<span className="flex items-center gap-1">
-								<div>Page</div>
+								<span className="flex items-center gap-1 whitespace-nowrap">
+									<div>Page</div>
 								<strong>
 									{table.getState().pagination.pageIndex + 1} of{" "}
 									{table.getPageCount()}
 								</strong>
 							</span>
-							<span className="flex items-center gap-1">
-								| Go to page:
+								<span className="hidden sm:flex items-center gap-1">
+									| Go to page:
 								<input
 									type="number"
 									defaultValue={
@@ -219,14 +219,15 @@ export default function TanstackTable({ tableData, columns }) {
 											: 0;
 										table.setPageIndex(page);
 									}}
-									className="w-16 rounded border p-1"
+										className="w-16 rounded border p-1"
 								/>
 							</span>
-							<select
+								<select
 								value={table.getState().pagination.pageSize}
 								onChange={(e) => {
 									table.setPageSize(Number(e.target.value));
 								}}
+									className="border rounded px-2 py-1"
 							>
 								{[10, 20, 30, 40, 50].map((pageSize) => (
 									<option key={pageSize} value={pageSize}>

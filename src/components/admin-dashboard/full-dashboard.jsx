@@ -12,7 +12,9 @@ import {
   Tooltip,
   ReferenceLine,
 } from "recharts";
-import { Calendar, Download, TrendingUp, TrendingDown, Printer, ChevronDown } from "lucide-react";
+import { TrendingUp, TrendingDown } from "lucide-react";
+import WebIcon from "../custom/WebIcons";
+import MessageModal from "./modal.jsx";
 
 /* ---------------- Colors ---------------- */
 const COLORS = {
@@ -160,6 +162,21 @@ const CustomTooltip = ({ active, payload }) => {
   );
 };
 
+/* ---------------- Donut Tooltip ---------------- */
+const DonutTooltip = ({ active, payload }) => {
+    if (!active || !payload?.length) return null;
+    const p = payload[0].payload; // { name, value, color }
+    return (
+        <div className="bg-white p-3 rounded-lg shadow-lg border border-gray-100 text-xs" style={{ minWidth: 160 }}>
+            <div className="flex items-center gap-2">
+                <div style={{ width: 10, height: 10, borderRadius: 6, background: p.color }} />
+                <div className="text-sm font-semibold text-gray-800">{p.name}</div>
+            </div>
+            <div className="text-gray-600 mt-2">Value: <span className="font-semibold">{formatNumberLabel(p.value)}</span></div>
+        </div>
+    );
+};
+
 /* ---------------- FullDashboard ---------------- */
 const FullDashboard = () => {
   const [startDate, setStartDate] = useState('10/02/2023');
@@ -180,6 +197,8 @@ const FullDashboard = () => {
   const [showRightEndDatePicker, setShowRightEndDatePicker] = useState(false);
   const [showRightTimePeriodDropdown, setShowRightTimePeriodDropdown] = useState(false);
   const [showRightFilterDropdown, setShowRightFilterDropdown] = useState(false);
+    const [showDownloadModal, setShowDownloadModal] = useState(false);
+    const [downloadSuccess, setDownloadSuccess] = useState(true);
 
   const scatterData = useMemo(() => {
     return sampleData.map((s) => {
@@ -234,6 +253,14 @@ const FullDashboard = () => {
 
   return (
     <div className="grid mx-2 sm:mx-4 lg:mx-5 grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
+          <MessageModal
+              isOpen={showDownloadModal}
+              onClose={() => setShowDownloadModal(false)}
+              variant={downloadSuccess ? "success" : "error"}
+              reportId="I-0125"
+              onRetry={() => { setDownloadSuccess(true); setShowDownloadModal(false); }}
+              onCancel={() => setShowDownloadModal(false)}
+          />
       {/* LEFT: Scatter */}
       <div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 md:p-6">
         {/* Header Section */}
@@ -242,19 +269,15 @@ const FullDashboard = () => {
           <div className="flex items-center justify-between mb-3 md:mb-4">
             <div className="flex items-center gap-1 md:gap-2">
               <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Sample Positivity Rates</h1>
-              <svg className="w-4 h-4 md:w-5 md:h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-              </svg>
+                          <WebIcon icon="chevron_down" className="w-4 h-4 md:w-5 md:h-5 text-gray-600" />
             </div>
             {/* Action icons */}
             <div className="flex items-center gap-3">
               <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <svg className="w-5 h-5 text-gray-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 17h2a2 2 0 002-2v-4a2 2 0 00-2-2H5a2 2 0 00-2 2v4a2 2 0 002 2h2m2 4h6a2 2 0 002-2v-4a2 2 0 00-2-2H9a2 2 0 00-2 2v4a2 2 0 002 2zm8-12V5a2 2 0 00-2-2H9a2 2 0 00-2 2v4h10z" />
-                </svg>
+                              <WebIcon icon="printer" className="w-6 h-6 text-gray-700" />
               </button>
-              <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-                <Download size={20} className="text-gray-700" />
+                          <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors" onClick={() => { setDownloadSuccess(false); setShowDownloadModal(true); }}>
+                              <WebIcon icon="download" className="w-6 h-6 text-gray-700" />
               </button>
             </div>
           </div>
@@ -263,9 +286,7 @@ const FullDashboard = () => {
           <div className="flex flex-wrap items-center gap-2 md:gap-3">
             {/* Trend Indicator */}
             <div className="flex items-center gap-2">
-              <svg className="w-5 h-5 text-red-500" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M5.293 9.707a1 1 0 010-1.414l4-4a1 1 0 011.414 0l4 4a1 1 0 01-1.414 1.414L11 7.414V15a1 1 0 11-2 0V7.414L6.707 9.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
-              </svg>
+                          <WebIcon icon="trend_up_green" className="w-5 h-5 text-red-500" />
               <span className="text-sm text-gray-600">+10.05% to last year</span>
             </div>
 
@@ -275,11 +296,9 @@ const FullDashboard = () => {
                 onClick={() => setShowStartDatePicker(!showStartDatePicker)}
                 className="flex items-center gap-2 px-3 py-2  rounded-lg bg-white hover:bg-gray-50 transition-colors"
               >
-                <Calendar size={14} className="text-gray-600" />
+                              <WebIcon icon="calendar" className="w-3.5 h-3.5 text-gray-600" />
                 <span className="text-sm text-gray-700">{startDate}</span>
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                              <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
               </button>
               {showStartDatePicker && (
                 <input 
@@ -301,11 +320,9 @@ const FullDashboard = () => {
                 onClick={() => setShowEndDatePicker(!showEndDatePicker)}
                 className="flex items-center gap-2 px-3 py-2 border-l border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
               >
-                <Calendar size={14} className="text-gray-600" />
+                              <WebIcon icon="calendar" className="w-3.5 h-3.5 text-gray-600" />
                 <span className="text-sm text-gray-700">{endDate}</span>
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                              <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
               </button>
               {showEndDatePicker && (
                 <input 
@@ -328,9 +345,7 @@ const FullDashboard = () => {
                 className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
               >
                 <span className="text-sm text-gray-700">{timePeriod}</span>
-                <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
+                              <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
               </button>
               {showTimePeriodDropdown && (
                 <div className="absolute top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
@@ -382,7 +397,14 @@ const FullDashboard = () => {
               />
               <YAxis type="number" dataKey="y" domain={[0, 70]} axisLine={false} tickLine={false} tick={false} width={0} />
               <Tooltip content={<CustomTooltip />} cursor={{ stroke: "#eef2ff", strokeWidth: 1 }} />
-              <Scatter data={scatterData} shape={<CustomScatterPoint />} />
+                          <Scatter
+                              data={scatterData}
+                              shape={<CustomScatterPoint />}
+                              isAnimationActive={true}
+                              animationBegin={200}
+                              animationDuration={900}
+                              animationEasing="ease-out"
+                          />
             </ScatterChart>
           </ResponsiveContainer>
         </div>
@@ -394,14 +416,14 @@ const FullDashboard = () => {
         <div className="flex items-center justify-between mb-3 md:mb-4">
           <div className="flex items-center gap-1 md:gap-2">
             <h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">Positive Samples detected</h1>
-            <ChevronDown size={16} className="hidden sm:block text-gray-600 md:w-5 md:h-5" />
+                      <WebIcon icon="chevron_down" className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5" />
           </div>
           <div className="flex items-center gap-3">
             <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Printer size={20} className="text-gray-700" />
+                          <WebIcon icon="printer" className="w-6 h-6 text-gray-700" />
             </button>
-            <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-              <Download size={20} className="text-gray-700" />
+                      <button className="p-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors" onClick={() => { setDownloadSuccess(true); setShowDownloadModal(true); }}>
+                          <WebIcon icon="download" className="w-5 h-5 text-gray-700" />
             </button>
           </div>
         </div>
@@ -414,9 +436,9 @@ const FullDashboard = () => {
               onClick={() => setShowRightStartDatePicker(!showRightStartDatePicker)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
             >
-              <Calendar size={14} className="text-gray-600" />
+                          <WebIcon icon="calendar" className="w-3.5 h-3.5 text-gray-600" />
               <span className="text-xs text-gray-600">{rightStartDate}</span>
-              <ChevronDown size={14} className="text-gray-600" />
+                          <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
             </button>
             {showRightStartDatePicker && (
               <input 
@@ -438,9 +460,9 @@ const FullDashboard = () => {
               onClick={() => setShowRightEndDatePicker(!showRightEndDatePicker)}
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
             >
-              <Calendar size={14} className="text-gray-600" />
+                          <WebIcon icon="calendar" className="w-3.5 h-3.5 text-gray-600" />
               <span className="text-xs text-gray-600">{rightEndDate}</span>
-              <ChevronDown size={14} className="text-gray-600" />
+                          <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
             </button>
             {showRightEndDatePicker && (
               <input 
@@ -463,7 +485,7 @@ const FullDashboard = () => {
               className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
             >
               <span className="text-xs text-gray-600">{rightTimePeriod}</span>
-              <ChevronDown size={14} className="text-gray-600" />
+                          <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-600" />
             </button>
             {showRightTimePeriodDropdown && (
               <div className="absolute top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
@@ -490,7 +512,7 @@ const FullDashboard = () => {
               className="flex items-center gap-2 px-3 py-1.5 bg-[#412461] text-white rounded-full hover:bg-[#7C3AED] transition-colors"
             >
               <span className="text-xs font-medium">{rightFilterType}</span>
-              <ChevronDown size={14} className="text-white" />
+                          <WebIcon icon="chevron_down" className="w-4 h-4 text-white" />
             </button>
             {showRightFilterDropdown && (
               <div className="absolute top-full mt-1 bg-[#6B21A8] rounded-lg shadow-lg z-50 min-w-[100px]">
@@ -531,6 +553,7 @@ const FullDashboard = () => {
                     <Cell key={`cell-${i}`} fill={entry.color} />
                   ))}
                 </Pie>
+                              <Tooltip content={<DonutTooltip />} cursor={false} />
               </PieChart>
             </ResponsiveContainer>
             
