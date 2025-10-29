@@ -13,6 +13,10 @@ export const WebIcons = {
 	delete_circle_red: "/icons/web_icons/delete-circle-red.svg",
 	chevron_down: "/icons/web_icons/chevron-down.svg",
 	trend_up_green: "/icons/web_icons/trend-up-green.svg",
+	MapPin: "/icons/web_icons/map-pin.svg",
+	Trash: "/icons/web_icons/trash-2.svg",
+	Trash3: "/icons/web_icons/trash-3.svg",
+	Cloud: "/icons/web_icons/upload-cloud.svg",
 	// Sidebar/Nav icons from public/icons/nav_icons/
 	activity: "/icons/nav_icons/activity.svg",
 	facility: "/icons/nav_icons/facility_icon.svg",

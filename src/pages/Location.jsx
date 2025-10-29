@@ -11,6 +11,8 @@ import LocationOverview from "./new/LocationOverview";
 import WebIcon from "../components/custom/WebIcons";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@mui/material";
+import { Button as ShButton } from "../components/ui/button";
+import SearchInput from "../components/ui/search-input";
 
 const url = "/location/locations";
 
@@ -149,37 +151,25 @@ const Location = () => {
 						<h2 className="text-2xl font-bold text-primary">Locations</h2>
 
 						{/* Add Facility Button */}
-						<Button
-							className="btn btn-success btn-sm"
+						<ShButton
+							className="w-[206px] rounded-[20px] bg-primary text-white border border-primary shadow-none"
 							onClick={() => setShowModal(true)}
 						>
-							+ Add Facility
-						</Button>
+							<p className="max-sm:text-sm">Add Facility</p>
+						</ShButton>
 					</div>
 
 					{/* Search Bar Row */}
 					<div className="flex items-center justify-end mb-6">
-						<div className="flex items-center gap-3">
-							{/* Search Bar */}
-							<div className="relative">
-								<input
-									type="text"
-									placeholder="Search facility..."
-									value={searchText}
-									onChange={(e) =>
-										handleFilterLocations(e.target.value)
-									}
-									className="px-4 py-1 pr-10 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent"
-									style={{ width: "469px", height: "24px" }}
-								/>
-								<div className="absolute right-3 top-1/2 transform -translate-y-1/2">
-									<WebIcon
-										icon="search"
-										className="w-4 h-4 text-gray-400"
-									/>
-								</div>
-							</div>
-						</div>
+						{/* Search Bar */}
+						<SearchInput
+							value={searchText}
+							onChange={(val) => {
+								setSearchText(val);
+								handleFilterLocations(val);
+							}}
+							placeholder="Search by Facility"
+						/>
 					</div>
 
 					{/* Table Section */}
