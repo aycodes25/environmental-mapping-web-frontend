@@ -1,4 +1,6 @@
 import React, { useMemo, useState, useEffect } from "react";
+import { customFetch } from "../../utils";
+import { getUserFromLocalStorage } from "../../redux/reducers/userReducer";
 import {
   ScatterChart,
   Scatter,
@@ -25,8 +27,8 @@ const COLORS = {
   others: "#FCE7F3",
 };
 
-/* ---------------- Sample Data ---------------- */
-const sampleData = [
+/* ---------------- Sample Data (fallback) ---------------- */
+const sampleDataFallback = [
   { id: 1, month: "Jan", day: 15, value: 2, organism: "fungi", y: 25 },
   { id: 2, month: "Jan", day: 15, value: 2, organism: "bacteria", y: 22 },
   { id: 3, month: "Feb", day: 35, value: 300, organism: "parasite", y: 0 },
@@ -82,8 +84,8 @@ const sampleData = [
   // ... (I will keep my full dataset here)
 ];
 
-/* ---------------- Donut Data ---------------- */
-const donutData = [
+/* ---------------- Donut Data (fallback) ---------------- */
+const donutDataFallback = [
   { name: "Bacteria", value: 1, color: COLORS.bacteria },
   { name: "Fungi", value: 1, color: COLORS.fungi },
   { name: "Virus", value: 1, color: COLORS.virus },
@@ -200,8 +202,61 @@ const FullDashboard = () => {
     const [showDownloadModal, setShowDownloadModal] = useState(false);
     const [downloadSuccess, setDownloadSuccess] = useState(true);
 
+  const [loadingScatter, setLoadingScatter] = useState(false);
+  const [serverScatter, setServerScatter] = useState([]);
+  const [useMyLocation, setUseMyLocation] = useState(false);
+  const currentUser = getUserFromLocalStorage();
+  const myLocationId = currentUser?.locations || currentUser?.location || null;
+
+  const [positiveMonth, setPositiveMonth] = useState(0);
+  const [totalMonth, setTotalMonth] = useState(0);
+
+  useEffect(() => {
+    const load = async () => {
+      setLoadingScatter(true);
+      try {
+        const url = useMyLocation && myLocationId
+          ? `/user/dashboard-by-location/${myLocationId}`
+          : "/user/dashboard";
+        const res = await customFetch.get(url);
+        const arr = Array.isArray(res.data?.positivityRatePerMonthYearToDate)
+          ? res.data.positivityRatePerMonthYearToDate
+          : [];
+        // donut metrics
+        const totalTagsThisMonth = Number(res.data?.totalTagsThisMonth || 0);
+        const positiveTagsThisMonth = Number(res.data?.positiveTagsThisMonth || 0);
+        setTotalMonth(totalTagsThisMonth);
+        setPositiveMonth(positiveTagsThisMonth);
+        const mapped = arr.map((it, idx) => {
+          const monthIdx = Math.max(1, Math.min(12, Number(it.month || 1)));
+          const month = monthLabels[monthIdx - 1] || "Jan";
+          const value = Number(it.totalTags || 0);
+          const positivity = Number(it.positivityRate || 0); // 0..1 or 0..100? backend returns fraction
+          const positivityPct = positivity <= 1 ? positivity * 100 : positivity;
+          // Map positivity to vertical position roughly within [8,62]
+          const y = clamp(8 + (positivityPct / 100) * 54, 8, 62);
+          return {
+            id: idx + 1,
+            month,
+            day: 15,
+            value,
+            organism: "bacteria",
+            y,
+          };
+        });
+        setServerScatter(mapped);
+      } catch (_e) {
+        setServerScatter([]);
+      } finally {
+        setLoadingScatter(false);
+      }
+    };
+    load();
+  }, [useMyLocation, myLocationId]);
+
   const scatterData = useMemo(() => {
-    return sampleData.map((s) => {
+    const source = serverScatter.length ? serverScatter : sampleDataFallback;
+    return source.map((s) => {
       const mi = monthLabels.indexOf(s.month);
       const baseX = monthTicks[mi] ?? monthTicks[0];
       const isLarge = s.value >= 5000;
@@ -211,9 +266,21 @@ const FullDashboard = () => {
       const color = COLORS[s.organism];
       return { ...s, x, y, color };
     });
-  }, []);
+  }, [serverScatter]);
 
-  const donutTotal = useMemo(() => donutData.reduce((s, d) => s + d.value, 0), []);
+  const donutData = useMemo(() => {
+    if (totalMonth > 0) {
+      const positive = Math.max(0, positiveMonth);
+      const negative = Math.max(0, totalMonth - positive);
+      return [
+        { name: "Positive", value: positive, color: COLORS.bacteria },
+        { name: "Negative", value: negative, color: COLORS.virus },
+      ];
+    }
+    return donutDataFallback;
+  }, [positiveMonth, totalMonth]);
+
+  const donutTotal = useMemo(() => donutData.reduce((s, d) => s + d.value, 0), [donutData]);
 
   // Calculate responsive donut radii based on container size
   const getDonutRadii = () => {
@@ -419,6 +486,14 @@ const FullDashboard = () => {
                       <WebIcon icon="chevron_down" className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5" />
           </div>
           <div className="flex items-center gap-3">
+            <button
+              className="px-2 py-1 text-xs rounded-full border border-gray-300 hover:bg-gray-50"
+              onClick={() => setUseMyLocation((s) => !s)}
+              disabled={!myLocationId}
+              title={myLocationId ? "Toggle between all locations and my location" : "No location on user"}
+            >
+              {useMyLocation ? "My location" : "All locations"}
+            </button>
             <button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
                           <WebIcon icon="printer" className="w-6 h-6 text-gray-700" />
             </button>
