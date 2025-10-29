@@ -27,62 +27,6 @@ const COLORS = {
   others: "#FCE7F3",
 };
 
-/* ---------------- Sample Data (fallback) ---------------- */
-const sampleDataFallback = [
-  { id: 1, month: "Jan", day: 15, value: 2, organism: "fungi", y: 25 },
-  { id: 2, month: "Jan", day: 15, value: 2, organism: "bacteria", y: 22 },
-  { id: 3, month: "Feb", day: 35, value: 300, organism: "parasite", y: 0 },
-  { id: 4, month: "Feb", day: 42, value: 50, organism: "bacteria", y: 15 },
-  { id: 5, month: "Feb", day: 50, value: 5000, organism: "fungi", y: 25 },
-  { id: 6, month: "Feb", day: 55, value: 7000, organism: "bacteria", y: 35 },
-  { id: 7, month: "Feb", day: 55, value: 5000, organism: "fungi", y: 45 },
-  { id: 8, month: "Feb", day: 55, value: 3000, organism: "virus", y: 50 },
-  { id: 9, month: "Feb", day: 55, value: 2, organism: "fungi", y: 55 },
-  { id: 10, month: "Feb", day: 55, value: 2, organism: "virus", y: 65 },
-  { id: 11, month: "Feb", day: 55, value: 400, organism: "virus", y: 80 },
-  { id: 12, month: "Mar", day: 70, value: 300, organism: "parasite", y: 10 },
-  { id: 13, month: "Mar", day: 75, value: 5000, organism: "bacteria", y: 20 },
-  { id: 14, month: "Mar", day: 80, value: 400, organism: "fungi", y: 40 },
-  { id: 15, month: "Mar", day: 85, value: 5000, organism: "bacteria", y: 60 },
-  { id: 16, month: "Apr", day: 20, value: 500, organism: "parasite", y: 10 },
-  { id: 17, month: "Apr", day: 45, value: 3000, organism: "fungi", y: 30 },
-  { id: 18, month: "Apr", day: 50, value: 500, organism: "parasite", y: 40 },
-  { id: 19, month: "Apr", day: 55, value: 400, organism: "parasite", y: 55 },
-  { id: 20, month: "May", day: 55, value: 300, organism: "parasite", y: 5 },
-  { id: 21, month: "May", day: 55, value: 5000, organism: "parasite", y: 25 },
-  { id: 22, month: "May", day: 55, value: 400, organism: "parasite", y: 45 },
-  { id: 23, month: "May", day: 55, value: 400, organism: "parasite", y: 50 },
-  { id: 24, month: "May", day: 55, value: 400, organism: "parasite", y: 80 },
-  { id: 25, month: "Jun", day: 55, value: 400, organism: "others", y: 5 },
-  { id: 26, month: "Jun", day: 55, value: 4000, organism: "fungi", y: 25 },
-  { id: 27, month: "Jun", day: 55, value: 400, organism: "parasite", y: 45 },
-  { id: 28, month: "Jul", day: 55, value: 400, organism: "bacteria", y: 20 },
-  { id: 29, month: "Jul", day: 55, value: 3000, organism: "virus", y: 40 },
-  { id: 30, month: "Jul", day: 55, value: 400, organism: "parasite", y: 50 },
-  { id: 31, month: "Jul", day: 55, value: 400, organism: "parasite", y: 70 },
-  { id: 32, month: "Jul", day: 55, value: 50, organism: "fungi", y: 80 },
-  { id: 33, month: "Aug", day: 55, value: 2, organism: "fungi", y: 10 },
-  { id: 34, month: "Aug", day: 55, value: 5, organism: "parasite", y: 80 },
-  { id: 35, month: "Sep", day: 55, value: 525, organism: "virus", y: 5 },
-  { id: 36, month: "Sep", day: 55, value: 5000, organism: "virus", y: 20 },
-  { id: 37, month: "Sep", day: 55, value: 10000, organism: "bacteria", y: 40 },
-  { id: 38, month: "Sep", day: 55, value: 300, organism: "virus", y: 55 },
-  { id: 39, month: "Sep", day: 55, value: 400, organism: "parasite", y: 60 },
-  { id: 40, month: "Sep", day: 55, value: 200, organism: "parasite", y: 80 },
-  { id: 41, month: "Oct", day: 55, value: 5000, organism: "bacteria", y: 8 },
-  { id: 42, month: "Oct", day: 55, value: 2, organism: "parasite", y: 40 },
-  { id: 43, month: "Oct", day: 55, value: 2, organism: "parasite", y: 50 },
-  { id: 44, month: "Oct", day: 55, value: 400, organism: "parasite", y: 65 },
-  { id: 45, month: "Nov", day: 55, value: 30, organism: "parasite", y: 80 },
-  { id: 46, month: "Nov", day: 55, value: 5, organism: "virus", y: 5 },
-  { id: 47, month: "Nov", day: 55, value: 5000, organism: "others", y: 40 },
-  { id: 48, month: "Nov", day: 55, value: 3000, organism: "parasite", y: 80 },
-  { id: 49, month: "Dec", day: 15, value: 2, organism: "virus", y: 45 },
-  { id: 50, month: "Dec", day: 20, value: 2, organism: "fungi", y: 50 },
-
-
-  // ... (I will keep my full dataset here)
-];
 
 /* ---------------- Donut Data (fallback) ---------------- */
 const donutDataFallback = [
@@ -255,8 +199,7 @@ const FullDashboard = () => {
   }, [useMyLocation, myLocationId]);
 
   const scatterData = useMemo(() => {
-    const source = serverScatter.length ? serverScatter : sampleDataFallback;
-    return source.map((s) => {
+    return serverScatter.map((s) => {
       const mi = monthLabels.indexOf(s.month);
       const baseX = monthTicks[mi] ?? monthTicks[0];
       const isLarge = s.value >= 5000;
@@ -277,7 +220,7 @@ const FullDashboard = () => {
         { name: "Negative", value: negative, color: COLORS.virus },
       ];
     }
-    return donutDataFallback;
+    return [];
   }, [positiveMonth, totalMonth]);
 
   const donutTotal = useMemo(() => donutData.reduce((s, d) => s + d.value, 0), [donutData]);
@@ -443,7 +386,14 @@ const FullDashboard = () => {
             </div>
           ))}
         </div>
-        <div className="h-48 sm:h-56 md:h-64 lg:h-72">
+        <div className="h-48 sm:h-56 md:h-64 lg:h-72 relative">
+          {loadingScatter && (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">Loading...</div>
+          )}
+          {!loadingScatter && scatterData.length === 0 && (
+            <div className="absolute inset-0 flex items-center justify-center text-gray-500 text-sm">The chart is empty.</div>
+          )}
+          {scatterData.length > 0 && (
           <ResponsiveContainer width="100%" height="100%">
             <ScatterChart margin={{ top: 8, right: 10, bottom: 28, left: 10 }}>
               <CartesianGrid horizontal={false} vertical={false} />
@@ -474,6 +424,7 @@ const FullDashboard = () => {
                           />
             </ScatterChart>
           </ResponsiveContainer>
+          )}
         </div>
       </div>
 
@@ -612,6 +563,9 @@ const FullDashboard = () => {
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
+              {donutData.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">No data</div>
+              ) : (
               <PieChart>
                 <Pie
                   data={donutData}
@@ -630,27 +584,30 @@ const FullDashboard = () => {
                 </Pie>
                               <Tooltip content={<DonutTooltip />} cursor={false} />
               </PieChart>
+              )}
             </ResponsiveContainer>
             
-            {/* Content inside Donut */}
-            <div className="absolute inset-[15%] flex shadow-lg rounded-full flex-col items-center justify-center pointer-events-none">
-              <div className="flex flex-col gap-1 mb-1 md:mb-2">
-                {legendData.map((item) => (
-                  <div key={item.name} className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]">
-                    <div className="flex items-center gap-1 md:gap-2">
-                      <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full" style={{ background: item.color }} />
-                      <span className="text-[10px] md:text-xs font-semibold text-gray-900">{item.value}</span>
+            {/* Content inside Donut (hide when no data) */}
+            {donutData.length > 0 && (
+              <div className="absolute inset-[15%] flex shadow-lg rounded-full flex-col items-center justify-center pointer-events-none">
+                <div className="flex flex-col gap-1 mb-1 md:mb-2">
+                  {legendData.map((item) => (
+                    <div key={item.name} className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]">
+                      <div className="flex items-center gap-1 md:gap-2">
+                        <div className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full" style={{ background: item.color }} />
+                        <span className="text-[10px] md:text-xs font-semibold text-gray-900">{item.value}</span>
+                      </div>
+                      <div className="flex items-center gap-1">
+                        <TrendingUp size={10} className={`hidden sm:block md:w-3 md:h-3 ${item.trendColor === "green" ? "text-green-500" : "text-red-500"}`} />
+                        <span className="text-[10px] md:text-xs text-gray-600">{item.percentage}</span>
+                      </div>
                     </div>
-                    <div className="flex items-center gap-1">
-                      <TrendingUp size={10} className={`hidden sm:block md:w-3 md:h-3 ${item.trendColor === "green" ? "text-green-500" : "text-red-500"}`} />
-                      <span className="text-[10px] md:text-xs text-gray-600">{item.percentage}</span>
-                    </div>
-                  </div>
-                ))}
+                  ))}
+                </div>
+                <div className="text-sm md:text-base font-bold text-gray-900">Total: {donutTotal}</div>
+                <div className="text-[10px] md:text-xs text-purple-600">Facilities: 30</div>
               </div>
-              <div className="text-sm md:text-base font-bold text-gray-900">Total: {donutTotal}</div>
-              <div className="text-[10px] md:text-xs text-purple-600">Facilities: 30</div>
-            </div>
+            )}
           </div>
         </div>
 
