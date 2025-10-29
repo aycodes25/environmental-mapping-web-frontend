@@ -2,6 +2,8 @@ import React, { useEffect, useMemo, useState } from "react";
 import MessageModal from "./modal.jsx";
 import TanstackTable from "../TanstackTable";
 import WebIcon from "../custom/WebIcons";
+import { customFetch, formatDate } from "../../utils";
+import { toast } from "react-toastify";
 
 const ActivitiesLog = () => {
     // Dropdown states (match pattern from full-dashboard)
@@ -45,17 +47,69 @@ const ActivitiesLog = () => {
 		},
 		{ accessorKey: "tagger", header: () => <span>Tagger</span>, cell: ({ row }) => <span className="text-gray-800">{row.original.tagger}</span> },
 		{ accessorKey: "date", header: () => <span>Date</span>, cell: ({ row }) => <span className="text-gray-800">{row.original.date}</span> },
-		{ accessorKey: "action", header: () => <span>Action</span>, cell: () => <span className="text-gray-500">⋮</span> },
+        {
+            accessorKey: "action", header: () => <span>Action</span>, cell: ({ row }) => (
+                <div className="flex items-center gap-1">
+                    <button
+                        className="p-1 rounded hover:bg-gray-100"
+                        onClick={() => handleEditStart(row.original)}
+                        aria-label="Edit tag"
+                    >
+                        <WebIcon icon="edit" className="w-5 h-5" />
+                    </button>
+                    <button
+                        className="p-1 rounded hover:bg-gray-100"
+                        onClick={() => handleDelete(row.original.tagId)}
+                        aria-label="Delete tag"
+                    >
+                        <WebIcon icon="delete" className="w-5 h-5" />
+                    </button>
+                    <button
+                        className="p-1 rounded hover:bg-gray-100"
+                        onClick={() => handleDeleteModelTags(row.original.modelId)}
+                        aria-label="Delete all tags for model"
+                        disabled={!row.original.modelId}
+                        title={!row.original.modelId ? "No model id on this tag" : "Delete all tags for this model"}
+                    >
+                        <WebIcon icon="trash2" className="w-5 h-5" />
+                    </button>
+                </div>
+            )
+        },
 	];
 
-    const rows = [
-		{ tagId: "I-0125", type: "Incident", facility: "Captain Nudge", source: "Chemical", extent: "10%", status: "Pending", tagger: "Shola Green", date: "3/9/2025" },
-		{ tagId: "S-0225", type: "Sample", facility: "Fruit Lab", source: "Surface", extent: "10CFU/cm2", status: "Active", tagger: "Marvel Stone", date: "3/9/2025" },
-		{ tagId: "S-0325", type: "Sample", facility: "Beeb Flow", source: "Surface", extent: "50CFU/cm2", status: "Rejected", tagger: "Bluey Pink", date: "4/9/2025" },
-		{ tagId: "I-0425", type: "Incident", facility: "Situ Site", source: "Structural", extent: "50%", status: "Active", tagger: "Tamara Now", date: "4/9/2025" },
-		{ tagId: "I-0525", type: "Incident", facility: "Neon Bacter", source: "Environmental", extent: "88%", status: "Pending", tagger: "Salty Areem", date: "4/9/2025" },
-		{ tagId: "S-0625", type: "Sample", facility: "Situ Site", source: "Water", extent: "66CFU/cm2", status: "Active", tagger: "Merlin Cyrus", date: "4/9/2025" },
-	];
+    const [rows, setRows] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const [editingId, setEditingId] = useState(null);
+    const [editSubmitting, setEditSubmitting] = useState(false);
+    const [editForm, setEditForm] = useState({ action: "", presence: "", text: "", type: "", objectName: "" });
+
+    useEffect(() => {
+        const load = async () => {
+            setLoading(true);
+            try {
+                const res = await customFetch.get("/tag/all-tags");
+                const tags = Array.isArray(res.data?.data) ? res.data.data : [];
+                const mapped = tags.map((t) => ({
+                    tagId: t?._id,
+                    type: (t?.type || "").toString().replace(/\b\w/g, (c) => c.toUpperCase()),
+                    facility: t?.model?.location?.name || t?.model?.location || "-",
+                    source: t?.sample?.name || t?.objectName || "-",
+                    extent: t?.presence || t?.taggedInfo?.extent || "-",
+                    status: t?.action || "-",
+                    tagger: t?.user?.username || t?.user?.email || "-",
+                    date: t?.createdAt ? formatDate(t.createdAt) : "-",
+                    modelId: t?.model?._id || null,
+                }));
+                setRows(mapped);
+            } catch (e) {
+                setRows([]);
+            } finally {
+                setLoading(false);
+            }
+        };
+        load();
+    }, []);
 
     // Search state
     const [search, setSearch] = useState("");
@@ -70,7 +124,72 @@ const ActivitiesLog = () => {
                 .toLowerCase();
             return values.includes(q);
         });
-    }, [search]);
+    }, [search, rows]);
+
+    async function handleDelete(id) {
+        try {
+            const yes = window.confirm("Delete this tag? This cannot be undone.");
+            if (!yes) return;
+            await customFetch.delete(`/tag/tags-delete/${id}`);
+            setRows((prev) => prev.filter((r) => r.tagId !== id));
+            toast.success("Tag deleted");
+        } catch (e) {
+            toast.error("Failed to delete tag");
+        }
+    }
+
+    async function handleDeleteModelTags(modelId) {
+        if (!modelId) return;
+        try {
+            const yes = window.confirm("Delete all tags for this model? This cannot be undone.");
+            if (!yes) return;
+            await customFetch.delete(`/tag/delete-model-tags/${modelId}`);
+            setRows((prev) => prev.filter((r) => r.modelId !== modelId));
+            toast.success("All tags for model deleted");
+        } catch (e) {
+            toast.error("Failed to delete model tags");
+        }
+    }
+
+    function handleEditStart(row) {
+        setEditingId(row.tagId);
+        setEditForm({
+            action: row.status || "",
+            presence: row.extent || "",
+            text: "",
+            type: (row.type || "").toLowerCase(),
+            objectName: row.source || "",
+        });
+    }
+
+    async function handleEditSubmit() {
+        if (!editingId) return;
+        try {
+            setEditSubmitting(true);
+            await customFetch.put(`/tag/update-tag/${editingId}`, {
+                action: editForm.action,
+                presence: editForm.presence,
+                text: editForm.text,
+                type: editForm.type,
+                objectName: editForm.objectName,
+            });
+            setRows((prev) => prev.map((r) => r.tagId === editingId ? {
+                ...r,
+                status: editForm.action,
+                extent: editForm.presence,
+                source: editForm.objectName || r.source,
+                type: (editForm.type || r.type).toString().replace(/\b\w/g, (c) => c.toUpperCase()),
+            } : r));
+            setEditingId(null);
+            toast.success("Tag updated");
+        } catch (e) {
+            toast.error("Failed to update tag");
+        } finally {
+            setEditSubmitting(false);
+        }
+    }
+
+    const tableData = filteredRows;
 
     // Modal state for download actions
     const [showDownloadModal, setShowDownloadModal] = useState(false);
@@ -179,6 +298,24 @@ const ActivitiesLog = () => {
                 </div>
             </div>
 
+            {editingId && (
+                <div className="mb-4 p-4 border rounded-lg bg-white">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Action" value={editForm.action} onChange={(e) => setEditForm({ ...editForm, action: e.target.value })} />
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Presence / Extent" value={editForm.presence} onChange={(e) => setEditForm({ ...editForm, presence: e.target.value })} />
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Type (incident/sampling)" value={editForm.type} onChange={(e) => setEditForm({ ...editForm, type: e.target.value })} />
+                        <input className="border rounded px-2 py-1 text-sm" placeholder="Source / Object Name" value={editForm.objectName} onChange={(e) => setEditForm({ ...editForm, objectName: e.target.value })} />
+                        <input className="border rounded px-2 py-1 text-sm col-span-1 sm:col-span-2 lg:col-span-3" placeholder="Notes" value={editForm.text} onChange={(e) => setEditForm({ ...editForm, text: e.target.value })} />
+                    </div>
+                    <div className="mt-3 flex justify-end gap-2">
+                        <button className="px-3 py-1.5 text-sm rounded border" onClick={() => setEditingId(null)}>Cancel</button>
+                        <button className="px-3 py-1.5 text-sm rounded bg-[#412461] text-white disabled:opacity-50" disabled={editSubmitting} onClick={handleEditSubmit}>
+                            {editSubmitting ? "Saving..." : "Save Changes"}
+                        </button>
+                    </div>
+                </div>
+            )}
+
             {/* Download modal */}
             <MessageModal
                 isOpen={showDownloadModal}
@@ -191,10 +328,18 @@ const ActivitiesLog = () => {
 
             {/* Table */}
             <div className="mt-4 overflow-x-auto">
-                <TanstackTable tableData={filteredRows} columns={columns} />
-                <div className="flex justify-end mt-2">
-                    <button className="text-xs text-purple-700">See All</button>
-                </div>
+                {loading ? (
+                    <div className="px-4 py-6 text-center text-gray-500">Loading...</div>
+                ) : tableData.length === 0 ? (
+                    <div className="px-4 py-6 text-center text-gray-500">The list is empty.</div>
+                ) : (
+                    <>
+                        <TanstackTable tableData={tableData} columns={columns} />
+                        <div className="flex justify-end mt-2">
+                            <button className="text-xs text-purple-700">See All</button>
+                        </div>
+                    </>
+                )}
             </div>
         </div>
     );

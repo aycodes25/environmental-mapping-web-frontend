@@ -4,52 +4,14 @@ import { customFetch, formatDate } from "../utils";
 import WebIcon from "../components/custom/WebIcons";
 import RemoveModal from "../components/admin-dashboard/remove-modal";
 import UserOverview from "./new/UserOverview.jsx";
-// import UserOverview from "./new/UserOverview.jsx";
 
-const SAMPLE_USERS = [
-  {
-    _id: "usr_0001",
-    username: "sherifat.k",
-    fullname: "Sherifat Kimspolo",
-    email: "sherifat@example.com",
-    locations: { name: "Lagos" },
-    role: "tagger",
-    models: ["m1", "m2", "m3"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "usr_0002",
-    username: "aaron.s",
-    fullname: "Aaron Saffy",
-    email: "aaron@example.com",
-    locations: { name: "Abuja" },
-    role: "reviewer",
-    models: ["m4"],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-  {
-    _id: "usr_0003",
-    username: "andre.n",
-    fullname: "Andre Nurain",
-    email: "andre@example.com",
-    locations: { name: "Port Harcourt" },
-    role: "tagger",
-    models: [],
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString(),
-  },
-];
-
-// Exported loader to satisfy AdminRoute import
 export const loader = (queryClient) => async () => {  
   try {
-    const res = await customFetch.get("/users");
-    const users = Array.isArray(res.data?.data) ? res.data.data : [];
-    return { users: users.length ? users : SAMPLE_USERS };
+    const res = await customFetch.get("/user/getusers");
+    const users = Array.isArray(res.data?.users) ? res.data.users : [];
+    return { users };
   } catch (e) {
-    return { users: SAMPLE_USERS };
+    return { users: [] };
   }
 };
 
@@ -78,16 +40,17 @@ const AllUsers = () => {
   const [showEndDatePicker, setShowEndDatePicker] = useState(false);
   const [listFilter, setListFilter] = useState("All");
   const [showListDropdown, setShowListDropdown] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     const load = async () => {
       setLoading(true);
       try {
-        const res = await customFetch.get("/users");
-        const list = Array.isArray(res.data?.data) ? res.data.data : [];
-        setUsers(list.length ? list : SAMPLE_USERS);
+        const res = await customFetch.get("/user/getusers");
+        const list = Array.isArray(res.data?.users) ? res.data.users : [];
+        setUsers(list);
       } catch (e) {
-        setUsers(SAMPLE_USERS);
+        setUsers([]);
       } finally {
         setLoading(false);
       }
@@ -259,7 +222,7 @@ const AllUsers = () => {
               <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">Loading...</td></tr>
             )}
             {!loading && tabFiltered.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">No users found</td></tr>
+              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">The list is empty.</td></tr>
             )}
             {!loading && tabFiltered.map((u) => (
               <tr key={u._id} className="hover:bg-gray-50">
@@ -296,17 +259,23 @@ const AllUsers = () => {
         onClose={() => setShowRemoveModal(false)}
         variant={removeVariant}
         userDisplayName={userToRemove?.fullname || userToRemove?.username || "this user"}
-        onConfirm={() => {
-          if (!userToRemove) return;
-          // Simulate delete success locally
-          setUsers((prev) => prev.filter((x) => x._id !== userToRemove._id));
-          setRemoveVariant("success");
-          // keep modal open to show success
-          setTimeout(() => {
-            setShowRemoveModal(false);
-            setRemoveVariant("confirm");
-            setUserToRemove(null);
-          }, 1400);
+        onConfirm={async () => {
+          if (!userToRemove || deleting) return;
+          try {
+            setDeleting(true);
+            await customFetch.delete(`/user/delete/${userToRemove._id}`);
+            setUsers((prev) => prev.filter((x) => x._id !== userToRemove._id));
+            setRemoveVariant("success");
+            setTimeout(() => {
+              setShowRemoveModal(false);
+              setRemoveVariant("confirm");
+              setUserToRemove(null);
+            }, 1400);
+          } catch (e) {
+            // keep modal open; optionally surface error via toast if available
+          } finally {
+            setDeleting(false);
+          }
         }}
       />
     </div>
