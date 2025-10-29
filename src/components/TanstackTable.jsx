@@ -17,7 +17,7 @@ import CustomScrollbar from "./CustomScrollbar";
 import { Checkbox } from "./ui/checkbox";
 
 // eslint-disable-next-line react/prop-types
-export default function TanstackTable({ tableData, columns }) {
+export default function TanstackTable({ tableData, columns = [] }) {
 	const [sorting, setSorting] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
@@ -28,9 +28,10 @@ export default function TanstackTable({ tableData, columns }) {
 
 	// eslint-disable-next-line no-unused-vars
 	const [data, setData] = useState([]);
+
 	const table = useReactTable({
 		data,
-		columns,
+		columns: Array.isArray(columns) ? columns : [],
 		state: {
 			sorting,
 			pagination,
@@ -47,7 +48,7 @@ export default function TanstackTable({ tableData, columns }) {
 	const { rows } = table.getRowModel();
 
 	useEffect(() => {
-		setData(tableData);
+		setData(Array.isArray(tableData) ? tableData : []);
 	}, [tableData]);
 
 	return (
@@ -60,7 +61,7 @@ export default function TanstackTable({ tableData, columns }) {
 					</div>
 				) : (
 					<>
-							<TableVirtuoso
+						<TableVirtuoso
 							id="virtuoso-table"
 							style={{
 								height: "520px",
@@ -89,6 +90,11 @@ export default function TanstackTable({ tableData, columns }) {
 									const index = props["data-index"];
 									const row = rows[index];
 
+									if (!row) {
+										// During virtualization or data updates, a row may be temporarily undefined
+										return <tr {...props} />;
+									}
+
 									return (
 										<tr
 											className="border-b hover:bg-gray-100"
@@ -116,7 +122,14 @@ export default function TanstackTable({ tableData, columns }) {
 								},
 							}}
 							fixedHeaderContent={() => {
-								return table.getHeaderGroups().map((headerGroup) => (
+								let headerGroups = [];
+								try {
+									headerGroups = table.getHeaderGroups();
+								} catch (err) {
+									headerGroups = [];
+								}
+								if (!Array.isArray(headerGroups)) headerGroups = [];
+								return headerGroups.map((headerGroup) => (
 									<tr key={headerGroup.id} className="bg-primary">
 										{/* Checkbox header */}
 										<th className="px-4 py-2 text-white font-semibold w-12">
@@ -167,47 +180,47 @@ export default function TanstackTable({ tableData, columns }) {
 									</tr>
 								));
 							}}
-							/>
-							<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
+						/>
+						<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
-									className="rounded border px-2 py-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.setPageIndex(0)}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<<"}
 							</button>
 							<button
-									className="rounded border px-2 py-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.previousPage()}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<"}
 							</button>
 							<button
-									className="rounded border px-2 py-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.nextPage()}
 								disabled={!table.getCanNextPage()}
 							>
 								{">"}
 							</button>
 							<button
-									className="rounded border px-2 py-1"
+								className="rounded border px-2 py-1"
 								onClick={() =>
 									table.setPageIndex(table.getPageCount() - 1)
 								}
 								disabled={!table.getCanNextPage()}
 							>
-								{">>"}
+								{"»"}
 							</button>
-								<span className="flex items-center gap-1 whitespace-nowrap">
-									<div>Page</div>
+							<span className="flex items-center gap-1 whitespace-nowrap">
+								<div>Page</div>
 								<strong>
 									{table.getState().pagination.pageIndex + 1} of{" "}
 									{table.getPageCount()}
 								</strong>
 							</span>
-								<span className="hidden sm:flex items-center gap-1">
-									| Go to page:
+							<span className="hidden sm:flex items-center gap-1">
+								| Go to page:
 								<input
 									type="number"
 									defaultValue={
@@ -219,15 +232,15 @@ export default function TanstackTable({ tableData, columns }) {
 											: 0;
 										table.setPageIndex(page);
 									}}
-										className="w-16 rounded border p-1"
+									className="w-16 rounded border p-1"
 								/>
 							</span>
-								<select
+							<select
 								value={table.getState().pagination.pageSize}
 								onChange={(e) => {
 									table.setPageSize(Number(e.target.value));
 								}}
-									className="border rounded px-2 py-1"
+								className="border rounded px-2 py-1"
 							>
 								{[10, 20, 30, 40, 50].map((pageSize) => (
 									<option key={pageSize} value={pageSize}>

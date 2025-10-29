@@ -17,4 +17,3 @@ export { default as OtpInput } from "./OtpInput";
 export { default as Table } from "./Table";
 export { default as LocationTable } from "./LocationTable";
 export { default as FullDashboard } from "./admin-dashboard/full-dashboard";
-export { default as ActivitiesLog } from "./admin-dashboard/activities-log";
