@@ -43,7 +43,7 @@ const SAMPLE_USERS = [
 ];
 
 // Exported loader to satisfy AdminRoute import
-export const loader = (queryClient) => async () => {
+export const loader = (queryClient) => async () => {  
   try {
     const res = await customFetch.get("/users");
     const users = Array.isArray(res.data?.data) ? res.data.data : [];

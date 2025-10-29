@@ -78,7 +78,7 @@ const UserOverview = ({ dashboardData }) => {
 		},
     ];
 
-    // Keep filters consistent with other headers for layout parity
+    // Keep filters consistent with other headers for layout
     const filters = [
         { label: "Start Date", showDropdown: true, onClick: () => {} },
         { label: "End Date", showDropdown: true, onClick: () => {} },

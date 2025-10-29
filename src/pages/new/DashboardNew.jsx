@@ -10,7 +10,7 @@ const url = "/user/dashboard";
 const DashboardNew = () => {
 	const navigate = useNavigate();
 	const [dashboardData, setDashboardData] = useState({});
-
+ 
 
 	const fetchData = async () => {
 		try {
