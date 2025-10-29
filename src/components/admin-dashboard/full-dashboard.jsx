@@ -147,6 +147,7 @@ const FullDashboard = () => {
     const [downloadSuccess, setDownloadSuccess] = useState(true);
 
   const [loadingScatter, setLoadingScatter] = useState(false);
+  const [loadingDonut, setLoadingDonut] = useState(false);
   const [serverScatter, setServerScatter] = useState([]);
   const [useMyLocation, setUseMyLocation] = useState(false);
   const currentUser = getUserFromLocalStorage();
@@ -158,6 +159,7 @@ const FullDashboard = () => {
   useEffect(() => {
     const load = async () => {
       setLoadingScatter(true);
+      setLoadingDonut(true);
       try {
         const url = useMyLocation && myLocationId
           ? `/user/dashboard-by-location/${myLocationId}`
@@ -193,6 +195,7 @@ const FullDashboard = () => {
         setServerScatter([]);
       } finally {
         setLoadingScatter(false);
+        setLoadingDonut(false);
       }
     };
     load();
@@ -563,8 +566,10 @@ const FullDashboard = () => {
         <div className="flex-1 flex flex-col items-center justify-center">
           <div className="relative w-64 h-64 sm:w-72 sm:h-72 md:w-80 md:h-80">
             <ResponsiveContainer width="100%" height="100%">
-              {donutData.length === 0 ? (
-                <div className="flex items-center justify-center h-full text-gray-500 text-sm">No data</div>
+              {loadingDonut ? (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">Loading...</div>
+              ) : donutData.length === 0 ? (
+                <div className="flex items-center justify-center h-full text-gray-500 text-sm">The chart is empty.</div>
               ) : (
               <PieChart>
                 <Pie
