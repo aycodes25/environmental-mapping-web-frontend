@@ -3,6 +3,8 @@ import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate } from "../utils";
 import WebIcon from "../components/custom/WebIcons";
 import RemoveModal from "../components/admin-dashboard/remove-modal";
+import DashboardOverview from "./new/DashboardOverview.jsx";
+import UserHeader from "./new/UserHeader.jsx";
 
 const SAMPLE_USERS = [
   {
@@ -93,6 +95,18 @@ const AllUsers = () => {
     load();
   }, []);
 
+  const dashboardData = useMemo(() => {
+    const totalReviewers = users.filter((u) => (u.role || "").toLowerCase() === "reviewer").length;
+    const totalTaggers = users.filter((u) => (u.role || "").toLowerCase() === "tagger").length;
+    return {
+      totalTagsThisMonth: users.length,
+      totalModels: 0,
+      totalReviewers,
+      totalTaggers,
+      todaysModels: 0,
+    };
+  }, [users]);
+
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
     if (!q) return users;
@@ -119,7 +133,8 @@ const AllUsers = () => {
   }, [filtered, activeTab]);
 
   return (
-    <div className="p-6 md:p-8">
+    <div className="p-6 md:p-8 mx-5">
+      <UserHeader dashboardData={dashboardData} />
       {/* Tabs + Add user */}
       <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
         <div className="flex items-center gap-2 bg-white rounded-full p-1 border border-gray-200">

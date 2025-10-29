@@ -25,5 +25,9 @@ export const WebIcons = {
 	notification: "/icons/web_icons/notification.svg",
 	deletcapMain: "/icons/web_icons/deletcapMain.svg",
 	checkcirclemain: "/icons/web_icons/check-circle-main.svg",
+	user_icon: "/icons/web_icons/user_icon.svg",
+	tagger: "/icons/web_icons/tagger.svg",
+	inactive_users: "/icons/web_icons/inactive-users.svg",
+	new_tagger: "/icons/web_icons/new-tagger.svg",
 	
 };
