@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import OverviewSection from "../../components/ui/overview-section";
 
 // A slim header for the Users page showing only the "Total Users" card
-const UserHeader = ({ dashboardData }) => {
+const UserOverview = ({ dashboardData }) => {
     const navigate = useNavigate();
 
     const {
@@ -95,6 +95,6 @@ const UserHeader = ({ dashboardData }) => {
     );
 };
 
-export default UserHeader;
+export default UserOverview;
 
 
