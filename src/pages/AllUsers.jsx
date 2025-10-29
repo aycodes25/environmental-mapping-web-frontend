@@ -154,7 +154,7 @@ const AllUsers = () => {
             </button>
           ))}
         </div>
-        <button className="rounded-full px-3 py-2 bg-[#2D1342] text-white text-xs md:text-sm" onClick={() => navigate("/admin/users/add-user")}>+ Add User</button>
+        <button className="rounded-full px-3 py-2 bg-[#2D1342] text-white text-xs md:text-sm" onClick={() => navigate("/admin/users/add-user")}>Add User</button>
       </div>
 
       {/* Search and filters */}
