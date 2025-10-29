@@ -76,57 +76,7 @@ const DashboardOverview = ({ dashboardData }) => {
 
 
 
-		// -------------------------- user profile overview card --------------------------
-		{
-			icon: "user_icon",
-			title: "Total Users",
-			count: totalTagsThisMonth,
-			trend: "+1",
-			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTagsThisMonth),
-			iconBgColor: "bg-purple-100",
-			iconColor: "text-purple-600",
-			trendColor: "text-red-500",
-		},
-		{
-			icon: "tagger",
-			title: "Total Facilities",
-			count: totalModels,
-			trend: "+34",
-			trendLabel: "to last month",
-			chartData: generateMockChartData(totalModels),
-			iconBgColor: "bg-blue-100",
-			iconColor: "text-blue-600",
-			trendColor: "text-green-500",
-			onClick: () => navigate("models"),
-			isClickable: true,
-		},
-		{
-			icon: "inactive_users",
-			title: "Total Reviewers",
-			count: totalReviewers,
-			trend: "+200",
-			trendLabel: "to last month",
-			chartData: generateMockChartData(totalReviewers),
-			iconBgColor: "bg-green-100",
-			iconColor: "text-green-600",
-			trendColor: "text-green-500",
-			onClick: () => navigate("users"),
-			isClickable: true,
-		},
-		{
-			icon: "new_tagger",
-			title: "Total Samplers",
-			count: totalTaggers,
-			trend: "+0",
-			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTaggers),
-			iconBgColor: "bg-orange-100",
-			iconColor: "text-orange-600",
-			trendColor: "text-red-500",
-			onClick: () => navigate("users"),
-			isClickable: true,
-		},
+		
 	];
 
 	// Filter configuration - calendar icon is now hardcoded in overview-section
