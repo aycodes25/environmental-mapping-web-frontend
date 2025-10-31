@@ -41,40 +41,7 @@ const OverviewSection = ({
 					<h2 className="text-lg sm:text-xl md:text-2xl font-bold text-primary">Overview</h2>
 				)}
 
-				{/* Filter Controls */}
-				{filters.length > 0 && (
-					<div className="flex items-center flex-wrap gap-2 sm:gap-3">
-						{filters.map((filter, index) => (
-							<button
-								key={index}
-								onClick={filter.onClick}
-								className={`px-3 py-1.5 sm:px-4 sm:py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1.5 sm:gap-2 ${
-									filter.className || ""
-								}`}
-								disabled={filter.disabled}
-							>
-								{/* Always show calendar icon for all filters */}
-								<WebIcon icon="calendar" className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-								<span className="whitespace-nowrap">{filter.label}</span>
-								{filter.showDropdown && (
-									<svg
-										className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-										fill="none"
-										stroke="currentColor"
-										viewBox="0 0 24 24"
-									>
-										<path
-											strokeLinecap="round"
-											strokeLinejoin="round"
-											strokeWidth={2}
-											d="M19 9l-7 7-7-7"
-										/>
-									</svg>
-								)}
-							</button>
-						))}
-					</div>
-				)}
+				{/* Filters removed as requested */}
 			</div>
 
 			{/* Stats Cards Grid */}

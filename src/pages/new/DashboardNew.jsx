@@ -6,7 +6,6 @@ import DashboardOverview from "./DashboardOverview";
 import { FullDashboard } from "../../components";
 import TanstackTable from "../../components/TanstackTable";
 import WebIcon from "../../components/custom/WebIcons";
-import MessageModal from "../../components/admin-dashboard/modal.jsx";
 
 const url = "/user/dashboard";
 
@@ -59,14 +58,8 @@ const DashboardNew = () => {
 	const navigate = useNavigate();
 	const [dashboardData, setDashboardData] = useState({});
 	const [search, setSearch] = useState("");
-	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-	const [showTimePeriodDropdown, setShowTimePeriodDropdown] = useState(false);
-	const [startDate, setStartDate] = useState("Start Date");
-	const [endDate, setEndDate] = useState("End Date");
-	const [timePeriod, setTimePeriod] = useState("Monthly");
-	const [showDownloadModal, setShowDownloadModal] = useState(false);
-	const [downloadSuccess, setDownloadSuccess] = useState(true);
+	const [showDownloadModal] = useState(false);
+	const [downloadSuccess] = useState(true);
 	const [loading, setLoading] = useState(true);
 
 	const fetchData = async () => {
@@ -89,17 +82,7 @@ const DashboardNew = () => {
 		fetchData();
 	}, []);
 
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (!event.target.closest(".dropdown-container")) {
-				setShowStartDatePicker(false);
-				setShowEndDatePicker(false);
-				setShowTimePeriodDropdown(false);
-			}
-		};
-		document.addEventListener("click", handleClickOutside);
-		return () => document.removeEventListener("click", handleClickOutside);
-	}, []);
+	// Removed unused dropdown/date filter listeners
 
 	const safeRecentModels = Array.isArray(dashboardData?.recentlyViewedModels)
 		? dashboardData.recentlyViewedModels
@@ -223,127 +206,10 @@ const DashboardNew = () => {
 			<DashboardOverview dashboardData={dashboardData} />
 			<FullDashboard dashboardData={dashboardData} />
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 sm:p-5 md:p-6 mx-2 sm:mx-4 lg:mx-5">
-				{/* Header and Filters */}
 				<div className="flex items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-3">
 					<h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
 						Activities Log
 					</h2>
-					<div className="flex items-center flex-wrap gap-2 sm:gap-3">
-						{/* Start Date */}
-						<div className="relative dropdown-container">
-							<button
-								onClick={() =>
-									setShowStartDatePicker(!showStartDatePicker)
-								}
-								className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
-							>
-								<WebIcon
-									icon="calendar"
-									className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-								/>
-								<span className="text-sm text-gray-700 whitespace-nowrap">
-									{startDate}
-								</span>
-								<WebIcon
-									icon="chevron_down"
-									className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-								/>
-							</button>
-							{showStartDatePicker && (
-								<input
-									type="date"
-									className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
-									onChange={(e) => {
-										const d = new Date(e.target.value);
-										setStartDate(
-											`${
-												d.getMonth() + 1
-											}/${d.getDate()}/${d.getFullYear()}`
-										);
-										setShowStartDatePicker(false);
-									}}
-									autoFocus
-								/>
-							)}
-						</div>
-
-						{/* End Date */}
-						<div className="relative dropdown-container">
-							<button
-								onClick={() => setShowEndDatePicker(!showEndDatePicker)}
-								className="flex items-center gap-2 px-3 py-2 border-l border-gray-300 rounded-lg bg-white hover:bg-gray-50 transition-colors"
-							>
-								<WebIcon
-									icon="calendar"
-									className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-								/>
-								<span className="text-sm text-gray-700 whitespace-nowrap">
-									{endDate}
-								</span>
-								<WebIcon
-									icon="chevron_down"
-									className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-								/>
-							</button>
-							{showEndDatePicker && (
-								<input
-									type="date"
-									className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
-									onChange={(e) => {
-										const d = new Date(e.target.value);
-										setEndDate(
-											`${
-												d.getMonth() + 1
-											}/${d.getDate()}/${d.getFullYear()}`
-										);
-										setShowEndDatePicker(false);
-									}}
-									autoFocus
-								/>
-							)}
-						</div>
-
-						{/* Time Period */}
-						<div className="relative dropdown-container">
-							<button
-								onClick={() =>
-									setShowTimePeriodDropdown(!showTimePeriodDropdown)
-								}
-								className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors"
-							>
-								<span className="text-sm text-gray-700">
-									{timePeriod}
-								</span>
-								<WebIcon
-									icon="chevron_down"
-									className="w-3.5 h-3.5 sm:w-4 sm:h-4"
-								/>
-							</button>
-							{showTimePeriodDropdown && (
-								<div className="absolute top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
-									{["Monthly", "Weekly", "Daily"].map((period) => (
-										<button
-											key={period}
-											onClick={() => {
-												setTimePeriod(period);
-												setShowTimePeriodDropdown(false);
-											}}
-											className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
-										>
-											{period}
-										</button>
-									))}
-								</div>
-							)}
-						</div>
-						<button className="flex items-center gap-1.5 sm:gap-2 px-3 py-1.5 sm:px-4 sm:py-2 bg-[#412461] text-white rounded-full hover:bg-[#7C3AED]">
-							<span className="text-xs font-medium">All</span>
-							<WebIcon
-								icon="chevron_down"
-								className="w-3.5 h-3.5 sm:w-4 sm:h-4 text-white"
-							/>
-						</button>
-					</div>
 				</div>
 
 				{/* Search and Actions */}
@@ -369,32 +235,7 @@ const DashboardNew = () => {
 							</button>
 						)}
 					</div>
-					<div className="flex justify-between items-center gap-2">
-						<button
-							onClick={() => {
-								setDownloadSuccess(true);
-								setShowDownloadModal(true);
-							}}
-							className="p-1 rounded hover:bg-gray-100"
-						>
-							<WebIcon icon="download" className="w-6 h-6" />
-						</button>
-						<WebIcon icon="printer" className="w-6 h-6" />
-					</div>
 				</div>
-
-				{/* Download modal */}
-				<MessageModal
-					isOpen={showDownloadModal}
-					onClose={() => setShowDownloadModal(false)}
-					variant={downloadSuccess ? "success" : "error"}
-					reportId="I-0125"
-					onRetry={() => {
-						setDownloadSuccess(true);
-						setShowDownloadModal(false);
-					}}
-					onCancel={() => setShowDownloadModal(false)}
-				/>
 
 				{/* Table */}
 				<div className="mt-4 overflow-x-auto border border-gray-200 rounded-xl">

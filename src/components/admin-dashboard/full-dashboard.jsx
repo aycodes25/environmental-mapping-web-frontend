@@ -12,9 +12,7 @@ import {
 	Tooltip,
 	ReferenceLine,
 } from "recharts";
-import { TrendingUp, TrendingDown } from "lucide-react";
 import WebIcon from "../custom/WebIcons";
-import MessageModal from "./modal.jsx";
 
 /* ---------------- Colors ---------------- */
 const BASE_PALETTE = [
@@ -144,29 +142,13 @@ const DonutTooltip = ({ active, payload }) => {
 
 /* ---------------- FullDashboard ---------------- */
 const FullDashboard = ({ dashboardData = {} }) => {
-	const [startDate, setStartDate] = useState("10/02/2023");
-	const [endDate, setEndDate] = useState("End Date");
-	const [timePeriod, setTimePeriod] = useState("Monthly");
-	const [filterType, setFilterType] = useState("All"); // All | Sample | Incident
-	const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-	const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-	const [showTimePeriodDropdown, setShowTimePeriodDropdown] = useState(false);
-	const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+  const [filterType, setFilterType] = useState("All"); // All | Sample | Incident
+  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-	// Right side (Donut chart) states
-	const [rightStartDate, setRightStartDate] = useState("Start Date");
-	const [rightEndDate, setRightEndDate] = useState("End Date");
-	const [rightTimePeriod, setRightTimePeriod] = useState("Monthly");
-	const [rightFilterType, setRightFilterType] = useState("All");
-	const [showRightStartDatePicker, setShowRightStartDatePicker] =
-		useState(false);
-	const [showRightEndDatePicker, setShowRightEndDatePicker] = useState(false);
-	const [showRightTimePeriodDropdown, setShowRightTimePeriodDropdown] =
-		useState(false);
-	const [showRightFilterDropdown, setShowRightFilterDropdown] =
-		useState(false);
-	const [showDownloadModal, setShowDownloadModal] = useState(false);
-	const [downloadSuccess, setDownloadSuccess] = useState(true);
+  // Right side (Donut chart) state
+  const [rightFilterType, setRightFilterType] = useState("All");
+  const [showRightFilterDropdown, setShowRightFilterDropdown] =
+    useState(false);
 
 	// Build scatter bubbles based on selected filterType
 	const scatterData = useMemo(() => {
@@ -358,22 +340,16 @@ const FullDashboard = ({ dashboardData = {} }) => {
 	}, []);
 
 	// Close dropdowns when clicking outside
-	useEffect(() => {
-		const handleClickOutside = (event) => {
-			if (!event.target.closest(".dropdown-container")) {
-				setShowStartDatePicker(false);
-				setShowEndDatePicker(false);
-				setShowTimePeriodDropdown(false);
-				setShowFilterDropdown(false);
-				setShowRightStartDatePicker(false);
-				setShowRightEndDatePicker(false);
-				setShowRightTimePeriodDropdown(false);
-				setShowRightFilterDropdown(false);
-			}
-		};
-		document.addEventListener("click", handleClickOutside);
-		return () => document.removeEventListener("click", handleClickOutside);
-	}, []);
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (!event.target.closest(".dropdown-container")) {
+        setShowFilterDropdown(false);
+        setShowRightFilterDropdown(false);
+      }
+    };
+    document.addEventListener("click", handleClickOutside);
+    return () => document.removeEventListener("click", handleClickOutside);
+  }, []);
 
 	// Helper to render dynamic legend for the left chart
 	const renderLeftLegend = () => {
@@ -414,18 +390,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 	};
 
 	return (
-		<div className="grid mx-2 sm:mx-4 lg:mx-5 grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
-			<MessageModal
-				isOpen={showDownloadModal}
-				onClose={() => setShowDownloadModal(false)}
-				variant={downloadSuccess ? "success" : "error"}
-				reportId="I-0125"
-				onRetry={() => {
-					setDownloadSuccess(true);
-					setShowDownloadModal(false);
-				}}
-				onCancel={() => setShowDownloadModal(false)}
-			/>
+    <div className="grid mx-2 sm:mx-4 lg:mx-5 grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
 			{/* LEFT: Scatter */}
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 md:p-6">
 				{/* Header Section */}
@@ -445,7 +410,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 								className="w-4 h-4 md:w-5 md:h-5 text-gray-600"
 							/>
 						</div>
-						{/* Action icons & FilterType */}
+            {/* FilterType */}
 						<div className="flex items-center gap-3">
 							<div className="relative dropdown-container">
 								<button
@@ -478,25 +443,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 										))}
 									</div>
 								)}
-							</div>
-							<button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-								<WebIcon
-									icon="printer"
-									className="w-6 h-6 text-gray-700"
-								/>
-							</button>
-							<button
-								className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
-								onClick={() => {
-									setDownloadSuccess(false);
-									setShowDownloadModal(true);
-								}}
-							>
-								<WebIcon
-									icon="download"
-									className="w-6 h-6 text-gray-700"
-								/>
-							</button>
+              </div>
 						</div>
 					</div>
 
@@ -577,31 +524,11 @@ const FullDashboard = ({ dashboardData = {} }) => {
 							className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5"
 						/>
 					</div>
-					<div className="flex items-center gap-3">
-						<button className="p-2 hover:bg-gray-100 rounded-lg transition-colors">
-							<WebIcon
-								icon="printer"
-								className="w-6 h-6 text-gray-700"
-							/>
-						</button>
-						<button
-							className="p-2 cursor-pointer hover:bg-gray-100 rounded-lg transition-colors"
-							onClick={() => {
-								setDownloadSuccess(true);
-								setShowDownloadModal(true);
-							}}
-						>
-							<WebIcon
-								icon="download"
-								className="w-5 h-5 text-gray-700"
-							/>
-						</button>
-					</div>
+          <div className="flex items-center gap-3" />
 				</div>
 
 				{/* Filter Bar */}
-				<div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 md:mb-6">
-					{/* Start/End/Time omitted for brevity, keep existing pickers */}
+        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 md:mb-6">
 					<div className="relative dropdown-container">
 						<button
 							onClick={() =>
