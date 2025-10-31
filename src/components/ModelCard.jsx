@@ -39,7 +39,7 @@ export const ModelCard = ({
 			<div className="relative w-[332px] h-[180px] mx-auto mt-4 overflow-hidden rounded-[12px]">
 				{/* Eye indicator to show card is clickable */}
 				<div className="absolute left-3 top-3 z-10 pointer-events-none">
-					<div className="inline-flex items-center gap-1 rounded-full bg-black/50 text-white px-2 py-1 text-[11px]">
+					<div className="inline-flex items-center gap- 1 rounded-full bg-black/50 text-white px-2 py-1 text-[11px]">
 						<Eye className="h-3.5 w-3.5" />
 						<span>View</span>
 					</div>
