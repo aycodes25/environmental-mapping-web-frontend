@@ -561,7 +561,7 @@ const Report = () => {
 				{/* Report Title and Filters Row */}
 				<div className="flex items-center justify-between mb-6">
 					{/* Report Title */}
-					<h2 className="text-2xl font-bold text-primary">Reports</h2>
+					<h2 className="heading-large font-bold text-primary">Reports</h2>
 
 					{/* Filter Buttons */}
 					<div className="flex items-center gap-3">

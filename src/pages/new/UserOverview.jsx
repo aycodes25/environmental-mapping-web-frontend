@@ -4,28 +4,28 @@ import OverviewSection from "../../components/ui/overview-section";
 
 // A slim header for the Users page showing only the "Total Users" card
 const UserOverview = ({ dashboardData }) => {
-    const navigate = useNavigate();
+	const navigate = useNavigate();
 
-    const {
-        totalTagsThisMonth = 0,
-        totalModels = 0,
-        totalReviewers = 0,
-        totalTaggers = 0,
-        todaysModels = 0,
-    } = dashboardData || {};
+	const {
+		totalTagsThisMonth = 0,
+		totalModels = 0,
+		totalReviewers = 0,
+		totalTaggers = 0,
+		todaysModels = 0,
+	} = dashboardData || {};
 
-    // Mock chart data for tiny sparkline-like trend
-    const generateMockChartData = (baseValue) => {
-        const data = [];
-        for (let i = 0; i < 7; i++) {
-            data.push(baseValue + Math.random() * 20 - 10);
-        }
-        return data;
-    };
+	// Mock chart data for tiny sparkline-like trend
+	const generateMockChartData = (baseValue) => {
+		const data = [];
+		for (let i = 0; i < 7; i++) {
+			data.push(baseValue + Math.random() * 20 - 10);
+		}
+		return data;
+	};
 
-    // Only one card: Total Users
-    const statsCards = [
-    // -------------------------- user profile overview card --------------------------
+	// Only one card: Total Users
+	const statsCards = [
+		// -------------------------- user profile overview card --------------------------
 		{
 			icon: "user_icon",
 			title: "Total Users",
@@ -76,25 +76,23 @@ const UserOverview = ({ dashboardData }) => {
 			onClick: () => navigate("users"),
 			isClickable: true,
 		},
-    ];
+	];
 
-    // Keep filters consistent with other headers for layout
-    const filters = [
-        { label: "Start Date", showDropdown: true, onClick: () => {} },
-        { label: "End Date", showDropdown: true, onClick: () => {} },
-        { label: "Monthly", showDropdown: true, onClick: () => {} },
-    ];
+	// Keep filters consistent with other headers for layout
+	const filters = [
+		{ label: "Start Date", showDropdown: true, onClick: () => {} },
+		{ label: "End Date", showDropdown: true, onClick: () => {} },
+		{ label: "Monthly", showDropdown: true, onClick: () => {} },
+	];
 
-    return (
-        <OverviewSection
-            title="Welcome back!"
-            welcomeMessage="Here's a quick look at all the users."
-            filters={filters}
-            statsCards={statsCards}
-        />
-    );
+	return (
+		<OverviewSection
+			title="Welcome back"
+			welcomeMessage="Here's a quick look at all the users."
+			filters={filters}
+			statsCards={statsCards}
+		/>
+	);
 };
 
 export default UserOverview;
-
-

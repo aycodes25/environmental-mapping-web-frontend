@@ -2,286 +2,390 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate } from "../utils";
 import WebIcon from "../components/custom/WebIcons";
-import RemoveModal from "../components/admin-dashboard/remove-modal";
+import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
 import UserOverview from "./new/UserOverview.jsx";
+import TanstackTable from "../components/TanstackTable";
+import SearchInput from "../components/ui/search-input";
+import { Button as ShButton } from "../components/ui/button";
+import { useSelector } from "react-redux";
+import { memoize } from "proxy-memoize";
+import ReactPaginate from "react-paginate";
+import { useQueryClient } from "@tanstack/react-query";
 
-export const loader = (queryClient) => async () => {  
-  try {
-    const res = await customFetch.get("/user/getusers");
-    const users = Array.isArray(res.data?.users) ? res.data.users : [];
-    return { users };
-  } catch (e) {
-    return { users: [] };
-  }
+const url = "/user/getusers";
+
+export const loader = (queryClient) => async () => {
+	try {
+		const response = await queryClient.ensureQueryData({
+			queryKey: ["user"],
+			queryFn: () => customFetch(url),
+		});
+		const users = Array.isArray(response?.data?.users)
+			? response.data.users
+			: [];
+		return { users };
+	} catch (e) {
+		return { users: [] };
+	}
 };
-
-const columns = [
-  { key: "fullname", label: "Name" },
-  { key: "role", label: "Role" },
-  { key: "email", label: "Email" },
-  { key: "locations", label: "Location" },
-  { key: "models", label: "Models" },
-  { key: "createdAt", label: "Created" },
-  { key: "status", label: "Status" },
-];
 
 const AllUsers = () => {
-  const navigate = useNavigate();
-  const [users, setUsers] = useState([]);
-  const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState("All Users");
-  const [showRemoveModal, setShowRemoveModal] = useState(false);
-  const [removeVariant, setRemoveVariant] = useState("confirm");
-  const [userToRemove, setUserToRemove] = useState(null);
-  const [startDate, setStartDate] = useState("Start Date");
-  const [endDate, setEndDate] = useState("End Date");
-  const [showStartDatePicker, setShowStartDatePicker] = useState(false);
-  const [showEndDatePicker, setShowEndDatePicker] = useState(false);
-  const [listFilter, setListFilter] = useState("All");
-  const [showListDropdown, setShowListDropdown] = useState(false);
-  const [deleting, setDeleting] = useState(false);
+	const navigate = useNavigate();
+	const authUser = useSelector(memoize((state) => state.userState.user));
+	const queryClient = useQueryClient();
 
-  useEffect(() => {
-    const load = async () => {
-      setLoading(true);
-      try {
-        const res = await customFetch.get("/user/getusers");
-        const list = Array.isArray(res.data?.users) ? res.data.users : [];
-        setUsers(list);
-      } catch (e) {
-        setUsers([]);
-      } finally {
-        setLoading(false);
-      }
-    };
-    load();
-  }, []);
+	const [users, setUsers] = useState([]);
+	const [search, setSearch] = useState("");
+	const [loading, setLoading] = useState(false);
+	const [activeTab, setActiveTab] = useState("All Users");
+	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const [userToDelete, setUserToDelete] = useState(null);
+	const [deletedUserName, setDeletedUserName] = useState("");
 
-  const dashboardData = useMemo(() => {
-    const totalReviewers = users.filter((u) => (u.role || "").toLowerCase() === "reviewer").length;
-    const totalTaggers = users.filter((u) => (u.role || "").toLowerCase() === "tagger").length;
-    return {
-      totalTagsThisMonth: users.length,
-      totalModels: 0,
-      totalReviewers,
-      totalTaggers,
-      todaysModels: 0,
-    };
-  }, [users]);
+	// pagination state
+	const [itemOffset, setItemOffset] = useState(0);
+	const itemsPerPage = 10;
 
-  const filtered = useMemo(() => {
-    const q = search.trim().toLowerCase();
-    if (!q) return users;
-    return users.filter((u) =>
-      [u._id, u.username, u.fullname, u.email, u.role, u?.locations?.name || u.locations]
-        .filter(Boolean)
-        .join(" ")
-        .toLowerCase()
-        .includes(q)
-    );
-  }, [users, search]);
+	useEffect(() => {
+		const load = async () => {
+			setLoading(true);
+			try {
+				const res = await customFetch.get(url);
+				const list = Array.isArray(res.data?.users) ? res.data.users : [];
+				setUsers(list);
+			} catch (e) {
+				setUsers([]);
+			} finally {
+				setLoading(false);
+			}
+		};
+		load();
+	}, []);
 
-  const tabFiltered = useMemo(() => {
-    switch (activeTab) {
-      case "Taggers":
-        return filtered.filter((u) => (u.role || "").toLowerCase() === "tagger");
-      case "Reviewers":
-        return filtered.filter((u) => (u.role || "").toLowerCase() === "reviewer");
-      case "Inactive Users":
-        return filtered.filter((u) => (u.status || "").toLowerCase() === "inactive");
-      default:
-        return filtered;
-    }
-  }, [filtered, activeTab]);
+	const filtered = useMemo(() => {
+		const q = search.trim().toLowerCase();
+		const base = users;
+		const list = !q
+			? base
+			: base.filter((u) =>
+					[
+						u._id,
+						u.username,
+						u.fullname,
+						u.email,
+						u.role,
+						u?.locations?.name || u.locations,
+					]
+						.filter(Boolean)
+						.join(" ")
+						.toLowerCase()
+						.includes(q)
+			  );
+		switch (activeTab) {
+			case "Taggers":
+				return list.filter(
+					(u) => (u.role || "").toLowerCase() === "tagger"
+				);
+			case "Reviewers":
+				return list.filter(
+					(u) => (u.role || "").toLowerCase() === "reviewer"
+				);
 
-  return (
-    <div className="p-6 md:p-8 mx-5">
-      <UserOverview dashboardData={dashboardData} />
-      {/* Tabs + Add user */}
-      <div className="mb-4 flex flex-col sm:flex-row items-center justify-between gap-3">
-        <div className="flex items-center gap-2 bg-white rounded-full p-1 border border-gray-200">
-          {[
-            "All Users",
-            "Taggers",
-            "Reviewers",
-            "Inactive Users",
-          ].map((tab) => (
-            <button
-              key={tab}
-              onClick={() => setActiveTab(tab)}
-              className={`px-3 py-1.5 rounded-full text-xs md:text-sm ${activeTab === tab ? "bg-[#2D1342] text-white" : "text-gray-700 hover:bg-gray-100"
-                }`}
-            >
-              {tab}
-            </button>
-          ))}
-        </div>
-        <button className="rounded-full px-3 py-2 bg-[#2D1342] text-white text-xs md:text-sm" onClick={() => navigate("/admin/users/add-user")}>Add User</button>
-      </div>
+			default:
+				return list;
+		}
+	}, [users, search, activeTab]);
 
-      {/* Search and filters */}
-      <div className="mb-5 flex flex-col sm:flex-row items-center gap-3 text-end justify-end my-8">
-        <div className="relative flex-1 max-w-xl w-full">
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by Name, Status, Role...."
-            className="w-full rounded-full border border-gray-200 pl-4 pr-12 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-          />
-          <button
-            type="button"
-            className="absolute right-2 top-1/2 -translate-y-1/2 h-8 w-8 rounded-full bg-white shadow ring-1 ring-gray-200 flex items-center justify-center"
-          >
-            <WebIcon icon="search" className="w-4 h-4 text-gray-700" />
-          </button>
-        </div>
-        {/* Start Date */}
-        <div className="relative dropdown-container">
-          <button
-            onClick={() => setShowStartDatePicker(!showStartDatePicker)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
-          >
-            <WebIcon icon="calendar" className="w-4 h-4 text-gray-700" />
-            <span className="text-xs text-gray-700">{startDate}</span>
-            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
-          </button>
-          {showStartDatePicker && (
-            <input
-              type="date"
-              className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
-              onChange={(e) => {
-                const d = new Date(e.target.value);
-                setStartDate(`${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`);
-                setShowStartDatePicker(false);
-              }}
-              autoFocus
-            />
-          )}
-        </div>
-        {/* End Date */}
-        <div className="relative dropdown-container">
-          <button
-            onClick={() => setShowEndDatePicker(!showEndDatePicker)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
-          >
-            <WebIcon icon="calendar" className="w-4 h-4 text-gray-700" />
-            <span className="text-xs text-gray-700">{endDate}</span>
-            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
-          </button>
-          {showEndDatePicker && (
-            <input
-              type="date"
-              className="absolute top-full mt-1 z-50 border border-gray-300 rounded-lg p-2"
-              onChange={(e) => {
-                const d = new Date(e.target.value);
-                setEndDate(`${d.getMonth() + 1}/${d.getDate()}/${d.getFullYear()}`);
-                setShowEndDatePicker(false);
-              }}
-              autoFocus
-            />
-          )}
-        </div>
-        {/* All dropdown */}
-        <div className="relative dropdown-container">
-          <button
-            onClick={() => setShowListDropdown(!showListDropdown)}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white hover:bg-gray-50 transition-colors border border-gray-200"
-          >
-            <span className="text-xs text-gray-700">{listFilter}</span>
-            <WebIcon icon="chevron_down" className="w-4 h-4 text-gray-700" />
-          </button>
-          {showListDropdown && (
-            <div className="absolute top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
-              {["All", "Active", "Inactive"].map((s) => (
-                <button key={s} onClick={() => { setListFilter(s); setShowListDropdown(false); }} className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg">{s}</button>
-              ))}
-            </div>
-          )}
-        </div>
-      </div>
+	const endOffset = itemOffset + itemsPerPage;
+	const currentItems = useMemo(
+		() => filtered.slice(itemOffset, endOffset),
+		[filtered, itemOffset, endOffset]
+	);
+	const pageCount = Math.ceil(filtered.length / itemsPerPage) || 1;
 
-      <div className="overflow-x-auto rounded-xl border border-gray-200">
-        <table className="min-w-full divide-y divide-gray-200">
-          <thead className="bg-[#2D1342] text-white">
-            <tr>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">_id</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">username</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">fullname</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">email</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">locations</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">role</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">models</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">createdAt</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">updatedAt</th>
-              <th className="px-4 py-2 text-left text-xs font-semibold uppercase tracking-wider">Action</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-gray-100 bg-white text-sm">
-            {loading && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">Loading...</td></tr>
-            )}
-            {!loading && tabFiltered.length === 0 && (
-              <tr><td colSpan={7} className="px-4 py-6 text-center text-gray-500">The list is empty.</td></tr>
-            )}
-            {!loading && tabFiltered.map((u) => (
-              <tr key={u._id} className="hover:bg-gray-50">
-                <td className="px-4 py-3">{u?._id}</td>
-                <td className="px-4 py-3">{u?.username || ""}</td>
-                <td className="px-4 py-3 font-medium">{u?.fullname || ""}</td>
-                <td className="px-4 py-3">{u?.email || ""}</td>
-                <td className="px-4 py-3">{u?.role === 'superAdmin' ? 'All locations' : (u?.locations?.name || u?.locations || '')}</td>
-                <td className="px-4 py-3">{u?.role || ''}</td>
-                <td className="px-4 py-3">{Array.isArray(u?.models) ? u.models.length : 0}</td>
-                <td className="px-4 py-3">{u?.createdAt ? formatDate(u.createdAt) : ''}</td>
-                <td className="px-4 py-3">{u?.updatedAt ? formatDate(u.updatedAt) : ''}</td>
-                <td className="px-4 py-3">
-                  <div className="flex items-center justify-center">
-                    <button
-                      type="button"
-                      className="p-1.5 rounded hover:bg-gray-100 active:scale-95 transition"
-                      aria-label="Delete user"
-                      onClick={() => { setUserToRemove(u); setRemoveVariant("confirm"); setShowRemoveModal(true); }}
-                    >
-                      <WebIcon icon="delete" className="w-6 h-6 text-[#160a22]" />
-                    </button>
-                  </div>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </div>
+	const handlePageClick = (event) => {
+		const newOffset = (event.selected * itemsPerPage) % filtered.length;
+		setItemOffset(newOffset);
+	};
 
-      {/* Remove modal */}
-      <RemoveModal
-        isOpen={showRemoveModal}
-        onClose={() => setShowRemoveModal(false)}
-        variant={removeVariant}
-        userDisplayName={userToRemove?.fullname || userToRemove?.username || "this user"}
-        onConfirm={async () => {
-          if (!userToRemove || deleting) return;
-          try {
-            setDeleting(true);
-            await customFetch.delete(`/user/delete/${userToRemove._id}`);
-            setUsers((prev) => prev.filter((x) => x._id !== userToRemove._id));
-            setRemoveVariant("success");
-            setTimeout(() => {
-              setShowRemoveModal(false);
-              setRemoveVariant("confirm");
-              setUserToRemove(null);
-            }, 1400);
-          } catch (e) {
-            // keep modal open; optionally surface error via toast if available
-          } finally {
-            setDeleting(false);
-          }
-        }}
-      />
-    </div>
-  );
+	const handleDelete = async (_id) => {
+		try {
+			const user = userToDelete;
+			const userName = user?.fullname || user?.username || "User";
+			const res = await customFetch.delete(`/user/delete/${_id}`);
+			if (res.data?.status !== "error") {
+				setUsers((prev) => prev.filter((u) => u._id !== _id));
+				queryClient.invalidateQueries(["user"]);
+				setShowDeleteAlert(false);
+				setDeletedUserName(userName);
+				setShowSuccessAlert(true);
+				setUserToDelete(null);
+			} else {
+				// keep UI consistent
+			}
+		} catch (error) {
+			// toast in upstream utils generally; keep UI stable
+		}
+	};
+
+	const handleDeleteClick = (user) => {
+		setUserToDelete(user);
+		setShowDeleteAlert(true);
+	};
+
+	const columns = useMemo(
+		() => [
+			{
+				accessorKey: "username",
+				header: "Username",
+				cell: (info) => info.getValue() || "",
+			},
+			{
+				accessorKey: "fullname",
+				header: "Fullname",
+				cell: (info) => info.getValue() || "",
+			},
+			{
+				accessorKey: "email",
+				header: "Email",
+				cell: (info) => info.getValue() || "",
+			},
+			{
+				accessorKey: "role",
+				header: "Role",
+				cell: (info) => info.getValue() || "",
+			},
+			{
+				accessorFn: (row) =>
+					Array.isArray(row?.models) ? row.models.length : 0,
+				header: "Models",
+				cell: (info) => info.getValue(),
+			},
+			{
+				accessorFn: (row) =>
+					row?.createdAt ? formatDate(row.createdAt) : "",
+				header: "Created",
+				cell: (info) => info.getValue(),
+			},
+			{
+				accessorFn: (row) =>
+					row?.updatedAt ? formatDate(row.updatedAt) : "",
+				header: "Updated",
+				cell: (info) => info.getValue(),
+			},
+			{
+				accessorFn: () => "",
+				header: "Options",
+				excludeFromReport: true,
+				cell: ({ row }) => (
+					<OptionsDropdown
+						authRole={authUser?.role}
+						row={row.original}
+						onDeleteClick={handleDeleteClick}
+						navigate={navigate}
+					/>
+				),
+			},
+		],
+		[authUser?.role]
+	);
+
+	return (
+		<div className="flex overflow-auto flex-col flex-grow w-auto h-screen">
+			<UserOverview
+				dashboardData={{
+					totalTagsThisMonth: users.length,
+					totalModels: 0,
+					totalReviewers: users.filter(
+						(u) => (u.role || "").toLowerCase() === "reviewer"
+					).length,
+					totalTaggers: users.filter(
+						(u) => (u.role || "").toLowerCase() === "tagger"
+					).length,
+					todaysModels: 0,
+				}}
+			/>
+
+			{/* Users Title and Add User Button Row */}
+			<div className="flex items-center justify-between mb-6 px-5">
+				<div>
+					<h2 className="heading-large font-bold text-primary">Users</h2>
+				</div>
+				<ShButton
+					className="h-[48px] rounded-[20px] bg-primary text-white border border-primary shadow-none"
+					onClick={() => navigate("/admin/users/add-user")}
+				>
+					Add User
+				</ShButton>
+			</div>
+
+			{/* Tabs row with background container */}
+			<div className="mb-4 w-full px-5 flex items-center justify-between gap-3">
+				<div className="flex items-center gap-2 bg-white rounded-full p-1 border border-gray-200">
+					{["All Users", "Taggers", "Reviewers"].map((tab) => (
+						<button
+							key={tab}
+							onClick={() => {
+								setActiveTab(tab);
+								setItemOffset(0);
+							}}
+							className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${
+								activeTab === tab
+									? "bg-primary text-white border-primary"
+									: "bg-white text-gray-600 border-gray-300"
+							}`}
+						>
+							{tab}
+						</button>
+					))}
+				</div>
+			</div>
+
+			{/* Search Row aligned to right like Report */}
+			<div className="flex items-center justify-end mb-6 px-5">
+				<SearchInput
+					value={search}
+					onChange={(val) => {
+						setSearch(val);
+						setItemOffset(0);
+					}}
+					placeholder="Search by Name, Status, Role...."
+				/>
+			</div>
+
+			{/* Table Section */}
+			<section className="flex justify-center items-center px-5">
+				<div className="w-full border border-gray-200 rounded-xl overflow-hidden">
+					{loading ? (
+						<div className="w-full py-10 text-center text-gray-500">
+							Loading...
+						</div>
+					) : (
+						<TanstackTable columns={columns} tableData={currentItems} />
+					)}
+				</div>
+			</section>
+
+			{/* Pagination */}
+			<div className="navigatonBtnContainer">
+				<ReactPaginate
+					previousLabel="Prev"
+					nextLabel="Next"
+					pageClassName="flex h-10 w-10 items-center justify-center rounded-full text-center text-xl"
+					pageLinkClassName="page-link"
+					previousClassName="flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold"
+					previousLinkClassName="page-link"
+					nextClassName="flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold"
+					nextLinkClassName="page-link"
+					breakLabel="..."
+					breakClassName="flex h-10 w-10 items-center justify-center rounded-full text-center text-xl font-bold"
+					breakLinkClassName="page-link"
+					pageCount={pageCount}
+					marginPagesDisplayed={2}
+					pageRangeDisplayed={5}
+					onPageChange={handlePageClick}
+					containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
+					activeclassname="m-1 rounded-full bg-black p-0 text-white"
+					forcePage={Math.floor(itemOffset / itemsPerPage)}
+				/>
+			</div>
+
+			{/* Delete Alert Modal */}
+			<DeleteAlert
+				isOpen={showDeleteAlert}
+				onClose={() => {
+					setShowDeleteAlert(false);
+					setUserToDelete(null);
+				}}
+				onConfirm={() => {
+					if (userToDelete?._id) {
+						handleDelete(userToDelete._id);
+					}
+				}}
+				title="Delete User"
+				message={`Are you sure you want to delete ${
+					userToDelete?.fullname || userToDelete?.username || "this user"
+				}? This action cannot be undone.`}
+			/>
+
+			{/* Success Alert Modal */}
+			<SuccessAlert
+				isOpen={showSuccessAlert}
+				onClose={() => {
+					setShowSuccessAlert(false);
+					setDeletedUserName("");
+				}}
+				title="User Deleted"
+				message={`${
+					deletedUserName || "User"
+				} has been successfully deleted.`}
+			/>
+		</div>
+	);
 };
 
+function OptionsDropdown({ authRole, row, onDeleteClick, navigate }) {
+	const [isOpen, setIsOpen] = useState(false);
+	const normalizedRole = (authRole || "").toLowerCase();
+	const canManage = ["admin", "superadmin"].includes(normalizedRole);
+	return (
+		<div className="relative">
+			<button
+				onClick={() => setIsOpen(!isOpen)}
+				className="p-1 hover:bg-gray-100 rounded transition-colors"
+			>
+				<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
+					<circle cx="12" cy="6" r="2" fill="currentColor" />
+					<circle cx="12" cy="12" r="2" fill="currentColor" />
+					<circle cx="12" cy="18" r="2" fill="currentColor" />
+				</svg>
+			</button>
+			{isOpen && (
+				<div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px]">
+					<div className="py-1">
+						<button
+							onClick={() => {
+								setIsOpen(false);
+								navigate(`/admin/single-user/${row._id}`);
+							}}
+							className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+						>
+							View User
+						</button>
+						{canManage && (
+							<button
+								onClick={() => {
+									setIsOpen(false);
+									navigate(`/admin/edit-user/${row._id}`);
+								}}
+								className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
+							>
+								Edit User
+							</button>
+						)}
+						{canManage && (
+							<button
+								onClick={() => {
+									setIsOpen(false);
+									onDeleteClick(row);
+								}}
+								className="w-full px-4 py-2 text-left text-sm text-red-600 hover:bg-red-50 transition-colors"
+							>
+								Delete User
+							</button>
+						)}
+					</div>
+				</div>
+			)}
+			{isOpen && (
+				<div
+					className="fixed inset-0 z-40"
+					onClick={() => setIsOpen(false)}
+				/>
+			)}
+		</div>
+	);
+}
+
 export default AllUsers;
-
-
