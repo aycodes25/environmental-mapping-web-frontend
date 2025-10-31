@@ -16,15 +16,23 @@ const ViewIncidences = () => {
     () => tags.slice(itemOffset, endOffset),
     [endOffset, itemOffset, tags]
   );
-  const pageCount = Math.ceil(tags.length / itemsPerPage);
+  const pageCount = Math.max(1, Math.ceil(tags.length / itemsPerPage));
 
   const handlePageClick = (event) => {
-    setItemOffset(event.selected);
+    setItemOffset(event.selected * itemsPerPage);
   };
 
   useEffect(() => {
     setTagsData(currentItems);
   }, [currentItems]);
+
+  // Clamp itemOffset when list shrinks
+  useEffect(() => {
+    const total = tags.length;
+    const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
+    const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
+    if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
+  }, [tags, itemsPerPage, itemOffset]);
 
   const handleFilterTags = useCallback(
     (search) => {
@@ -149,7 +157,7 @@ const ViewIncidences = () => {
             onPageChange={handlePageClick}
             containerClassName='flex flex-row items-center justify-center gap-2 py-10 text-center text-xl'
             activeclassname='m-1 rounded-full bg-black p-0 text-white'
-            forcePage={itemOffset}
+            forcePage={Math.floor(itemOffset / itemsPerPage)}
           />
         </div>
       </main >

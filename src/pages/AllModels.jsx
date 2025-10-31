@@ -75,10 +75,10 @@ const AllModels = () => {
 	);
 
 	// Use filteredModels for pagination
-	const pageCount = Math.ceil(filteredModels.length / itemsPerPage);
+	const pageCount = Math.max(1, Math.ceil(filteredModels.length / itemsPerPage));
 
 	const handlePageClick = (event) => {
-		setItemOffset(event.selected);
+		setItemOffset(event.selected * itemsPerPage);
 	};
 
 	const user = useSelector(memoize((state) => state.userState.user));
@@ -142,6 +142,14 @@ const AllModels = () => {
 	useEffect(() => {
 		setModelList(currentItems);
 	}, [currentItems]);
+
+	// Clamp itemOffset when filtered list shrinks to avoid empty pages
+	useEffect(() => {
+		const total = filteredModels.length;
+		const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
+		const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
+		if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
+	}, [filteredModels, itemsPerPage, itemOffset]);
 
 	const handleDeleteAModel = (id) => {
 		setConfirmDelete(false);
@@ -332,7 +340,7 @@ const AllModels = () => {
 						onPageChange={handlePageClick}
 						containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
 						activeclassname="m-1 rounded-full bg-black p-0 text-white"
-						forcePage={itemOffset}
+						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>
 				{confirmDelete && (

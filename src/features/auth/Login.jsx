@@ -163,12 +163,7 @@ const Login = () => {
 										Keep me Logged In
 									</label>
 								</div>
-								<Link
-									to="/forgot-password"
-									className="text-small font-medium text-secondaryAlt hover:text-secondary-alt transition-colors"
-								>
-									Forgot Password?
-								</Link>
+								{/* Forgot Password link removed as requested */}
 							</div>
 						</div>
 

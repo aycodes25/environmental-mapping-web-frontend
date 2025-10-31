@@ -42,11 +42,11 @@ const Trash = () => {
     () => model.slice(itemOffset, endOffset),
     [endOffset, itemOffset, model]
   );
-  const pageCount = Math.ceil(model.length / itemsPerPage);
+  const pageCount = Math.max(1, Math.ceil(model.length / itemsPerPage));
 
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
-    setItemOffset(event.selected);
+    setItemOffset(event.selected * itemsPerPage);
   };
 
   const fetchData = async () => {
@@ -108,6 +108,14 @@ const Trash = () => {
   useEffect(() => {
     setModelList(currentItems);
   }, [currentItems]);
+
+  // Clamp itemOffset when list shrinks
+  useEffect(() => {
+    const total = model.length;
+    const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
+    const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
+    if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
+  }, [model, itemsPerPage, itemOffset]);
 
   return (
     <div className='AllModels flex justify-center items-center flex-col box-border w-full py-5'>
@@ -194,7 +202,7 @@ const Trash = () => {
             onPageChange={handlePageClick}
             containerClassName='flex flex-row items-center justify-center gap-2 py-10 text-center text-xl'
             activeclassname='m-1 rounded-full bg-black p-0 text-white'
-            forcePage={itemOffset}
+            forcePage={Math.floor(itemOffset / itemsPerPage)}
           />
         </div>
         {confirmDelete && (

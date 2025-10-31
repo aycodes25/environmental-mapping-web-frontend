@@ -30,7 +30,13 @@ function OptionsDropdown({ row, navigate }) {
 						<button
 							onClick={() => {
 								setIsOpen(false);
-								navigate(`/view-model/${row._id}`);
+								const id = row?._id;
+								if (id && typeof id === "string") {
+									navigate(`/view-model/${id}`);
+								} else {
+									// prevent crash when id is missing or invalid
+									toast.error("Unable to open model: missing or invalid id");
+								}
 							}}
 							className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
 						>
