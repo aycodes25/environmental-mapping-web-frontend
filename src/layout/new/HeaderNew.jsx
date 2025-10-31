@@ -29,27 +29,6 @@ const HeaderNew = () => {
 			style={{ boxShadow: "0 6px 24px rgba(0, 0, 0, 0.5)" }}
 		>
 			<div className="text-xl font-bold text-primary">{getPageTitle()}</div>
-			<div className="ml-auto flex items-center gap-4">
-				{/* Search Icon */}
-				<button className="flex items-center justify-center hover:bg-lightGrey transition-colors">
-					<WebIcon icon="search" className="w-10 h-10" size="large" />
-				</button>
-
-				{/* Clock Icon */}
-				<button className="flex items-center justify-center hover:bg-lightGrey transition-colors">
-					<WebIcon icon="clock" className="w-10 h-10" size="large" />
-				</button>
-
-				{/* Notification Icon with red dot */}
-				<button className="relative flex items-center justify-center hover:bg-lightGrey transition-colors">
-					<WebIcon
-						icon="notification"
-						className="w-10 h-10"
-						size="large"
-					/>
-					<div className="absolute -top-1 -right-1 w-3 h-3 bg-danger rounded-full"></div>
-				</button>
-			</div>
 		</div>
 	);
 };

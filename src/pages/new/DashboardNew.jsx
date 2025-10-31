@@ -11,10 +11,43 @@ const url = "/user/dashboard";
 
 function OptionsDropdown({ row, navigate }) {
 	const [isOpen, setIsOpen] = useState(false);
+
+	const handleViewModel = (e) => {
+		e.preventDefault();
+		e.stopPropagation(); // Prevent event from bubbling to table row
+		setIsOpen(false);
+
+		// Debug: Check row structure
+		if (!row) {
+			toast.error("Row data is missing");
+			return;
+		}
+
+		const _id = row._id;
+		if (!_id) {
+			toast.error(
+				`Unable to open model: ID not found. Row keys: ${Object.keys(
+					row
+				).join(", ")}`
+			);
+			return;
+		}
+
+		if (typeof _id !== "string") {
+			toast.error(`Invalid ID type: ${typeof _id}`);
+			return;
+		}
+
+		navigate(`/view-model/${_id}`);
+	};
+
 	return (
-		<div className="relative">
+		<div className="relative" onClick={(e) => e.stopPropagation()}>
 			<button
-				onClick={() => setIsOpen(!isOpen)}
+				onClick={(e) => {
+					e.stopPropagation();
+					setIsOpen(!isOpen);
+				}}
 				className="p-1 hover:bg-gray-100 rounded transition-colors"
 			>
 				<svg width="20" height="20" viewBox="0 0 24 24" fill="none">
@@ -27,16 +60,7 @@ function OptionsDropdown({ row, navigate }) {
 				<div className="absolute right-0 top-8 bg-white border border-gray-200 rounded-lg shadow-lg z-50 min-w-[160px]">
 					<div className="py-1">
 						<button
-							onClick={() => {
-								setIsOpen(false);
-								const id = row?._id;
-								if (id && typeof id === "string") {
-									navigate(`/view-model/${id}`);
-								} else {
-									// prevent crash when id is missing or invalid
-									toast.error("Unable to open model: missing or invalid id");
-								}
-							}}
+							onClick={handleViewModel}
 							className="w-full px-4 py-2 text-left text-sm text-gray-700 hover:bg-gray-100 transition-colors"
 						>
 							View Model
@@ -165,7 +189,7 @@ const DashboardNew = () => {
 								isComplete ? "text-green-600" : "text-yellow-500"
 							}`}
 						>
-							{isComplete ? "Completed" : "In Progress"}
+							{isComplete ? "Completed" : "Not Complete"}
 						</span>
 					);
 				},

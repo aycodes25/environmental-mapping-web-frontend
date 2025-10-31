@@ -142,13 +142,13 @@ const DonutTooltip = ({ active, payload }) => {
 
 /* ---------------- FullDashboard ---------------- */
 const FullDashboard = ({ dashboardData = {} }) => {
-  const [filterType, setFilterType] = useState("All"); // All | Sample | Incident
-  const [showFilterDropdown, setShowFilterDropdown] = useState(false);
+	const [filterType, setFilterType] = useState("All"); // All | Sample | Incident
+	const [showFilterDropdown, setShowFilterDropdown] = useState(false);
 
-  // Right side (Donut chart) state
-  const [rightFilterType, setRightFilterType] = useState("All");
-  const [showRightFilterDropdown, setShowRightFilterDropdown] =
-    useState(false);
+	// Right side (Donut chart) state
+	const [rightFilterType, setRightFilterType] = useState("All");
+	const [showRightFilterDropdown, setShowRightFilterDropdown] =
+		useState(false);
 
 	// Build scatter bubbles based on selected filterType
 	const scatterData = useMemo(() => {
@@ -340,16 +340,16 @@ const FullDashboard = ({ dashboardData = {} }) => {
 	}, []);
 
 	// Close dropdowns when clicking outside
-  useEffect(() => {
-    const handleClickOutside = (event) => {
-      if (!event.target.closest(".dropdown-container")) {
-        setShowFilterDropdown(false);
-        setShowRightFilterDropdown(false);
-      }
-    };
-    document.addEventListener("click", handleClickOutside);
-    return () => document.removeEventListener("click", handleClickOutside);
-  }, []);
+	useEffect(() => {
+		const handleClickOutside = (event) => {
+			if (!event.target.closest(".dropdown-container")) {
+				setShowFilterDropdown(false);
+				setShowRightFilterDropdown(false);
+			}
+		};
+		document.addEventListener("click", handleClickOutside);
+		return () => document.removeEventListener("click", handleClickOutside);
+	}, []);
 
 	// Helper to render dynamic legend for the left chart
 	const renderLeftLegend = () => {
@@ -390,7 +390,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 	};
 
 	return (
-    <div className="grid mx-2 sm:mx-4 lg:mx-5 grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
+		<div className="grid mx-2 sm:mx-4 lg:mx-5 grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6 mb-6 md:mb-10">
 			{/* LEFT: Scatter */}
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 md:p-6">
 				{/* Header Section */}
@@ -410,14 +410,14 @@ const FullDashboard = ({ dashboardData = {} }) => {
 								className="w-4 h-4 md:w-5 md:h-5 text-gray-600"
 							/>
 						</div>
-            {/* FilterType */}
+						{/* FilterType */}
 						<div className="flex items-center gap-3">
 							<div className="relative dropdown-container">
 								<button
 									onClick={() =>
 										setShowFilterDropdown(!showFilterDropdown)
 									}
-									className="flex items-center gap-2 px-3 py-1.5 bg-[#412461] text-white rounded-full hover:bg-[#7C3AED]"
+									className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full hover:bg-[#7C3AED]"
 								>
 									<span className="text-xs font-medium">
 										{filterType}
@@ -443,7 +443,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 										))}
 									</div>
 								)}
-              </div>
+							</div>
 						</div>
 					</div>
 
@@ -524,42 +524,42 @@ const FullDashboard = ({ dashboardData = {} }) => {
 							className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5"
 						/>
 					</div>
-          <div className="flex items-center gap-3" />
-				</div>
+					<div className="flex items-center gap-3" />
 
-				{/* Filter Bar */}
-        <div className="flex flex-wrap items-center gap-2 md:gap-3 mb-4 md:mb-6">
-					<div className="relative dropdown-container">
-						<button
-							onClick={() =>
-								setShowRightFilterDropdown(!showRightFilterDropdown)
-							}
-							className="flex items-center gap-2 px-3 py-1.5 bg-[#412461] text-white rounded-full hover:bg-[#7C3AED] transition-colors"
-						>
-							<span className="text-xs font-medium">
-								{rightFilterType}
-							</span>
-							<WebIcon
-								icon="chevron_down"
-								className="w-4 h-4 text-white"
-							/>
-						</button>
-						{showRightFilterDropdown && (
-							<div className="absolute top-full mt-1 bg-[#6B21A8] rounded-lg shadow-lg z-50 min-w-[120px]">
-								{["All", "Sample", "Incident"].map((opt) => (
-									<button
-										key={opt}
-										onClick={() => {
-											setRightFilterType(opt);
-											setShowRightFilterDropdown(false);
-										}}
-										className="w-full text-left px-3 py-2 text-xs text-white hover:bg-[#7C3AED] first:rounded-t-lg last:rounded-b-lg"
-									>
-										{opt}
-									</button>
-								))}
-							</div>
-						)}
+					{/* Filter Bar */}
+					<div className="flex flex-wrap items-center gap-2">
+						<div className="relative dropdown-container">
+							<button
+								onClick={() =>
+									setShowRightFilterDropdown(!showRightFilterDropdown)
+								}
+								className="flex items-center gap-2 px-3 py-1.5 bg-primary text-white rounded-full hover:bg-[#7C3AED] transition-colors"
+							>
+								<span className="text-xs font-medium">
+									{rightFilterType}
+								</span>
+								<WebIcon
+									icon="chevron_down"
+									className="w-4 h-4 text-white"
+								/>
+							</button>
+							{showRightFilterDropdown && (
+								<div className="absolute right-0 top-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg z-50 min-w-[120px]">
+									{["All", "Sample", "Incident"].map((opt) => (
+										<button
+											key={opt}
+											onClick={() => {
+												setRightFilterType(opt);
+												setShowRightFilterDropdown(false);
+											}}
+											className="w-full text-left px-3 py-2 text-sm hover:bg-gray-50 first:rounded-t-lg last:rounded-b-lg"
+										>
+											{opt}
+										</button>
+									))}
+								</div>
+							)}
+						</div>
 					</div>
 				</div>
 
