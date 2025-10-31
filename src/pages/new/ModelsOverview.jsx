@@ -61,7 +61,7 @@ const ModelsOverview = ({ data }) => {
 			isClickable: isCompletedView,
 		},
 		{
-			icon: "trash",
+			icon: "Trash",
 			title: "Deleted Facilities",
 			count: deletedModels,
 			trend: "+0",
