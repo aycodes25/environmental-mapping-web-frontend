@@ -71,6 +71,7 @@ const AddModel = () => {
 			const formDataForUpload = new FormData();
 			if (!formData.file) {
 				toast.error("please provide a model file");
+				setIsSubmitting(false);
 				return;
 			}
 
