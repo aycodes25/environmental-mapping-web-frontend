@@ -33,8 +33,8 @@ const SidebarFooter = ({ collapsed }) => {
 	};
 
 	const footerIcons = [
-		{ id: "activity", icon: "activity" },
-		{ id: "settings", icon: "settings" },
+		// { id: "activity", icon: "activity" },
+		// { id: "settings", icon: "settings" },
 		{ id: "logout", icon: "logout" },
 	];
 

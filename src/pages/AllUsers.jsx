@@ -192,7 +192,7 @@ const AllUsers = () => {
 	);
 
 	return (
-		<div className="flex overflow-auto flex-col flex-grow w-auto h-screen">
+		<div className="flex flex-col flex-grow w-auto">
 			<UserOverview
 				dashboardData={{
 					totalTagsThisMonth: users.length,
@@ -262,7 +262,11 @@ const AllUsers = () => {
 							Loading...
 						</div>
 					) : (
-						<TanstackTable columns={columns} tableData={currentItems} />
+						<TanstackTable
+							autoHeight
+							columns={columns}
+							tableData={currentItems}
+						/>
 					)}
 				</div>
 			</section>

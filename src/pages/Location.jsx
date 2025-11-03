@@ -139,7 +139,7 @@ const Location = () => {
 
 	return (
 		<>
-			<div className="flex overflow-auto flex-col flex-grow w-auto h-screen">
+			<div className="flex flex-col flex-grow w-auto">
 				{/* Location Overview Section */}
 				<LocationOverview locationData={locationData} />
 
@@ -174,7 +174,13 @@ const Location = () => {
 
 					{/* Table Section */}
 					<section className="flex justify-center items-center">
-						{data && <TanstackTable columns={columns} tableData={data} />}
+						{data && (
+							<TanstackTable
+								autoHeight
+								columns={columns}
+								tableData={data}
+							/>
+						)}
 					</section>
 				</div>
 			</div>

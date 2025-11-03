@@ -552,7 +552,7 @@ const Report = () => {
 	};
 
 	return (
-		<div className="flex overflow-auto flex-col flex-grow w-auto h-screen">
+		<div className="flex flex-col flex-grow w-auto">
 			{/* Report Overview Section */}
 			<ReportOverview reportData={reportData} />
 
@@ -684,6 +684,7 @@ const Report = () => {
 				{/* Table Section */}
 				<section className="flex justify-center items-center">
 					<TanstackTable
+						autoHeight
 						columns={getColumns()}
 						tableData={getFilteredData()}
 					/>

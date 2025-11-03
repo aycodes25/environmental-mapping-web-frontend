@@ -17,7 +17,11 @@ import CustomScrollbar from "./CustomScrollbar";
 import { Checkbox } from "./ui/checkbox";
 
 // eslint-disable-next-line react/prop-types
-export default function TanstackTable({ tableData, columns = [] }) {
+export default function TanstackTable({
+	tableData,
+	columns = [],
+	autoHeight = false,
+}) {
 	const [sorting, setSorting] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
@@ -61,46 +65,65 @@ export default function TanstackTable({ tableData, columns = [] }) {
 					</div>
 				) : (
 					<>
-						<TableVirtuoso
-							id="virtuoso-table"
-							style={{
-								height: "520px",
-								boxShadow: "none",
-								border: 0,
-								width: "100%",
-							}}
-							totalCount={rows.length}
-							components={{
-								Scroller: CustomScrollbar,
-								Table: ({ style, ...props }) => {
-									return (
-										<table
-											ref={tableRef}
-											className="table table-auto shadow-none w-full"
-											{...props}
-											style={{
-												...style,
-												width: "100%",
-												tableLayout: "auto",
-											}}
-										/>
-									);
-								},
-								TableRow: (props) => {
-									const index = props["data-index"];
-									const row = rows[index];
-
-									if (!row) {
-										// During virtualization or data updates, a row may be temporarily undefined
-										return <tr {...props} />;
-									}
-
-									return (
+						{autoHeight ? (
+							// Non-virtualized, grows with content so the page scroll controls it
+							<table
+								ref={tableRef}
+								className="table table-auto shadow-none w-full"
+							>
+								<thead>
+									{table.getHeaderGroups().map((headerGroup) => (
+										<tr key={headerGroup.id} className="bg-primary">
+											<th className="px-4 py-2 text-white font-semibold w-12">
+												<Checkbox
+													checked={table.getIsAllRowsSelected()}
+													indeterminate={table.getIsSomeRowsSelected()}
+													onCheckedChange={(value) =>
+														table.toggleAllRowsSelected(!!value)
+													}
+													className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+												/>
+											</th>
+											{headerGroup.headers.map((header, index) => (
+												<th
+													className="px-4 py-2 text-white font-semibold"
+													key={index}
+													colSpan={header.colSpan}
+												>
+													{header.isPlaceholder ? null : (
+														<div
+															style={
+																header.column.getCanSort()
+																	? {
+																			cursor: "pointer",
+																			userSelect: "none",
+																	  }
+																	: {}
+															}
+															onClick={header.column.getToggleSortingHandler()}
+														>
+															{flexRender(
+																header.column.columnDef.header,
+																header.getContext()
+															)}
+															{{
+																asc: <ExpandMoreIcon />,
+																desc: <ExpandLessIcon />,
+															}[header.column.getIsSorted()] ??
+																null}
+														</div>
+													)}
+												</th>
+											))}
+										</tr>
+									))}
+								</thead>
+								<tbody>
+									{rows.map((row) => (
 										<tr
+											key={row.id}
 											className="border-b hover:bg-gray-100"
-											{...props}
 										>
-											{/* Checkbox column */}
 											<td className="px-4 py-2 w-12">
 												<Checkbox
 													checked={row.getIsSelected()}
@@ -118,50 +141,99 @@ export default function TanstackTable({ tableData, columns = [] }) {
 												</td>
 											))}
 										</tr>
-									);
-								},
-							}}
-							fixedHeaderContent={() => {
-								let headerGroups = [];
-								try {
-									headerGroups = table.getHeaderGroups();
-								} catch (err) {
-									headerGroups = [];
-								}
-								if (!Array.isArray(headerGroups)) headerGroups = [];
-								return headerGroups.map((headerGroup) => (
-									<tr key={headerGroup.id} className="bg-primary">
-										{/* Checkbox header */}
-										<th className="px-4 py-2 text-white font-semibold w-12">
-											<Checkbox
-												checked={table.getIsAllRowsSelected()}
-												indeterminate={table.getIsSomeRowsSelected()}
-												onCheckedChange={(value) =>
-													table.toggleAllRowsSelected(!!value)
-												}
-												className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
-											/>
-										</th>
-										{headerGroup.headers.map((header, index) => {
-											return (
+									))}
+								</tbody>
+							</table>
+						) : (
+							<TableVirtuoso
+								id="virtuoso-table"
+								style={{
+									height: "520px",
+									boxShadow: "none",
+									border: 0,
+									width: "100%",
+								}}
+								totalCount={rows.length}
+								components={{
+									Scroller: CustomScrollbar,
+									Table: ({ style, ...props }) => (
+										<table
+											ref={tableRef}
+											className="table table-auto shadow-none w-full"
+											{...props}
+											style={{
+												...style,
+												width: "100%",
+												tableLayout: "auto",
+											}}
+										/>
+									),
+									TableRow: (props) => {
+										const index = props["data-index"];
+										const row = rows[index];
+										if (!row) return <tr {...props} />;
+										return (
+											<tr
+												className="border-b hover:bg-gray-100"
+												{...props}
+											>
+												<td className="px-4 py-2 w-12">
+													<Checkbox
+														checked={row.getIsSelected()}
+														onCheckedChange={(value) =>
+															row.toggleSelected(!!value)
+														}
+													/>
+												</td>
+												{row.getVisibleCells().map((cell) => (
+													<td key={cell.id} className="px-4 py-2">
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext()
+														)}
+													</td>
+												))}
+											</tr>
+										);
+									},
+								}}
+								fixedHeaderContent={() => {
+									let headerGroups = [];
+									try {
+										headerGroups = table.getHeaderGroups();
+									} catch (err) {
+										headerGroups = [];
+									}
+									if (!Array.isArray(headerGroups)) headerGroups = [];
+									return headerGroups.map((headerGroup) => (
+										<tr key={headerGroup.id} className="bg-primary">
+											<th className="px-4 py-2 text-white font-semibold w-12">
+												<Checkbox
+													checked={table.getIsAllRowsSelected()}
+													indeterminate={table.getIsSomeRowsSelected()}
+													onCheckedChange={(value) =>
+														table.toggleAllRowsSelected(!!value)
+													}
+													className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+												/>
+											</th>
+											{headerGroup.headers.map((header, index) => (
 												<th
 													className="px-4 py-2 text-white font-semibold"
 													key={index}
 													colSpan={header.colSpan}
 												>
 													{header.isPlaceholder ? null : (
-														// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 														<div
-															{...{
-																style: header.column.getCanSort()
+															style={
+																header.column.getCanSort()
 																	? {
 																			cursor: "pointer",
 																			userSelect: "none",
 																	  }
-																	: {},
-																onClick:
-																	header.column.getToggleSortingHandler(),
-															}}
+																	: {}
+															}
+															onClick={header.column.getToggleSortingHandler()}
 														>
 															{flexRender(
 																header.column.columnDef.header,
@@ -175,12 +247,12 @@ export default function TanstackTable({ tableData, columns = [] }) {
 														</div>
 													)}
 												</th>
-											);
-										})}
-									</tr>
-								));
-							}}
-						/>
+											))}
+										</tr>
+									));
+								}}
+							/>
+						)}
 						<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
 								className="rounded border px-2 py-1"

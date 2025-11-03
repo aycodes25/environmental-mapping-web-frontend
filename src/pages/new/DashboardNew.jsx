@@ -6,6 +6,7 @@ import DashboardOverview from "./DashboardOverview";
 import { FullDashboard } from "../../components";
 import TanstackTable from "../../components/TanstackTable";
 import WebIcon from "../../components/custom/WebIcons";
+import SearchInput from "../../components/ui/search-input";
 
 const url = "/user/dashboard";
 
@@ -108,7 +109,10 @@ const DashboardNew = () => {
 
 	// Removed unused dropdown/date filter listeners
 
-	const safeRecentModels = Array.isArray(dashboardData?.recentlyViewedModels)
+	// Use recentModels for activity log (recently uploaded), not recentlyViewedModels (recently viewed)
+	const safeRecentModels = Array.isArray(dashboardData?.recentModels)
+		? dashboardData.recentModels
+		: Array.isArray(dashboardData?.recentlyViewedModels)
 		? dashboardData.recentlyViewedModels
 		: [];
 
@@ -225,6 +229,11 @@ const DashboardNew = () => {
 		});
 	}, [search, safeRecentModels]);
 
+	const handleFilterActivities = (searchValue) => {
+		// Update search state so input displays typed characters
+		setSearch(searchValue);
+	};
+
 	return (
 		<div className="flex flex-col flex-grow w-auto">
 			<DashboardOverview dashboardData={dashboardData} />
@@ -239,25 +248,12 @@ const DashboardNew = () => {
 				{/* Search and Actions */}
 				<div className="flex flex-col sm:flex-row items-center my-8 justify-end gap-3">
 					<div className="relative flex-1 w-full max-w-full sm:max-w-xl">
-						<input
+						{/* Search Bar */}
+						<SearchInput
 							value={search}
-							onChange={(e) => setSearch(e.target.value)}
-							className="w-full rounded-full border border-gray-200 pl-9 pr-9 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-purple-200"
-							placeholder="Search by location, user, date, time...."
+							onChange={(v) => handleFilterActivities(v)}
+							placeholder="Search by name, status, class...."
 						/>
-						<WebIcon
-							icon="search"
-							className="absolute left-3 top-2.5 w-4 h-4 text-gray-500"
-						/>
-						{search && (
-							<button
-								onClick={() => setSearch("")}
-								className="absolute right-3 top-2 text-gray-500 hover:text-gray-700"
-								aria-label="Clear search"
-							>
-								×
-							</button>
-						)}
 					</div>
 				</div>
 
