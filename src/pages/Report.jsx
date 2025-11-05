@@ -563,52 +563,37 @@ const Report = () => {
 					{/* Report Title */}
 					<h2 className="heading-large font-bold text-primary">Reports</h2>
 
-					{/* Filter Buttons */}
+					{/* Date Range Filters */}
 					<div className="flex items-center gap-3">
-						{/* Start Date Filter */}
-						<button
-							onClick={() => handleFilterClick("Start Date")}
-							className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1 whitespace-nowrap"
-							style={{ width: "118px", height: "21px" }}
-						>
+						<label className="flex items-center gap-2 text-sm text-gray-700">
 							<WebIcon icon="calendar" className="w-3 h-3" />
-							Start Date
-							<svg
-								className="w-3 h-3"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M19 9l-7 7-7-7"
-								/>
-							</svg>
-						</button>
-
-						{/* End Date Filter */}
-						<button
-							onClick={() => handleFilterClick("End Date")}
-							className="px-3 py-1 bg-white border border-gray-300 rounded text-sm font-medium text-gray-700 hover:bg-gray-50 transition-colors flex items-center gap-1 whitespace-nowrap"
-							style={{ width: "118px", height: "21px" }}
-						>
+							<span>Start</span>
+							<input
+								type="date"
+								value={startDate || ""}
+								onChange={(e) => setStartDate(e.target.value)}
+								className="border border-gray-300 rounded px-2 py-1 h-[24px]"
+							/>
+						</label>
+						<label className="flex items-center gap-2 text-sm text-gray-700">
 							<WebIcon icon="calendar" className="w-3 h-3" />
-							End Date
-							<svg
-								className="w-3 h-3"
-								fill="none"
-								stroke="currentColor"
-								viewBox="0 0 24 24"
-							>
-								<path
-									strokeLinecap="round"
-									strokeLinejoin="round"
-									strokeWidth={2}
-									d="M19 9l-7 7-7-7"
-								/>
-							</svg>
+							<span>End</span>
+							<input
+								type="date"
+								value={endDate || ""}
+								min={startDate || undefined}
+								onChange={(e) => setEndDate(e.target.value)}
+								className="border border-gray-300 rounded px-2 py-1 h-[24px]"
+							/>
+						</label>
+						<button
+							onClick={() => {
+								setStartDate(null);
+								setEndDate(null);
+							}}
+							className="px-3 py-1 bg-white border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
+						>
+							Clear
 						</button>
 
 						{/* All Filter - Using Shadcn Select */}
