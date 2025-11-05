@@ -181,7 +181,7 @@ const Location = () => {
 								tableData={data}
 							/>
 						)}
-					</section>
+					</section> 
 				</div>
 			</div>
 

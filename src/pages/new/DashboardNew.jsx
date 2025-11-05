@@ -241,7 +241,7 @@ const DashboardNew = () => {
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 sm:p-5 md:p-6 mx-2 sm:mx-4 lg:mx-5">
 				<div className="flex items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-3">
 					<h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
-						Activities Log
+						List of Models
 					</h2>
 				</div>
 
