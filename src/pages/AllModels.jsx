@@ -219,7 +219,7 @@ const AllModels = () => {
 								: "bg-white text-gray-600 border-gray-300"
 						}`}
 					>
-						Completed Facilities
+						Complete Facilities
 					</button>
 				</div>
 
