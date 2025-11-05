@@ -255,7 +255,7 @@ const AllUsers = () => {
 			</div>
 
 			{/* Table Section */}
-			<section className="flex justify-center items-center px-5">
+			<section className="flex justify-center items-center px-5 mt-10">
 				<div className="w-full border border-gray-200 rounded-xl overflow-hidden">
 					{loading ? (
 						<div className="w-full py-10 text-center text-gray-500">
@@ -272,7 +272,7 @@ const AllUsers = () => {
 			</section>
 
 			{/* Pagination */}
-			<div className="navigatonBtnContainer">
+			{/* <div className="navigatonBtnContainer">
 				<ReactPaginate
 					previousLabel="Prev"
 					nextLabel="Next"
@@ -293,7 +293,7 @@ const AllUsers = () => {
 					activeclassname="m-1 rounded-full bg-black p-0 text-white"
 					forcePage={Math.floor(itemOffset / itemsPerPage)}
 				/>
-			</div>
+			</div> */}
 
 			{/* Delete Alert Modal */}
 			<DeleteAlert
