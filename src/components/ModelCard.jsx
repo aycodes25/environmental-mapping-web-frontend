@@ -86,7 +86,7 @@ export const ModelCard = ({
 								navigate(`/view-model/${_id}`);
 							}}
 						>
-							<WebIcon icon="MapPin" className="w-4 h-4 text-primary" />
+							<Eye className="h-6 w-6 text-primary" />
 						</Button>
 						{["admin", "superAdmin"].includes(currentUser.role) ? (
 							<>
