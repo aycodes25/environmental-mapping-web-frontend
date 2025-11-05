@@ -89,12 +89,13 @@ const AllModels = () => {
 		const response = await customFetch(url);
 		if (response.data.status !== "error") {
 			const allModels = response.data.data || [];
-			// Filter based on the current view
-			setModelList(
-				allModels.filter((item) =>
-					isCompletedView ? item.isComplete : !item.isComplete
-				)
+			// Filter based on the current view and respect pagination on first load
+			const filtered = allModels.filter((item) =>
+				isCompletedView ? item.isComplete : !item.isComplete
 			);
+			// Reset to first page then slice
+			setItemOffset(0);
+			setModelList(filtered.slice(0, itemsPerPage));
 		} else {
 			toast.error(response.data.message);
 		}
@@ -174,16 +175,18 @@ const AllModels = () => {
 		(search) => {
 			const term = (search || "").toLowerCase();
 			if (!term.length) {
-				setModelList(filteredModels);
+				setItemOffset(0);
+				setModelList(filteredModels.slice(0, itemsPerPage));
 				return;
 			}
 			const regex = new RegExp(`.*${term}.*`, "i");
 			const searchResult = filteredModels.filter((item) => {
 				return regex.test((item.modelName || "").toLowerCase());
 			});
-			setModelList(searchResult);
+			setItemOffset(0);
+			setModelList(searchResult.slice(0, itemsPerPage));
 		},
-		[filteredModels, setModelList]
+		[filteredModels, itemsPerPage]
 	);
 
 	return (
@@ -198,7 +201,7 @@ const AllModels = () => {
 				}}
 			/>
 
-			<main className="w-full mt-14">
+			<main className="w-full mt-4">
 				{/* Toggle row */}
 				<div className="mb-4 w-full px-1 lg:px-3 xl:px-5 flex items-center gap-3">
 					<button
@@ -321,7 +324,7 @@ const AllModels = () => {
 					))}
 				</div>
 
-				<div className="navigatonBtnContainer">
+				<div className="navigatonBtnContainer -mt-5">
 					<ReactPaginate
 						previousLabel="Prev"
 						nextLabel="Next"
