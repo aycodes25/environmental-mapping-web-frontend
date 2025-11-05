@@ -9,18 +9,30 @@ const HeaderNew = () => {
 	const currentUser = getUserFromLocalStorage() || user;
 	const location = useLocation();
 
-	// Get the current page title based on the route
+	// Derive page title from active route/segment (aligned with sidebar labels)
 	const getPageTitle = () => {
-		const pathname = location.pathname;
-		if (pathname.includes("/admin")) return "Facilities";
-		if (pathname.includes("/tagger")) return "Facilities";
-		if (pathname.includes("/reviewer")) return "Facilities";
-		if (pathname.includes("/models")) return "Facility Sections";
-		if (pathname.includes("/users")) return "Users";
-		if (pathname.includes("/location")) return "Facility";
-		if (pathname.includes("/report")) return "Report";
-		if (pathname.includes("/trash")) return "Recycle Bin";
-		return "Facilities"; // Default title
+		const pathname = location.pathname || "/";
+		const lower = pathname.toLowerCase();
+		const segmentToTitle = {
+			models: "Facility Sections",
+			users: "Users",
+			location: "Facility",
+			report: "Report",
+			trash: "Recycle Bin",
+		};
+
+		// If landing on a role root (e.g., /admin, /tagger, /reviewer), show Dashboard
+		if (/^\/(admin|tagger|reviewer)\/?$/.test(lower)) {
+			return "Dashboard";
+		}
+
+		// Try to find a known segment in the path
+		for (const [segment, title] of Object.entries(segmentToTitle)) {
+			if (lower.includes(`/${segment}`)) return title;
+		}
+
+		// Default
+		return "Dashboard";
 	};
 
 	return (

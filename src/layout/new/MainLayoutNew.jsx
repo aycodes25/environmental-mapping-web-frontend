@@ -39,8 +39,8 @@ const MainLayoutNew = () => {
 				}`}
 			>
 				<HeaderNew />
-				<main className="h-[calc(100vh-80px)] bg-lighterGrey overflow-hidden">
-					<div className="w-full h-full overflow-auto">
+				<main className="min-h-[calc(100vh-80px)] bg-lighterGrey">
+					<div className="w-full">
 						<Outlet />
 					</div>
 				</main>

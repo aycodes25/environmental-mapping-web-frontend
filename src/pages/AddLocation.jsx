@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { MdOutlineCancel } from "react-icons/md";
 import { CiLocationOn } from "react-icons/ci";
 import { customFetch } from "../utils";
@@ -21,6 +21,16 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
 		user: currentUser._id,
 		image: "",
 	});
+
+	useEffect(() => {
+		if (showModal) {
+			// prevent background scrolling when modal is open
+			document.body.classList.add("overflow-hidden");
+			return () => document.body.classList.remove("overflow-hidden");
+		}
+		// ensure cleanup if modal closes without unmount
+		document.body.classList.remove("overflow-hidden");
+	}, [showModal]);
 
 	const handleChange = (e) => {
 		const { name, value, files } = e.target;
@@ -73,7 +83,7 @@ const AddLocation = ({ showModal, setShowModal, fetchData }) => {
 	return (
 		<>
 			{showModal && (
-				<div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 py-4">
+				<div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 py-4 overflow-y-auto">
 					<form
 						onSubmit={handleSubmit}
 						method="POST"

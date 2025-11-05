@@ -121,7 +121,7 @@ const AddModel = () => {
 	return (
 		<section className="grid gap-10 place-items-center py-5 w-full">
 			{/* Gradient Header */}
-			<GradientHeader />
+			{/* <GradientHeader /> */}
 			<form
 				onSubmit={handleSubmit}
 				method="POST"
