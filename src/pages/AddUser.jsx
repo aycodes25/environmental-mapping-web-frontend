@@ -64,6 +64,21 @@ const AddUser = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		// Frontend validation: ensure required fields are present (image optional)
+		const requiredFields = [
+			{ key: "fullname", label: "Full name" },
+			{ key: "username", label: "Username" },
+			{ key: "email", label: "Email" },
+			{ key: "password", label: "Password" },
+			{ key: "role", label: "Role" },
+			{ key: "location", label: "Location" },
+		];
+		for (const field of requiredFields) {
+			if (!String(formData[field.key] || "").trim()) {
+				toast.error(`${field.label} is required`);
+				return;
+			}
+		}
 		setIsSubmitting(true);
 		try {
 			const formDataForUpload = new FormData();
@@ -72,7 +87,10 @@ const AddUser = () => {
 			formDataForUpload.append("email", formData.email);
 			formDataForUpload.append("password", formData.password);
 			formDataForUpload.append("role", formData.role);
-			formDataForUpload.append("image", formData.image);
+			// Image is optional; append only if provided
+			if (formData.image) {
+				formDataForUpload.append("image", formData.image);
+			}
 			formDataForUpload.append("location", formData.location);
 
 			const response = await customFetch.post(

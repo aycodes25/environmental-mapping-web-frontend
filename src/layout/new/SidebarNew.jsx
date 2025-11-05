@@ -22,18 +22,16 @@ const SidebarNew = ({ onCollapse }) => {
 				}`}
 			>
 				<div
-					className={`h-20 flex items-center ${
+					className={`h-20 relative flex items-center ${
 						collapsed ? "justify-center" : "justify-between px-4"
 					}`}
 				>
 					<div className="flex items-center gap-2">
-						<div className="bg-primary p-2 rounded-lg">
-							<WebIcon icon="group" />
-						</div>
-						{!collapsed && (
-							<div className="text-white text-lg font-bold">EMP</div>
-						)}
+						{!collapsed && null}
 					</div>
+					{!collapsed && (
+						<div className="absolute left-1/2 -translate-x-1/2 text-white text-lg font-bold pointer-events-none">EMP</div>
+					)}
 					{!collapsed && (
 						<button
 							onClick={toggle}
