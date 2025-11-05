@@ -60,7 +60,7 @@ export default function TanstackTable({
 		<Box className="z-0 h-auto min-h-96 w-full">
 			<Box className="flex h-auto min-h-96 w-full flex-col gap-2">
 				{rows.length === 0 ? (
-					<div className="flex flex-col justify-center items-center w-full h-[600px]">
+					<div className="flex flex-col justify-center items-center w-full h-[400px]">
 						<div>No data available</div>
 					</div>
 				) : (
@@ -253,6 +253,17 @@ export default function TanstackTable({
 								}}
 							/>
 						)}
+
+					</>
+				)}
+				{/* Always render pagination controls, even when there are no rows */}
+				{(() => {
+					const displayPageCount = Math.max(1, table.getPageCount());
+					const currentPageIndex = Math.min(
+						table.getState().pagination.pageIndex,
+						displayPageCount - 1
+					);
+					return (
 						<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
 								className="rounded border px-2 py-1"
@@ -287,17 +298,14 @@ export default function TanstackTable({
 							<span className="flex items-center gap-1 whitespace-nowrap">
 								<div>Page</div>
 								<strong>
-									{table.getState().pagination.pageIndex + 1} of{" "}
-									{table.getPageCount()}
+									{currentPageIndex + 1} of {displayPageCount}
 								</strong>
 							</span>
 							<span className="hidden sm:flex items-center gap-1">
 								| Go to page:
 								<input
 									type="number"
-									defaultValue={
-										table.getState().pagination.pageIndex + 1
-									}
+									defaultValue={currentPageIndex + 1}
 									onChange={(e) => {
 										const page = e.target.value
 											? Number(e.target.value) - 1
@@ -321,8 +329,8 @@ export default function TanstackTable({
 								))}
 							</select>
 						</div>
-					</>
-				)}
+					);
+				})()}
 			</Box>
 		</Box>
 	);
