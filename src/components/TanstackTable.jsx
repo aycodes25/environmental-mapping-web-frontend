@@ -10,200 +10,39 @@ import {
 	useReactTable,
 } from "@tanstack/react-table";
 import { TableVirtuoso } from "react-virtuoso";
-import { Box, Button, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import ExpandLessIcon from "@mui/icons-material/ExpandLess";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
-import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import CustomScrollbar from "./CustomScrollbar";
-import jsPDF from "jspdf";
-import "jspdf-autotable";
+import { Checkbox } from "./ui/checkbox";
 
 // eslint-disable-next-line react/prop-types
 export default function TanstackTable({
 	tableData,
-	columns,
-	startDate,
-	endDate,
-	setStartDate,
-	setEndDate,
-	searchText,
-	handleFilterTags,
+	columns = [],
+	autoHeight = false,
 }) {
 	const [sorting, setSorting] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
 		pageSize: 10,
 	});
+	const [rowSelection, setRowSelection] = useState({});
 	const tableRef = useRef();
-
-	const handleExportPDF = useCallback(() => {
-		const options = {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-			hour12: true,
-		};
-
-		const unit = "pt";
-		const size = "A3";
-		const orientation = "landscape";
-
-		const marginLeft = 20;
-		const marginRight = 20;
-		const marginTop = 40;
-		const rowsPerPage = 30;
-
-		const doc = new jsPDF(orientation, unit, size);
-
-		// Get available width for table
-		const pageWidth = doc.internal.pageSize.getWidth();
-		const availableWidth = pageWidth - marginLeft - marginRight;
-
-		doc.setFontSize(12);
-
-		const title = `Exported Data - ${new Date().toLocaleString(
-			"en-US",
-			options
-		)}`;
-
-		const visibleColumns = columns.filter((c) => !c.excludeFromReport);
-		const headers = visibleColumns.map((column) => column.header);
-
-		// Calculate column widths proportionally to fill the entire width
-		const totalColumns = headers.length;
-		const columnWidths = {};
-
-		// Assign proportional width values based on content type
-		let totalProportions = 0;
-		const proportions = headers.map((header, index) => {
-			let proportion;
-			if (header === "SN") {
-				proportion = 2; // Smallest
-			} else if (["Ref", "Group", "Result"].includes(header)) {
-				proportion = 4;
-			} else if (["Facility", "Location", "Time"].includes(header)) {
-				proportion = 5;
-			} else if (
-				[
-					"Object Name",
-					"Factory location",
-					"Sample Type",
-					"Added By",
-					"Date",
-				].includes(header)
-			) {
-				proportion = 6;
-			} else if (["Note"].includes(header)) {
-				proportion = 7;
-			} else if (["Corrective Actions", "Evidence"].includes(header)) {
-				proportion = 10; // Largest for content-heavy columns
-			} else {
-				proportion = 5; // Default
-			}
-			totalProportions += proportion;
-			return proportion;
-		});
-
-		// Calculate actual width in points for each column
-		headers.forEach((header, index) => {
-			const widthPercentage = proportions[index] / totalProportions;
-			columnWidths[index] = Math.floor(availableWidth * widthPercentage);
-		});
-
-		const generateTableRows = (rows) => {
-			return rows.map((row, rowIndex) => {
-				let currentRow = [];
-				for (let i = 0; i < visibleColumns.length; i++) {
-					let column = visibleColumns[i];
-					if (column.accessorFn) {
-						currentRow.push(column.accessorFn(row, rowIndex) || "");
-					} else {
-						currentRow.push(row[column.accessorKey] || "");
-					}
-				}
-				return currentRow;
-			});
-		};
-
-		// Clear space for title
-		doc.text(title, marginLeft, 25);
-
-		const addTableToPDF = (rows, startY) => {
-			const tableRows = generateTableRows(rows);
-
-			doc.autoTable({
-				head: [headers],
-				body: tableRows,
-				startY: startY,
-				margin: { left: marginLeft, right: marginRight },
-				columnStyles: Object.fromEntries(
-					Object.entries(columnWidths).map(([index, width]) => [
-						index,
-						{ cellWidth: width },
-					])
-				),
-				styles: {
-					cellPadding: 5,
-					fontSize: 9,
-					overflow: "linebreak",
-					valign: "middle",
-					lineWidth: 0.1,
-					lineColor: [0, 0, 0],
-				},
-				headStyles: {
-					fillColor: [173, 216, 230], // Original light blue color
-					textColor: [0, 0, 0],
-					fontStyle: "bold",
-					fontSize: 10,
-					halign: "center",
-					cellPadding: { top: 5, right: 2, bottom: 5, left: 2 }, // Smaller padding for headers
-					minCellHeight: 20,
-					overflow: "ellipsize", // Prevent header wrapping
-				},
-				pageBreak: "auto",
-				tableLineColor: [0, 0, 0],
-				tableLineWidth: 0.1,
-				tableWidth: availableWidth, // Use full available width
-				didDrawPage: (data) => {
-					if (data.pageNumber > 1) {
-						doc.setFontSize(12);
-						doc.text(title, marginLeft, 25);
-					}
-				},
-			});
-		};
-
-		let currentY = marginTop;
-
-		for (let i = 0; i < tableData.length; i += rowsPerPage) {
-			const slicedData = tableData.slice(i, i + rowsPerPage);
-
-			if (i > 0) {
-				doc.addPage();
-				currentY = marginTop;
-			}
-
-			addTableToPDF(slicedData, currentY);
-		}
-
-		doc.save(
-			`exported_data_${new Date().toLocaleString("en-US", options)}.pdf`
-		);
-	}, [columns, tableData]);
 
 	// eslint-disable-next-line no-unused-vars
 	const [data, setData] = useState([]);
+
 	const table = useReactTable({
 		data,
-		columns,
+		columns: Array.isArray(columns) ? columns : [],
 		state: {
 			sorting,
 			pagination,
+			rowSelection,
 		},
+		enableRowSelection: true,
+		onRowSelectionChange: setRowSelection,
 		onPaginationChange: setPagination,
 		onSortingChange: (e) => setSorting(e),
 		getCoreRowModel: getCoreRowModel(),
@@ -213,185 +52,55 @@ export default function TanstackTable({
 	const { rows } = table.getRowModel();
 
 	useEffect(() => {
-		setData(tableData);
+		setData(Array.isArray(tableData) ? tableData : []);
 	}, [tableData]);
-
-	function exportCSV() {
-		const csvContent = [];
-
-		// Header row
-		const headers = columns
-			.filter((c) => !c.excludeFromReport)
-			.map((column) => column.header);
-		csvContent.push(headers.join(","));
-
-		// Data rows
-		tableData.forEach((row, rowIndex) => {
-			let currentRow = [];
-			for (let i = 0; i < columns.length; i++) {
-				let column = columns[i];
-				if (column.excludeFromReport) {
-					continue;
-				}
-				if (column.accessorFn) {
-					currentRow.push(column.accessorFn(row, rowIndex) || "");
-				} else {
-					currentRow.push(row[column.accessorKey] || "");
-				}
-			}
-			csvContent.push(currentRow.join(","));
-		});
-
-		// Join rows with newline character
-		const csvString = csvContent.join("\n");
-
-		// Create a Blob object with the CSV data
-		const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-
-		// Create a temporary URL for the Blob
-		const url = URL.createObjectURL(blob);
-
-		// Create a link element to trigger the download
-		const link = document.createElement("a");
-		link.setAttribute("href", url);
-		link.setAttribute("download", "export.csv");
-
-		// Trigger the download
-		document.body.appendChild(link);
-		link.click();
-
-		// Clean up
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
-	}
 
 	return (
 		// eslint-disable-next-line react/prop-types
-		<Box className="z-0 h-auto min-h-96 w-full min-w-96">
-			<Box className="flex h-auto min-h-96 w-full min-w-96 flex-col gap-2">
-				<div className="flex flex-row items-center justify-between">
-					<div className="pt-3 flex flex-row justify-center items-center gap-4">
-						<Button
-							className="btn btn-neutral btn-sm h-11"
-							onClick={() => exportCSV()}
-						>
-							Export CSV
-						</Button>
-						<Button
-							className="btn btn-neutral btn-sm h-11"
-							onClick={() => handleExportPDF()}
-						>
-							Download Pdf
-						</Button>
-					</div>
-					<div>
-						<input
-							className="block border border-gray-300 rounded-lg shadow-sm focus:ring-2 focus:ring-blue-500 focus:outline-none px-4 py-2"
-							type="text"
-							name="search"
-							value={searchText}
-							placeholder="Search"
-							onChange={(e) => {
-								handleFilterTags(e.target.value);
-							}}
-						/>
-					</div>
-					<div className="flex flex-row items-center justify-center gap-1 pt-3">
-						<div className="w-40">
-							<Typography className="text-xs">Start Date</Typography>
-							<DatePicker
-								className="text-xs"
-								value={startDate}
-								onChange={(e) => setStartDate(e)}
-							/>
-						</div>
-						<div className="w-40">
-							<Typography className="text-xs">End Date</Typography>
-							<DatePicker
-								className="text-xs"
-								value={endDate}
-								onChange={(e) => setEndDate(e)}
-							/>
-						</div>
-					</div>
-				</div>
+		<Box className="z-0 h-auto min-h-96 w-full">
+			<Box className="flex h-auto min-h-96 w-full flex-col gap-2">
 				{rows.length === 0 ? (
-					<div className="flex flex-col justify-center items-center w-full h-[600px]">
+					<div className="flex flex-col justify-center items-center w-full h-[400px]">
 						<div>No data available</div>
 					</div>
 				) : (
 					<>
-						<TableVirtuoso
-							id="virtuoso-table"
-							style={{ height: "700px", boxShadow: "none", border: 0 }}
-							totalCount={rows.length}
-							components={{
-								Scroller: CustomScrollbar,
-								Table: ({ style, ...props }) => {
-									return (
-										<table
-											ref={tableRef}
-											className="table table-auto shadow-none"
-											{...props}
-											style={{
-												...style,
-												width: "calc(100vw - 600px)",
-												tableLayout: "fixed",
-											}}
-										/>
-									);
-								},
-								TableRow: (props) => {
-									const index = props["data-index"];
-									const row = rows[index];
-
-									return (
-										<tr
-											className="border-b hover:bg-gray-100"
-											{...props}
-										>
-											{row.getVisibleCells().map((cell) => (
-												<td key={cell.id} className="px-4 py-2">
-													{flexRender(
-														cell.column.columnDef.cell,
-														cell.getContext()
-													)}
-												</td>
-											))}
-										</tr>
-									);
-								},
-							}}
-							fixedHeaderContent={() => {
-								return table.getHeaderGroups().map((headerGroup) => (
-									<tr
-										key={headerGroup.id}
-										style={{ background: "lightgray", margin: 0 }}
-									>
-										{headerGroup.headers.map((header, index) => {
-											return (
+						{autoHeight ? (
+							// Non-virtualized, grows with content so the page scroll controls it
+							<table
+								ref={tableRef}
+								className="table table-auto shadow-none w-full"
+							>
+								<thead>
+									{table.getHeaderGroups().map((headerGroup) => (
+										<tr key={headerGroup.id} className="bg-primary">
+											<th className="px-4 py-2 text-white font-semibold w-12">
+												<Checkbox
+													checked={table.getIsAllRowsSelected()}
+													indeterminate={table.getIsSomeRowsSelected()}
+													onCheckedChange={(value) =>
+														table.toggleAllRowsSelected(!!value)
+													}
+													className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+												/>
+											</th>
+											{headerGroup.headers.map((header, index) => (
 												<th
-													className="bg-gray-200 px-4 py-2"
+													className="px-4 py-2 text-white font-semibold"
 													key={index}
 													colSpan={header.colSpan}
-													style={{
-														width: header.getSize(),
-														borderBottom: "1px solid lightgray",
-													}}
 												>
 													{header.isPlaceholder ? null : (
-														// eslint-disable-next-line jsx-a11y/click-events-have-key-events
 														<div
-															{...{
-																style: header.column.getCanSort()
+															style={
+																header.column.getCanSort()
 																	? {
 																			cursor: "pointer",
 																			userSelect: "none",
 																	  }
-																	: {},
-																onClick:
-																	header.column.getToggleSortingHandler(),
-															}}
+																	: {}
+															}
+															onClick={header.column.getToggleSortingHandler()}
 														>
 															{flexRender(
 																header.column.columnDef.header,
@@ -405,57 +114,197 @@ export default function TanstackTable({
 														</div>
 													)}
 												</th>
-											);
-										})}
-									</tr>
-								));
-							}}
-						/>
-						<div className="flex w-full items-center justify-center gap-2">
+											))}
+										</tr>
+									))}
+								</thead>
+								<tbody>
+									{rows.map((row) => (
+										<tr
+											key={row.id}
+											className="border-b hover:bg-gray-100"
+										>
+											<td className="px-4 py-2 w-12">
+												<Checkbox
+													checked={row.getIsSelected()}
+													onCheckedChange={(value) =>
+														row.toggleSelected(!!value)
+													}
+												/>
+											</td>
+											{row.getVisibleCells().map((cell) => (
+												<td key={cell.id} className="px-4 py-2">
+													{flexRender(
+														cell.column.columnDef.cell,
+														cell.getContext()
+													)}
+												</td>
+											))}
+										</tr>
+									))}
+								</tbody>
+							</table>
+						) : (
+							<TableVirtuoso
+								id="virtuoso-table"
+								style={{
+									height: "520px",
+									boxShadow: "none",
+									border: 0,
+									width: "100%",
+								}}
+								totalCount={rows.length}
+								components={{
+									Scroller: CustomScrollbar,
+									Table: ({ style, ...props }) => (
+										<table
+											ref={tableRef}
+											className="table table-auto shadow-none w-full"
+											{...props}
+											style={{
+												...style,
+												width: "100%",
+												tableLayout: "auto",
+											}}
+										/>
+									),
+									TableRow: (props) => {
+										const index = props["data-index"];
+										const row = rows[index];
+										if (!row) return <tr {...props} />;
+										return (
+											<tr
+												className="border-b hover:bg-gray-100"
+												{...props}
+											>
+												<td className="px-4 py-2 w-12">
+													<Checkbox
+														checked={row.getIsSelected()}
+														onCheckedChange={(value) =>
+															row.toggleSelected(!!value)
+														}
+													/>
+												</td>
+												{row.getVisibleCells().map((cell) => (
+													<td key={cell.id} className="px-4 py-2">
+														{flexRender(
+															cell.column.columnDef.cell,
+															cell.getContext()
+														)}
+													</td>
+												))}
+											</tr>
+										);
+									},
+								}}
+								fixedHeaderContent={() => {
+									let headerGroups = [];
+									try {
+										headerGroups = table.getHeaderGroups();
+									} catch (err) {
+										headerGroups = [];
+									}
+									if (!Array.isArray(headerGroups)) headerGroups = [];
+									return headerGroups.map((headerGroup) => (
+										<tr key={headerGroup.id} className="bg-primary">
+											<th className="px-4 py-2 text-white font-semibold w-12">
+												<Checkbox
+													checked={table.getIsAllRowsSelected()}
+													indeterminate={table.getIsSomeRowsSelected()}
+													onCheckedChange={(value) =>
+														table.toggleAllRowsSelected(!!value)
+													}
+													className="border-white data-[state=checked]:bg-white data-[state=checked]:text-primary"
+												/>
+											</th>
+											{headerGroup.headers.map((header, index) => (
+												<th
+													className="px-4 py-2 text-white font-semibold"
+													key={index}
+													colSpan={header.colSpan}
+												>
+													{header.isPlaceholder ? null : (
+														<div
+															style={
+																header.column.getCanSort()
+																	? {
+																			cursor: "pointer",
+																			userSelect: "none",
+																	  }
+																	: {}
+															}
+															onClick={header.column.getToggleSortingHandler()}
+														>
+															{flexRender(
+																header.column.columnDef.header,
+																header.getContext()
+															)}
+															{{
+																asc: <ExpandMoreIcon />,
+																desc: <ExpandLessIcon />,
+															}[header.column.getIsSorted()] ??
+																null}
+														</div>
+													)}
+												</th>
+											))}
+										</tr>
+									));
+								}}
+							/>
+						)}
+					</>
+				)}
+				{/* Always render pagination controls, even when there are no rows */}
+				{(() => {
+					const displayPageCount = Math.max(1, table.getPageCount());
+					const currentPageIndex = Math.min(
+						table.getState().pagination.pageIndex,
+						displayPageCount - 1
+					);
+					return (
+						<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
-								className="rounded border p-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.setPageIndex(0)}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<<"}
 							</button>
 							<button
-								className="rounded border p-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.previousPage()}
 								disabled={!table.getCanPreviousPage()}
 							>
 								{"<"}
 							</button>
 							<button
-								className="rounded border p-1"
+								className="rounded border px-2 py-1"
 								onClick={() => table.nextPage()}
 								disabled={!table.getCanNextPage()}
 							>
 								{">"}
 							</button>
 							<button
-								className="rounded border p-1"
+								className="rounded border px-2 py-1"
 								onClick={() =>
 									table.setPageIndex(table.getPageCount() - 1)
 								}
 								disabled={!table.getCanNextPage()}
 							>
-								{">>"}
+								{"»"}
 							</button>
-							<span className="flex items-center gap-1">
+							<span className="flex items-center gap-1 whitespace-nowrap">
 								<div>Page</div>
 								<strong>
-									{table.getState().pagination.pageIndex + 1} of{" "}
-									{table.getPageCount()}
+									{currentPageIndex + 1} of {displayPageCount}
 								</strong>
 							</span>
-							<span className="flex items-center gap-1">
+							<span className="hidden sm:flex items-center gap-1">
 								| Go to page:
 								<input
 									type="number"
-									defaultValue={
-										table.getState().pagination.pageIndex + 1
-									}
+									defaultValue={currentPageIndex + 1}
 									onChange={(e) => {
 										const page = e.target.value
 											? Number(e.target.value) - 1
@@ -470,6 +319,7 @@ export default function TanstackTable({
 								onChange={(e) => {
 									table.setPageSize(Number(e.target.value));
 								}}
+								className="border rounded px-2 py-1"
 							>
 								{[10, 20, 30, 40, 50].map((pageSize) => (
 									<option key={pageSize} value={pageSize}>
@@ -478,8 +328,8 @@ export default function TanstackTable({
 								))}
 							</select>
 						</div>
-					</>
-				)}
+					);
+				})()}
 			</Box>
 		</Box>
 	);

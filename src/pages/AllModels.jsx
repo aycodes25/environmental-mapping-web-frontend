@@ -13,15 +13,19 @@ import { memoize } from "proxy-memoize";
 import { customFetch, getRealFileUrl } from "../utils";
 import { toast } from "react-toastify";
 import { Button, Card } from "@mui/material";
+import { Button as ShButton } from "../components/ui/button";
 import ReactPaginate from "react-paginate";
 import { useCallback } from "react";
 import { useQueryClient, useMutation } from "@tanstack/react-query";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
-// import ModalCard component
+// import ModalCard component.
 import { ModelCard } from "../components/ModelCard";
 import { deleteFromDb } from "@/components/SceneComponent";
+// import ModelsOverview from "./new/ModelsOverview";
+import SearchInput from "../components/ui/search-input";
+import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
 
 const url = "/model/get-models";
 
@@ -49,17 +53,21 @@ const AllModels = () => {
 
 	// Filter based on the URL query parameter
 	const filteredModels = useMemo(() => {
-		return model?.filter((item) =>
-			isCompletedView ? item.isComplete : !item.isComplete
-		);
+		// When viewing completed, filter to completed; otherwise show ALL models
+		if (isCompletedView) return model.filter((item) => item.isComplete);
+		return model; // All Facilities view shows every model
 	}, [model, isCompletedView]);
 
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [modelList, setModelList] = useState([]);
+	const [searchText, setSearchText] = useState("");
 	const [deleteModel, setDeleteModel] = useState(false);
 	const [modelToDelList, setModelToDelList] = useState([]);
-	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [confirmDelete, setConfirmDelete] = useState(false); // legacy, replaced below
+	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 	const [itemOffset, setItemOffset] = useState(0);
 	const itemsPerPage = 6;
 	const endOffset = itemOffset + itemsPerPage;
@@ -69,11 +77,14 @@ const AllModels = () => {
 		[endOffset, itemOffset, modelList]
 	);
 
-	const pageCount = Math.ceil((modelList?.length ?? 1) / itemsPerPage);
+	// Use filteredModels for pagination
+	const pageCount = Math.max(
+		1,
+		Math.ceil(filteredModels.length / itemsPerPage)
+	);
 
 	const handlePageClick = (event) => {
-		const newOffset = event.selected * itemsPerPage;
-		setItemOffset(newOffset);
+		setItemOffset(event.selected * itemsPerPage);
 	};
 
 	const user = useSelector(memoize((state) => state?.userState?.user));
@@ -82,14 +93,13 @@ const AllModels = () => {
 
 	const fetchData = async () => {
 		const response = await customFetch(url);
-		if (response?.data?.status !== "error") {
-			const allModels = response.data.data || [];
-			// Filter based on the current view
-			setModelList(
-				allModels.filter((item) =>
-					isCompletedView ? item.isComplete : !item.isComplete
-				)
-			);
+		if (response.data.status !== "error") {
+			const all = response.data.data || [];
+			const filtered = isCompletedView
+				? all.filter((i) => i.isComplete)
+				: all;
+			setItemOffset(0);
+			setModelList(filtered.slice(0, itemsPerPage));
 		} else {
 			toast.error(response.data.message);
 		}
@@ -105,7 +115,7 @@ const AllModels = () => {
 			customFetch.post(`/model/soft-delete-models/`, { modelIds: ids }),
 		{
 			onSuccess: async () => {
-				toast.success("Facility Section(s) deleted successfully");
+				setShowSuccessAlert(true);
 				await queryClient.invalidateQueries("model");
 				const response = await queryClient.fetchQuery(
 					["model"],
@@ -116,6 +126,8 @@ const AllModels = () => {
 				} else {
 					toast.error(response.data.message);
 				}
+				setModelToDelList([]);
+				setDeleteModel(false);
 			},
 			onError: (error) => {
 				toast.error(error.message);
@@ -124,20 +136,31 @@ const AllModels = () => {
 	);
 
 	const handleDeleteModels = () => {
-		setConfirmDelete(false);
-		setDeleteModel(false);
-		mutation.mutate(modelToDelList);
-		modelList.forEach((m) => {
-			if (modelToDelList.includes(m._id)) {
-				deleteFromDb(getRealFileUrl(m.file)).then(console.log);
-			}
-		});
+		// Open confirm modal for selected IDs
+		if (!modelToDelList.length) {
+			toast.error("Please select at least one Facility Section");
+			return;
+		}
+		setPendingDeleteIds(modelToDelList);
+		setShowDeleteAlert(true);
 	};
 
+	useEffect(() => {
+		setModelList(currentItems);
+	}, [currentItems]);
+
+	// Clamp itemOffset when filtered list shrinks to avoid empty pages
+	useEffect(() => {
+		const total = filteredModels.length;
+		const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
+		const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
+		if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
+	}, [filteredModels, itemsPerPage, itemOffset]);
+
 	const handleDeleteAModel = (id) => {
-		setConfirmDelete(false);
-		setDeleteModel(false);
-		mutation.mutate([id]);
+		// Single delete path uses the same confirm modal
+		setPendingDeleteIds([id]);
+		setShowDeleteAlert(true);
 	};
 
 	const deleteModels = () => {
@@ -145,7 +168,12 @@ const AllModels = () => {
 		setDeleteModel(false);
 	};
 
-	const handleCheckedForSoftDelete = (id) => {
+	const handleCheckedForSoftDelete = (id, e) => {
+		// Prevent card clicks from navigating when selecting checkboxes
+		if (e) {
+			e.preventDefault?.();
+			e.stopPropagation?.();
+		}
 		if (modelToDelList.includes(id)) {
 			setModelToDelList(modelToDelList.filter((item) => item !== id));
 		} else {
@@ -155,19 +183,59 @@ const AllModels = () => {
 
 	const handleFilterModels = useCallback(
 		(search) => {
-			const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
+			const term = (search || "").toLowerCase();
+			if (!term.length) {
+				setItemOffset(0);
+				setModelList(filteredModels.slice(0, itemsPerPage));
+				return;
+			}
+			const regex = new RegExp(`.*${term}.*`, "i");
 			const searchResult = filteredModels.filter((item) => {
-				return regex.test(item.modelName.toLowerCase());
+				return regex.test((item.modelName || "").toLowerCase());
 			});
-			setModelList(searchResult);
 			setItemOffset(0);
+			setModelList(searchResult.slice(0, itemsPerPage));
 		},
-		[filteredModels, setModelList]
+		[filteredModels, itemsPerPage]
 	);
 
 	return (
 		<div className="AllModels box-border w-full py-5">
-			<main className="w-full">
+			{/* Models Overview Section */}
+			{/* <ModelsOverview
+				data={{
+					totalModels: model?.length || 0,
+					completedModels: model?.filter((m) => m.isComplete)?.length || 0,
+					activeModels: model?.filter((m) => !m.isComplete)?.length || 0,
+					deletedModels: 0,
+				}}
+			/> */}
+
+			<main className="w-full mt-4">
+				{/* Toggle row */}
+				<div className="mb-4 w-full px-1 lg:px-3 xl:px-5 flex items-center gap-3">
+					<button
+						onClick={() => navigate("/admin/models")}
+						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${
+							!isCompletedView
+								? "bg-primary text-white border-primary"
+								: "bg-white text-gray-600 border-gray-300"
+						}`}
+					>
+						All Facilities
+					</button>
+					<button
+						onClick={() => navigate("/admin/models?type=completed")}
+						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${
+							isCompletedView
+								? "bg-primary text-white border-primary"
+								: "bg-white text-gray-600 border-gray-300"
+						}`}
+					>
+						Complete Facilities
+					</button>
+				</div>
+
 				<div className="modelControl mb-3 w-full items-center justify-end px-1 lg:px-3 xl:px-5">
 					{deleteModel ? (
 						<div className="deleteModeWrapper flex flex-row items-center justify-between">
@@ -188,7 +256,7 @@ const AllModels = () => {
 							</div>
 							<Button
 								className="add btn btn-success btn-sm mr-5 bg-red-900"
-								onClick={() => setConfirmDelete(true)}
+								onClick={handleDeleteModels}
 							>
 								<RemoveIcon style={{ color: "#FFF" }} />
 								<p className="text-white max-md:truncate max-sm:text-sm">
@@ -196,54 +264,48 @@ const AllModels = () => {
 								</p>
 							</Button>
 						</div>
-					) : !isCompletedView &&
-					  ["admin", "superAdmin"].includes(currentUser.role) ? (
-						<div className="mr-5 flex items-center justify-end gap-4">
-							<Link
-								to={`${
-									["admin", "superAdmin"].includes(currentUser.role)
-										? "/admin/models/add-model"
-										: currentUser.role === "sampler"
-										? "/sampler/models/add-model"
-										: "/login"
-								}`}
-							>
-								<Button className="btn btn-success btn-sm mr-0">
-									<p className="max-sm:text-sm">
-										+ Add Facility Section
-									</p>
-								</Button>
-							</Link>
-							<Button
-								className="btn btn-success btn-sm mr-0"
-								onClick={() => setDeleteModel(true)}
-							>
-								<p className="text-[red] max-sm:text-sm">
-									- Delete Facility Section
-								</p>
-							</Button>
-						</div>
 					) : null}
 				</div>
 
-				<div className="searchBarContainer mx-3 w-[94%]">
-					<div className="searchIconWrapper">
-						<div className="img searchImg ml-2">
-							<img src="/img/search (2).png" alt="icon" />
-						</div>
-					</div>
-					<input
-						className="max-sm:text-sm"
-						type="text"
-						name="search"
-						placeholder="Search Facility Sections"
-						onChange={(e) => handleFilterModels(e.target.value)}
+				{/* Search and actions row */}
+				<div className="mx-3 w-[94%] flex items-center justify-between gap-4">
+					<SearchInput
+						value={searchText}
+						onChange={(v) => {
+							setSearchText(v);
+							handleFilterModels(v);
+						}}
+						placeholder="Search by Facility, Status, Location..."
 					/>
-					<div className="filter">
-						<div className="img">
-							<img className="max-sm:w-10" src="/img/edit.png" alt="" />
-						</div>
-						<p className="max-sm:text-sm">Search</p>
+					<div className="flex items-center gap-3">
+						{!deleteModel &&
+							["admin", "superAdmin"].includes(currentUser.role) && (
+								<>
+									<Link
+										to={`${
+											["admin", "superAdmin"].includes(
+												currentUser.role
+											)
+												? "/admin/models/add-model"
+												: currentUser.role === "sampler"
+												? "/sampler/models/add-model"
+												: "/login"
+										}`}
+									>
+										<ShButton className="w-[206px] h-[48px] rounded-[20px] bg-primary text-white border border-primary shadow-none">
+											<p className="max-sm:text-sm">
+												Add Facility Model
+											</p>
+										</ShButton>
+									</Link>
+									<ShButton
+										onClick={() => setDeleteModel(true)}
+										className="w-[206px] h-[48px] rounded-[20px] bg-white text-primary border border-primary shadow-none"
+									>
+										<p className="max-sm:text-sm">Delete Multiple</p>
+									</ShButton>
+								</>
+							)}
 					</div>
 				</div>
 				<div className="flex flex-wrap justify-start gap-6 p-6">
@@ -251,28 +313,41 @@ const AllModels = () => {
 						<div
 							key={index}
 							className="w-[calc(33.33%-1rem)] min-w-[300px]"
+							onClick={(e) => {
+								// In delete mode, swallow clicks to avoid navigation
+								if (deleteModel) {
+									e.preventDefault();
+									e.stopPropagation();
+								}
+							}}
 						>
 							<ModelCard
 								model={item}
 								onDelete={handleDeleteAModel}
-								onEdit={(id) =>
+								onEdit={(id, e) => {
+									if (deleteModel) {
+										e?.preventDefault?.();
+										e?.stopPropagation?.();
+										return;
+									}
 									navigate(
 										`/${
 											["admin", "superAdmin"].includes(user?.role)
 												? "admin"
 												: user?.role
 										}/edit-model/${id}`
-									)
-								}
+									);
+								}}
 								deleteModel={deleteModel}
-								onCheck={handleCheckedForSoftDelete}
+								onCheck={(id, e) => handleCheckedForSoftDelete(id, e)}
 								userRole={user?.role}
+								isChecked={modelToDelList.includes(item._id)}
 							/>
 						</div>
 					))}
 				</div>
 
-				<div className="navigatonBtnContainer">
+				<div className="navigatonBtnContainer -mt-5">
 					<ReactPaginate
 						previousLabel="Prev"
 						nextLabel="Next"
@@ -291,33 +366,28 @@ const AllModels = () => {
 						onPageChange={handlePageClick}
 						containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
 						activeclassname="m-1 rounded-full bg-black p-0 text-white"
-						forcePage={itemOffset / itemsPerPage}
+						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>
-				{confirmDelete && (
-					<div className="confirmationModalWrapper absolute">
-						<div className="confirmationModal">
-							<h1>Are you sure you want to delete?</h1>
-							<div className="btnWrapper">
-								<button
-									className="Yes"
-									onClick={() => {
-										deleteModels();
-										handleDeleteModels();
-									}}
-								>
-									Yes
-								</button>
-								<button
-									className="No"
-									onClick={() => setConfirmDelete(false)}
-								>
-									No
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
+				{/* Alerts */}
+				<DeleteAlert
+					isOpen={showDeleteAlert}
+					onClose={() => setShowDeleteAlert(false)}
+					onConfirm={() => {
+						setShowDeleteAlert(false);
+						if (pendingDeleteIds.length) {
+							mutation.mutate(pendingDeleteIds);
+						}
+					}}
+					title="Delete Facility Section(s)"
+					message="Are you sure you want to delete the selected Facility Section(s)? This action cannot be undone."
+				/>
+				<SuccessAlert
+					isOpen={showSuccessAlert}
+					onClose={() => setShowSuccessAlert(false)}
+					title="Delete Successful"
+					message="Facility Section(s) were deleted successfully."
+				/>
 			</main>
 		</div>
 	);
