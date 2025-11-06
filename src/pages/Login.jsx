@@ -5,7 +5,7 @@ import { FaEye, FaEyeSlash } from "react-icons/fa";
 import axios from "axios";
 
 import "../styles/Login.css";
-import { customFetch } from "../utils";
+import { baseURL, customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { useDispatch, useSelector } from "react-redux";
 import { SubmitBtn } from "../components";
@@ -70,15 +70,19 @@ const Login = () => {
 
 		try {
 			// Try with direct axios call to bypass customFetch issues
-			const response = await axios.post("http://localhost:8000/api/user/login", {
-				email: email.trim(),
-				password: password.trim(),
-			}, {
-				headers: {
-					'Content-Type': 'application/json',
+			const response = await axios.post(
+				baseURL + "/api/user/login",
+				{
+					email: email.trim(),
+					password: password.trim(),
 				},
-				timeout: 10000
-			});
+				{
+					headers: {
+						"Content-Type": "application/json",
+					},
+					timeout: 10000,
+				}
+			);
 
 			console.log("Login response:", response.data);
 
@@ -96,7 +100,8 @@ const Login = () => {
 			console.error("Login catch error:", err);
 			console.error("Error response:", err?.response?.data);
 			const errorMessage =
-				err?.response?.data?.message || "Wrong login details or Network error";
+				err?.response?.data?.message ||
+				"Wrong login details or Network error";
 			toast.error(errorMessage);
 			return null;
 		} finally {

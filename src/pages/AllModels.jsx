@@ -51,16 +51,8 @@ const AllModels = () => {
 	const [searchParams] = useSearchParams();
 	const isCompletedView = searchParams.get("type") === "completed";
 
-	// Filter based on the URL query parameter
-	const filteredModels = useMemo(() => {
-		// When viewing completed, filter to completed; otherwise show ALL models
-		if (isCompletedView) return model.filter((item) => item.isComplete);
-		return model; // All Facilities view shows every model
-	}, [model, isCompletedView]);
-
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
-	const [modelList, setModelList] = useState([]);
 	const [searchText, setSearchText] = useState("");
 	const [deleteModel, setDeleteModel] = useState(false);
 	const [modelToDelList, setModelToDelList] = useState([]);
@@ -70,64 +62,53 @@ const AllModels = () => {
 	const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 	const [itemOffset, setItemOffset] = useState(0);
 	const itemsPerPage = 6;
-	const endOffset = itemOffset + itemsPerPage;
 
+	const modelsAfterViewAndSearch = useMemo(() => {
+		const viewFiltered = isCompletedView
+			? model.filter((item) => item.isComplete)
+			: model;
+
+		const term = searchText.toLowerCase();
+		if (!term.length) {
+			return viewFiltered;
+		}
+		const regex = new RegExp(`.*${term}.*`, "i");
+		return viewFiltered.filter((item) => {
+			return regex.test((item.modelName || "").toLowerCase());
+		});
+	}, [model, isCompletedView, searchText]);
+
+	const endOffset = itemOffset + itemsPerPage;
 	const currentItems = useMemo(
-		() => modelList?.slice(itemOffset, endOffset),
-		[endOffset, itemOffset, modelList]
+		() => modelsAfterViewAndSearch.slice(itemOffset, endOffset),
+		[endOffset, itemOffset, modelsAfterViewAndSearch]
 	);
 
-	// Use filteredModels for pagination
 	const pageCount = Math.max(
 		1,
-		Math.ceil(filteredModels.length / itemsPerPage)
+		Math.ceil(modelsAfterViewAndSearch.length / itemsPerPage)
 	);
 
 	const handlePageClick = (event) => {
-		setItemOffset(event.selected * itemsPerPage);
+		const newOffset =
+			(event.selected * itemsPerPage) % modelsAfterViewAndSearch.length;
+		setItemOffset(newOffset);
 	};
 
 	const user = useSelector(memoize((state) => state?.userState?.user));
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
 
-	const fetchData = async () => {
-		const response = await customFetch(url);
-		if (response.data.status !== "error") {
-			const all = response.data.data || [];
-			const filtered = isCompletedView
-				? all.filter((i) => i.isComplete)
-				: all;
-			setItemOffset(0);
-			setModelList(filtered.slice(0, itemsPerPage));
-		} else {
-			toast.error(response.data.message);
-		}
-	};
-
-	useEffect(() => {
-		fetchData();
-	}, [isCompletedView]); // Re-fetch when the view changes
-
 	const mutation = useMutation(
-		// hack - post method?
 		(ids) =>
 			customFetch.post(`/model/soft-delete-models/`, { modelIds: ids }),
 		{
 			onSuccess: async () => {
 				setShowSuccessAlert(true);
-				await queryClient.invalidateQueries("model");
-				const response = await queryClient.fetchQuery(
-					["model"],
-					modelQuery
-				);
-				if (response.data.status !== "error") {
-					setModelList(response.data.data);
-				} else {
-					toast.error(response.data.message);
-				}
+				await queryClient.invalidateQueries(["model"]);
 				setModelToDelList([]);
 				setDeleteModel(false);
+				setItemOffset(0);
 			},
 			onError: (error) => {
 				toast.error(error.message);
@@ -136,7 +117,6 @@ const AllModels = () => {
 	);
 
 	const handleDeleteModels = () => {
-		// Open confirm modal for selected IDs
 		if (!modelToDelList.length) {
 			toast.error("Please select at least one Facility Section");
 			return;
@@ -146,19 +126,13 @@ const AllModels = () => {
 	};
 
 	useEffect(() => {
-		setModelList(currentItems);
-	}, [currentItems]);
-
-	// Clamp itemOffset when filtered list shrinks to avoid empty pages
-	useEffect(() => {
-		const total = filteredModels.length;
+		const total = modelsAfterViewAndSearch.length;
 		const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
 		const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
 		if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
-	}, [filteredModels, itemsPerPage, itemOffset]);
+	}, [modelsAfterViewAndSearch, itemsPerPage, itemOffset]);
 
 	const handleDeleteAModel = (id) => {
-		// Single delete path uses the same confirm modal
 		setPendingDeleteIds([id]);
 		setShowDeleteAlert(true);
 	};
@@ -169,7 +143,6 @@ const AllModels = () => {
 	};
 
 	const handleCheckedForSoftDelete = (id, e) => {
-		// Prevent card clicks from navigating when selecting checkboxes
 		if (e) {
 			e.preventDefault?.();
 			e.stopPropagation?.();
@@ -181,38 +154,9 @@ const AllModels = () => {
 		}
 	};
 
-	const handleFilterModels = useCallback(
-		(search) => {
-			const term = (search || "").toLowerCase();
-			if (!term.length) {
-				setItemOffset(0);
-				setModelList(filteredModels.slice(0, itemsPerPage));
-				return;
-			}
-			const regex = new RegExp(`.*${term}.*`, "i");
-			const searchResult = filteredModels.filter((item) => {
-				return regex.test((item.modelName || "").toLowerCase());
-			});
-			setItemOffset(0);
-			setModelList(searchResult.slice(0, itemsPerPage));
-		},
-		[filteredModels, itemsPerPage]
-	);
-
 	return (
 		<div className="AllModels box-border w-full py-5">
-			{/* Models Overview Section */}
-			{/* <ModelsOverview
-				data={{
-					totalModels: model?.length || 0,
-					completedModels: model?.filter((m) => m.isComplete)?.length || 0,
-					activeModels: model?.filter((m) => !m.isComplete)?.length || 0,
-					deletedModels: 0,
-				}}
-			/> */}
-
 			<main className="w-full mt-4">
-				{/* Toggle row */}
 				<div className="mb-4 w-full px-1 lg:px-3 xl:px-5 flex items-center gap-3">
 					<button
 						onClick={() => navigate("/admin/models")}
@@ -267,13 +211,12 @@ const AllModels = () => {
 					) : null}
 				</div>
 
-				{/* Search and actions row */}
 				<div className="mx-3 w-[94%] flex items-center justify-between gap-4">
 					<SearchInput
 						value={searchText}
 						onChange={(v) => {
 							setSearchText(v);
-							handleFilterModels(v);
+							setItemOffset(0);
 						}}
 						placeholder="Search by Facility, Status, Location..."
 					/>
@@ -314,7 +257,6 @@ const AllModels = () => {
 							key={index}
 							className="w-[calc(33.33%-1rem)] min-w-[300px]"
 							onClick={(e) => {
-								// In delete mode, swallow clicks to avoid navigation
 								if (deleteModel) {
 									e.preventDefault();
 									e.stopPropagation();
@@ -369,7 +311,6 @@ const AllModels = () => {
 						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>
-				{/* Alerts */}
 				<DeleteAlert
 					isOpen={showDeleteAlert}
 					onClose={() => setShowDeleteAlert(false)}
