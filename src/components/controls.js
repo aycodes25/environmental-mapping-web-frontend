@@ -1,526 +1,510 @@
-import { Vector3, ActionManager, ExecuteCodeAction, PointerEventTypes } from 'babylonjs';
+import {
+	Vector3,
+	ActionManager,
+	ExecuteCodeAction,
+	PointerEventTypes,
+} from "babylonjs";
+import { simulateKeyDown } from "./ModelOnScreenControls";
 
 export class JetBoxControls {
-  constructor(scene) {
-    this.scene = scene;
-    this.camera = scene.activeCamera
-    this.jetBox = scene.getMeshByName('jetBox');
-    this.position = Vector3.TransformCoordinates(scene.getMeshByName('jetBox').position, scene.getMeshByName('jetBox').computeWorldMatrix(true));
-    this.displacement = new Vector3(0, 0, 0);
+	constructor(scene) {
+		this.scene = scene;
+		this.camera = scene.activeCamera;
+		this.jetBox = scene.getMeshByName("jetBox");
+		this.position = Vector3.TransformCoordinates(
+			scene.getMeshByName("jetBox").position,
+			scene.getMeshByName("jetBox").computeWorldMatrix(true)
+		);
+		this.displacement = new Vector3(0, 0, 0);
 
-    this.keys = {
-      'a': () => this.panLeft(),
-      'd': () => this.panRight(),
-      'q': () => this.panUp(),
-      'e': () => this.panDown(),
-      'w': () => this.panForward(),
-      's': () => this.panBackward(),
-      'z': () => this.zoomIn(),
-      'x': () => this.zoomOut(),
-      // 'ArrowUp': () => this.rotateUp(),
-      // 'ArrowDown': () => this.rotateDown(),
-      // 'ArrowLeft': () => this.rotateLeft(),
-      // 'ArrowRight': () => this.rotateRight(),
-    };
+		this.keys = {
+			a: () => this.panLeft(),
+			d: () => this.panRight(),
+			q: () => this.panUp(),
+			e: () => this.panDown(),
+			w: () => this.panForward(),
+			s: () => this.panBackward(),
+			z: () => this.zoomIn(),
+			x: () => this.zoomOut(),
+			// 'ArrowUp': () => this.rotateUp(),
+			// 'ArrowDown': () => this.rotateDown(),
+			// 'ArrowLeft': () => this.rotateLeft(),
+			// 'ArrowRight': () => this.rotateRight(),
+		};
 
-    // this.setMouseEventsToControls();
-    this.setupKeyboardObservables();
-    this.setupOnScreenControls();
-  }
+		this.setMouseEventsToControls();
+		this.setupKeyboardObservables();
+		this.setupOnScreenControls();
+	}
 
-  //   getCurrentDirection() {
-  //     // Get the direction vector from the camera's position
-  //     var ray = this.camera.getForwardRay();
+	//   getCurrentDirection() {
+	//     // Get the direction vector from the camera's position
+	//     var ray = this.camera.getForwardRay();
 
-  //     // Perform a ray cast to find the intersected mesh
-  //     var pickInfo = this.scene.pickWithRay(ray);
-  //     if (pickInfo.hit) {
-  //         // Get the normal of the intersected surface
-  //         var normal = pickInfo.getNormal();
+	//     // Perform a ray cast to find the intersected mesh
+	//     var pickInfo = this.scene.pickWithRay(ray);
+	//     if (pickInfo.hit) {
+	//         // Get the normal of the intersected surface
+	//         var normal = pickInfo.getNormal();
 
-  //         // Determine the direction based on the surface normal
-  //         var directionText = "";
+	//         // Determine the direction based on the surface normal
+	//         var directionText = "";
 
-  //         if (Math.abs(normal.x) > Math.abs(normal.z)) {
-  //             if (normal.x > 0) {
-  //                 directionText = "E";
-  //             } else {
-  //                 directionText = "W";
-  //             }
-  //         } else {
-  //             if (normal.z > 0) {
-  //                 directionText = "S";
-  //             } else {
-  //                 directionText = "N";
-  //             }
-  //         }
+	//         if (Math.abs(normal.x) > Math.abs(normal.z)) {
+	//             if (normal.x > 0) {
+	//                 directionText = "E";
+	//             } else {
+	//                 directionText = "W";
+	//             }
+	//         } else {
+	//             if (normal.z > 0) {
+	//                 directionText = "S";
+	//             } else {
+	//                 directionText = "N";
+	//             }
+	//         }
 
-  //         return directionText;
-  //     } else {
-  //         // No intersection found, return default direction
-  //         return "N"; // You can choose a default direction if no intersection occurs
-  //     }
-  // }
+	//         return directionText;
+	//     } else {
+	//         // No intersection found, return default direction
+	//         return "N"; // You can choose a default direction if no intersection occurs
+	//     }
+	// }
 
+	// getCurrentDirection() {
+	//   // Get camera's rotation quaternion
+	//   var rotationQuaternion = this.camera.absoluteRotationQuaternion;
+	//   rotationQuaternion.normalize();
 
-  // getCurrentDirection() {
-  //   // Get camera's rotation quaternion
-  //   var rotationQuaternion = this.camera.absoluteRotationQuaternion;
-  //   rotationQuaternion.normalize();
+	//   // Get forward vector
+	//   var forward = Vector3.Forward();
+	//   forward = Vector3.TransformCoordinates(forward, rotationQuaternion);
 
-  //   // Get forward vector
-  //   var forward = Vector3.Forward();
-  //   forward = Vector3.TransformCoordinates(forward, rotationQuaternion);
+	//   // Calculate angle between forward vector and north direction
+	//   var angle = Math.atan2(forward.x, forward.z);
+	//   angle = angle * (180 / Math.PI); // Convert radians to degrees
+	//   var direction = "N";
 
-  //   // Calculate angle between forward vector and north direction
-  //   var angle = Math.atan2(forward.x, forward.z);
-  //   angle = angle * (180 / Math.PI); // Convert radians to degrees
-  //   var direction = "N";
+	//   // Determine cardinal direction
+	//   if (angle >= -45 && angle < 45) direction = "N";
+	//   else if (angle >= 45 && angle < 135) direction = "E";
+	//   else if (angle >= -135 && angle < -45) direction = "W";
+	//   else direction = "S";
 
-  //   // Determine cardinal direction
-  //   if (angle >= -45 && angle < 45) direction = "N";
-  //   else if (angle >= 45 && angle < 135) direction = "E";
-  //   else if (angle >= -135 && angle < -45) direction = "W";
-  //   else direction = "S";
+	//   return direction;
+	// }
 
-  //   return direction;
-  // }
+	getCurrentDirection() {
+		if (!this.jetBox || !this.camera) {
+			console.error("Parent mesh or camera not found in the scene.");
+			return null;
+		}
 
-  getCurrentDirection() {
+		// Get parent mesh's world matrix
+		var parentWorldMatrix = this.jetBox.getWorldMatrix();
 
+		// Get camera's local matrix
+		var cameraLocalMatrix = this.camera
+			.getWorldMatrix()
+			.multiply(parentWorldMatrix.invert());
 
-    if (!this.jetBox || !this.camera) {
-      console.error("Parent mesh or camera not found in the scene.");
-      return null;
-    }
+		// Extract forward direction from camera's local matrix
+		var direction = new Vector3(
+			cameraLocalMatrix.m[8],
+			cameraLocalMatrix.m[9],
+			cameraLocalMatrix.m[10]
+		);
 
-    // Get parent mesh's world matrix
-    var parentWorldMatrix = this.jetBox.getWorldMatrix();
+		// Normalize direction vector
+		direction.normalize();
 
-    // Get camera's local matrix
-    var cameraLocalMatrix = this.camera.getWorldMatrix().multiply(parentWorldMatrix.invert());
+		// Determine the direction based on the vector components
+		var directionText = "";
 
-    // Extract forward direction from camera's local matrix
-    var direction = new Vector3(cameraLocalMatrix.m[8], cameraLocalMatrix.m[9], cameraLocalMatrix.m[10]);
+		// Determine the primary direction (north, south, east, west)
+		if (Math.abs(direction.x) > Math.abs(direction.z)) {
+			if (direction.x > 0) {
+				directionText = "S";
+			} else {
+				directionText = "N";
+			}
+		} else {
+			if (direction.z > 0) {
+				directionText = "E";
+			} else {
+				directionText = "W";
+			}
+		}
 
-    // Normalize direction vector
-    direction.normalize();
+		return directionText;
+	}
 
-    // Determine the direction based on the vector components
-    var directionText = "";
+	// getCurrentDirection() {
 
-    // Determine the primary direction (north, south, east, west)
-    if (Math.abs(direction.x) > Math.abs(direction.z)) {
-      if (direction.x > 0) {
-        directionText = "S";
-      } else {
-        directionText = "N";
-      }
-    } else {
-      if (direction.z > 0) {
-        directionText = "E";
-      } else {
-        directionText = "W";
-      }
-    }
+	//    if (!this.jetBox || !this.camera) {
+	//       console.error("Parent mesh or camera not found in the scene.");
+	//       return null;
+	//   }
 
-    return directionText;
-  }
+	//   // Get parent mesh's world matrix
+	//   var parentWorldMatrix = this.jetBox.getWorldMatrix();
 
-  // getCurrentDirection() {
+	//   // Get camera's local matrix
+	//   var cameraLocalMatrix = this.camera.getWorldMatrix().multiply(parentWorldMatrix.invert());
 
+	//   // Extract forward direction from camera's local matrix
+	//   var direction = new Vector3(cameraLocalMatrix.m[8], cameraLocalMatrix.m[9], cameraLocalMatrix.m[10]);
 
-  //    if (!this.jetBox || !this.camera) {
-  //       console.error("Parent mesh or camera not found in the scene.");
-  //       return null;
-  //   }
+	//   // Normalize direction vector
+	//   direction.normalize();
 
-  //   // Get parent mesh's world matrix
-  //   var parentWorldMatrix = this.jetBox.getWorldMatrix();
+	//   // Determine the primary direction (north, south, east, west)
+	//   var primaryDirection = "";
+	//   if (Math.abs(direction.z) > Math.abs(direction.x)) {
+	//       if (direction.z > 0) {
+	//           primaryDirection = "N";
+	//       } else {
+	//           primaryDirection = "S";
+	//       }
+	//   } else {
+	//       if (direction.x > 0) {
+	//           primaryDirection = "E";
+	//       } else {
+	//           primaryDirection = "W";
+	//       }
+	//   }
 
-  //   // Get camera's local matrix
-  //   var cameraLocalMatrix = this.camera.getWorldMatrix().multiply(parentWorldMatrix.invert());
+	//   // Determine the secondary direction (northeast, northwest, southeast, southwest)
+	//   var secondaryDirection = "";
+	//   if (Math.abs(direction.z) > Math.abs(direction.x)) {
+	//       if (direction.x > 0) {
+	//           secondaryDirection = "E";
+	//       } else {
+	//           secondaryDirection = "W";
+	//       }
+	//   } else {
+	//       if (direction.z > 0) {
+	//           secondaryDirection = "N";
+	//       } else {
+	//           secondaryDirection = "S";
+	//       }
+	//   }
 
-  //   // Extract forward direction from camera's local matrix
-  //   var direction = new Vector3(cameraLocalMatrix.m[8], cameraLocalMatrix.m[9], cameraLocalMatrix.m[10]);
+	//   // Combine primary and secondary directions
+	//   var finalDirection = primaryDirection;
+	//   if (secondaryDirection !== "") {
+	//       finalDirection += "" + secondaryDirection;
+	//   }
 
-  //   // Normalize direction vector
-  //   direction.normalize();
+	//   return finalDirection;
+	// }
 
-  //   // Determine the primary direction (north, south, east, west)
-  //   var primaryDirection = "";
-  //   if (Math.abs(direction.z) > Math.abs(direction.x)) {
-  //       if (direction.z > 0) {
-  //           primaryDirection = "N";
-  //       } else {
-  //           primaryDirection = "S";
-  //       }
-  //   } else {
-  //       if (direction.x > 0) {
-  //           primaryDirection = "E";
-  //       } else {
-  //           primaryDirection = "W";
-  //       }
-  //   }
+	setMouseEventsToControls() {
+		this.scene.onPointerObservable.add((pointerInfo) => {
+			switch (pointerInfo.type) {
+				case PointerEventTypes.POINTERWHEEL:
+					if (pointerInfo.event.deltaY < 0) {
+						simulateKeyDown("ArrowUp", "ArrowUp", 38);
+					} else {
+						simulateKeyDown("ArrowDown", "ArrowDown", 40);
+					}
+					break;
+			}
+		});
+	}
 
-  //   // Determine the secondary direction (northeast, northwest, southeast, southwest)
-  //   var secondaryDirection = "";
-  //   if (Math.abs(direction.z) > Math.abs(direction.x)) {
-  //       if (direction.x > 0) {
-  //           secondaryDirection = "E";
-  //       } else {
-  //           secondaryDirection = "W";
-  //       }
-  //   } else {
-  //       if (direction.z > 0) {
-  //           secondaryDirection = "N";
-  //       } else {
-  //           secondaryDirection = "S";
-  //       }
-  //   }
+	setupActionManager() {
+		// Register actions for pointer events using ActionManager
+		this.jetBox.actionManager = new ActionManager(this.scene);
 
-  //   // Combine primary and secondary directions
-  //   var finalDirection = primaryDirection;
-  //   if (secondaryDirection !== "") {
-  //       finalDirection += "" + secondaryDirection;
-  //   }
+		// Example: Trigger action on key down
+		this.jetBox.actionManager.registerAction(
+			new ExecuteCodeAction(ActionManager.OnKeyDownTrigger, (evt) => {
+				const key = evt.sourceEvent.key.toLowerCase();
+				this.handleKeyPress(key);
+			})
+		);
+	}
 
-  //   return finalDirection;
-  // }
+	setupKeyboardObservables() {
+		this.scene.onKeyboardObservable.add((kbInfo) => {
+			const key = kbInfo.event.key.toLowerCase();
+			this.handleKeyPress(key);
+		});
+	}
 
+	setupOnScreenControls() {
+		const intervals = {};
 
-  setMouseEventsToControls() {
-    var rotationSpeed = 0.01;
-    var isPointerDown = false;
-    var lastPointerX;
-    var lastPointerY;
-    this.scene.onPointerObservable.add(function (pointerInfo) {
-      switch (pointerInfo.type) {
-        case PointerEventTypes.POINTERDOWN:
-          // Set the pointer down state
-          isPointerDown = true;
-          // Store the initial pointer position
-          lastPointerX = pointerInfo.event.clientX;
-          lastPointerY = pointerInfo.event.clientY;
-          break;
+		function startAction(buttonId, action, intervalDuration = 100) {
+			action;
+			intervals[buttonId] = setInterval(action, intervalDuration);
+		}
 
-        case PointerEventTypes.POINTERUP:
-          // Reset the pointer down state
-          isPointerDown = false;
-          break;
+		function stopAction(buttonId) {
+			clearInterval(intervals[buttonId]);
+			delete intervals[buttonId];
+		}
 
-        case PointerEventTypes.POINTERMOVE:
-          if (isPointerDown) {
-            // Calculate the movement delta
-            var deltaX = pointerInfo.event.clientX - lastPointerX;
-            var deltaY = pointerInfo.event.clientY - lastPointerY;
+		function attachListeners(buttonId, action) {
+			const button = document.getElementById(buttonId);
+			button.addEventListener("pointerdown", () =>
+				startAction(buttonId, action)
+			);
+			button.addEventListener("pointerup", () => stopAction(buttonId));
+		}
 
-            // Update the last pointer position
-            lastPointerX = pointerInfo.event.clientX;
-            lastPointerY = pointerInfo.event.clientY;
+		// Attach event listeners for each button and its corresponding action
+		attachListeners("panLeft", () => this.panLeft());
+		attachListeners("panRight", () => this.panRight());
+		attachListeners("panUp", () => this.panUp());
+		attachListeners("panDown", () => this.panDown());
+		attachListeners("panForward", () => this.panForward());
+		attachListeners("panBackward", () => this.panBackward());
+		attachListeners("zoomIn", () => this.zoomIn());
+		attachListeners("zoomOut", () => this.zoomOut());
+		attachListeners("rotateLeft", () => this.rotateLeft());
+		attachListeners("rotateRight", () => this.rotateRight());
+		attachListeners("rotateUp", () => this.rotateUp());
+		attachListeners("rotateDown", () => this.rotateDown());
+	}
 
-            // Rotate the box based on mouse movement
-            this.jetBox.rotation.y += deltaX * rotationSpeed;
-            this.jetBox.rotation.x -= deltaY * rotationSpeed;
-            break;
-          }
-      }
-    }, PointerEventTypes.POINTERDOWN | PointerEventTypes.POINTERUP | PointerEventTypes.POINTERMOVE);
-  }
+	handleKeyPress(key) {
+		const handler = this.keys[key];
+		if (handler) {
+			handler();
+		}
+	}
 
-  setupActionManager() {
-    // Register actions for pointer events using ActionManager
-    this.jetBox.actionManager = new ActionManager(this.scene);
+	panLeft() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(0, 0, -0.15);
+				break;
+			case "NE":
+				this.updateDisplacement(-0.05, 0, -0.05);
+				break;
+			case "E":
+				this.updateDisplacement(-0.15, 0, 0);
+				break;
+			case "SE":
+				this.updateDisplacement(-0.05, 0, 0.05);
+				break;
+			case "S":
+				this.updateDisplacement(0, 0, 0.15);
+				break;
+			case "SW":
+				this.updateDisplacement(0.05, 0, 0.05);
+				break;
+			case "W":
+				this.updateDisplacement(0.15, 0, 0);
+				break;
+			case "NW":
+				this.updateDisplacement(0.05, 0, -0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-    // Example: Trigger action on key down
-    this.jetBox.actionManager.registerAction(
-      new ExecuteCodeAction(
-        ActionManager.OnKeyDownTrigger,
-        (evt) => {
-          const key = evt.sourceEvent.key.toLowerCase();
-          this.handleKeyPress(key);
-        }
-      )
-    );
-  }
+	panRight() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(0, 0, 0.15);
+				break;
+			case "NE":
+				this.updateDisplacement(0.05, 0, 0.05);
+				break;
+			case "E":
+				this.updateDisplacement(0.15, 0, 0);
+				break;
+			case "SE":
+				this.updateDisplacement(0.05, 0, -0.05);
+				break;
+			case "S":
+				this.updateDisplacement(0, 0, -0.15);
+				break;
+			case "SW":
+				this.updateDisplacement(-0.05, 0, -0.05);
+				break;
+			case "W":
+				this.updateDisplacement(-0.15, 0, 0);
+				break;
+			case "NW":
+				this.updateDisplacement(-0.05, 0, 0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-  setupKeyboardObservables() {
-    this.scene.onKeyboardObservable.add((kbInfo) => {
-      const key = kbInfo.event.key.toLowerCase();
-      this.handleKeyPress(key);
-    });
-  }
+	panUp() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(0, 0.15, 0);
+				break;
+			case "NE":
+				this.updateDisplacement(0, -0.05, -0.05);
+				break;
+			case "E":
+				this.updateDisplacement(0, 0.15, 0);
+				break;
+			case "SE":
+				this.updateDisplacement(0, 0.05, -0.05);
+				break;
+			case "S":
+				this.updateDisplacement(0, 0.15, 0);
+				break;
+			case "SW":
+				this.updateDisplacement(0, 0.05, 0.05);
+				break;
+			case "W":
+				this.updateDisplacement(0, 0.15, 0);
+				break;
+			case "NW":
+				this.updateDisplacement(0, -0.05, 0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-  setupOnScreenControls() {
-    const intervals = {};
+	panDown() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(0, -0.15, 0);
+				break;
+			case "NE":
+				this.updateDisplacement(0, 0.05, 0.05);
+				break;
+			case "E":
+				this.updateDisplacement(0, -0.15, 0);
+				break;
+			case "SE":
+				this.updateDisplacement(0, -0.05, 0.05);
+				break;
+			case "S":
+				this.updateDisplacement(0, -0.15, 0);
+				break;
+			case "SW":
+				this.updateDisplacement(0, -0.05, -0.05);
+				break;
+			case "W":
+				this.updateDisplacement(0, -0.15, 0);
+				break;
+			case "NW":
+				this.updateDisplacement(0, 0.05, -0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-    function startAction(buttonId, action, intervalDuration = 100) {
-      action;
-      intervals[buttonId] = setInterval(action, intervalDuration);
-    }
+	panForward() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(-0.15, 0, 0);
+				break;
+			case "NE":
+				this.updateDisplacement(-0.05, 0, 0.05);
+				break;
+			case "E":
+				this.updateDisplacement(0, 0, 0.15);
+				break;
+			case "SE":
+				this.updateDisplacement(0.05, 0, 0.05);
+				break;
+			case "S":
+				this.updateDisplacement(0.15, 0, 0);
+				break;
+			case "SW":
+				this.updateDisplacement(0.05, 0, -0.05);
+				break;
+			case "W":
+				this.updateDisplacement(0, 0, -0.15);
+				break;
+			case "NW":
+				this.updateDisplacement(-0.05, 0, -0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-    function stopAction(buttonId) {
-      clearInterval(intervals[buttonId]);
-      delete intervals[buttonId];
-    }
+	panBackward() {
+		const direction = this.getCurrentDirection();
+		switch (direction) {
+			case "N":
+				this.updateDisplacement(0.15, 0, 0);
+				break;
+			case "NE":
+				this.updateDisplacement(0.05, 0, -0.05);
+				break;
+			case "E":
+				this.updateDisplacement(0, 0, -0.15);
+				break;
+			case "SE":
+				this.updateDisplacement(-0.05, 0, -0.05);
+				break;
+			case "S":
+				this.updateDisplacement(-0.15, 0, 0);
+				break;
+			case "SW":
+				this.updateDisplacement(-0.05, 0, 0.05);
+				break;
+			case "W":
+				this.updateDisplacement(0, 0, 0.15);
+				break;
+			case "NW":
+				this.updateDisplacement(0.05, 0, 0.05);
+				break;
+			default:
+				break;
+		}
+	}
 
-    function attachListeners(buttonId, action) {
-      const button = document.getElementById(buttonId);
-      button.addEventListener('pointerdown', () => startAction(buttonId, action));
-      button.addEventListener('pointerup', () => stopAction(buttonId));
-    }
+	zoomIn() {
+		this.scene.activeCamera.radius -= 0.3;
+	}
 
-    // Attach event listeners for each button and its corresponding action
-    attachListeners('panLeft', () => this.panLeft());
-    attachListeners('panRight', () => this.panRight());
-    attachListeners('panUp', () => this.panUp());
-    attachListeners('panDown', () => this.panDown());
-    attachListeners('panForward', () => this.panForward());
-    attachListeners('panBackward', () => this.panBackward());
-    attachListeners('zoomIn', () => this.zoomIn());
-    attachListeners('zoomOut', () => this.zoomOut());
-    attachListeners('rotateLeft', () => this.rotateLeft());
-    attachListeners('rotateRight', () => this.rotateRight());
-    attachListeners('rotateUp', () => this.rotateUp());
-    attachListeners('rotateDown', () => this.rotateDown());
-  }
+	zoomOut() {
+		this.scene.activeCamera.radius += 0.3;
+	}
 
-  handleKeyPress(key) {
-    const handler = this.keys[key];
-    if (handler) {
-      handler();
-    }
-  }
+	rotateLeft() {
+		this.updateRotation(0, -0.15, 0);
+	}
 
-  panLeft() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(0, 0, -0.15);
-        break;
-      case 'NE':
-        this.updateDisplacement(-0.05, 0, -0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(-0.15, 0, 0);
-        break;
-      case 'SE':
-        this.updateDisplacement(-0.05, 0, 0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(0, 0, 0.15);
-        break;
-      case 'SW':
-        this.updateDisplacement(0.05, 0, 0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(0.15, 0, 0);
-        break;
-      case 'NW':
-        this.updateDisplacement(0.05, 0, -0.05);
-        break;
-      default:
-        break;
-    }
-  }
+	rotateRight() {
+		this.updateRotation(0, 0.15, 0);
+	}
 
-  panRight() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(0, 0, 0.15);
-        break;
-      case 'NE':
-        this.updateDisplacement(0.05, 0, 0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(0.15, 0, 0);
-        break;
-      case 'SE':
-        this.updateDisplacement(0.05, 0, -0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(0, 0, -0.15);
-        break;
-      case 'SW':
-        this.updateDisplacement(-0.05, 0, -0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(-0.15, 0, 0);
-        break;
-      case 'NW':
-        this.updateDisplacement(-0.05, 0, 0.05);
-        break;
-      default:
-        break;
-    }
-  }
+	rotateUp() {
+		this.updateRotation(-0.15, 0, 0);
+	}
 
-  panUp() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(0, 0.15, 0);
-        break;
-      case 'NE':
-        this.updateDisplacement(0, -0.05, -0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(0, 0.15, 0);
-        break;
-      case 'SE':
-        this.updateDisplacement(0, 0.05, -0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(0, 0.15, 0);
-        break;
-      case 'SW':
-        this.updateDisplacement(0, 0.05, 0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(0, 0.15, 0);
-        break;
-      case 'NW':
-        this.updateDisplacement(0, -0.05, 0.05);
-        break;
-      default:
-        break;
-    }
-  }
+	rotateDown() {
+		this.updateRotation(0.15, 0, 0);
+	}
 
-  panDown() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(0, -0.15, 0);
-        break;
-      case 'NE':
-        this.updateDisplacement(0, 0.05, 0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(0, -0.15, 0);
-        break;
-      case 'SE':
-        this.updateDisplacement(0, -0.05, 0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(0, -0.15, 0);
-        break;
-      case 'SW':
-        this.updateDisplacement(0, -0.05, -0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(0, -0.15, 0);
-        break;
-      case 'NW':
-        this.updateDisplacement(0, 0.05, -0.05);
-        break;
-      default:
-        break;
-    }
-  }
+	updateDisplacement(x, y, z) {
+		this.camera.position.x += x;
+		this.camera.position.y += y;
+		this.camera.position.z += z;
+	}
 
-  panForward() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(-0.15, 0, 0);
-        break;
-      case 'NE':
-        this.updateDisplacement(-0.05, 0, 0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(0, 0, 0.15);
-        break;
-      case 'SE':
-        this.updateDisplacement(0.05, 0, 0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(0.15, 0, 0);
-        break;
-      case 'SW':
-        this.updateDisplacement(0.05, 0, -0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(0, 0, -0.15);
-        break;
-      case 'NW':
-        this.updateDisplacement(-0.05, 0, -0.05);
-        break;
-      default:
-        break;
-    }
-  }
-
-  panBackward() {
-    const direction = this.getCurrentDirection();
-    switch (direction) {
-      case 'N':
-        this.updateDisplacement(0.15, 0, 0);
-        break;
-      case 'NE':
-        this.updateDisplacement(0.05, 0, -0.05);
-        break;
-      case 'E':
-        this.updateDisplacement(0, 0, -0.15);
-        break;
-      case 'SE':
-        this.updateDisplacement(-0.05, 0, -0.05);
-        break;
-      case 'S':
-        this.updateDisplacement(-0.15, 0, 0);
-        break;
-      case 'SW':
-        this.updateDisplacement(-0.05, 0, 0.05);
-        break;
-      case 'W':
-        this.updateDisplacement(0, 0, 0.15);
-        break;
-      case 'NW':
-        this.updateDisplacement(0.05, 0, 0.05);
-        break;
-      default:
-        break;
-    }
-  }
-
-  zoomIn() {
-    this.scene.activeCamera.radius -= 0.3;
-  }
-
-  zoomOut() {
-    this.scene.activeCamera.radius += 0.3;
-  }
-
-  rotateLeft() {
-    this.updateRotation(0, -0.15, 0);
-  }
-
-  rotateRight() {
-    this.updateRotation(0, 0.15, 0);
-  }
-
-  rotateUp() {
-    this.updateRotation(-0.15, 0, 0);
-  }
-
-  rotateDown() {
-    this.updateRotation(0.15, 0, 0);
-  }
-
-  updateDisplacement(x, y, z) {
-    this.camera.position.x += x;
-    this.camera.position.y += y;
-    this.camera.position.z += z;
-  }
-
-  updateRotation(x, y, z) {
-    this.jetBox.rotation.x += x;
-    this.jetBox.rotation.y += y;
-    this.jetBox.rotation.z += z;
-  }
+	updateRotation(x, y, z) {
+		this.jetBox.rotation.x += x;
+		this.jetBox.rotation.y += y;
+		this.jetBox.rotation.z += z;
+	}
 }
 
 export default function BabylonControls(scene) {
-  new JetBoxControls(scene);
+	new JetBoxControls(scene);
 }

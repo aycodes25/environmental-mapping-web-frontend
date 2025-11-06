@@ -253,7 +253,6 @@ export default function TanstackTable({
 								}}
 							/>
 						)}
-
 					</>
 				)}
 				{/* Always render pagination controls, even when there are no rows */}

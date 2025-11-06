@@ -13,12 +13,10 @@ import { toast } from "react-toastify";
 import { Button, Typography } from "@mui/material";
 import { useQueryClient } from "@tanstack/react-query";
 import { dispatchSelectedMeshTags } from "../redux/actions/meshActions";
-import { toggleSetting } from "../redux/actions/settingActions";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 
 const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 	const dispatch = useDispatch();
-	const setting = useSelector(memoize((state) => state.settingState.setting));
 
 	const [samples, setSamples] = useState([]);
 	const [incidents, setIncidents] = useState([]);
@@ -29,6 +27,13 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 	const [newTaggedInfo, setNewTaggedInfo] = useState();
 	const [customData, setCustomData] = useState(false);
 	const [evidenceName, setEvidenceName] = useState("");
+	const [date, setDate] = useState(new Date().toISOString().split("T")[0]);
+	const [time, setTime] = useState(
+		new Date().toLocaleTimeString("it-IT", {
+			hour: "2-digit",
+			minute: "2-digit",
+		})
+	);
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const goBack = () => {
@@ -146,6 +151,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+		const dateTime = new Date(`${date}T${time}`);
 		if (tagType === "sample") {
 			formData.type = "sampling";
 		} else {
@@ -186,6 +192,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 			formDataForUpload.append("taggedInfo", newTaggedInfo);
 			formDataForUpload.append("userId", currentUser?._id);
 			formDataForUpload.append("modelId", model?._id);
+			formDataForUpload.append("createdAt", dateTime.toISOString());
 
 			const response = await customFetch.post("/tag/add", formDataForUpload);
 			console.log("Response after adding tag:", response);
@@ -207,7 +214,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 						response.data.data.sampleDetails ||
 						formData.sampleDetails ||
 						"",
-					createdAt: new Date().toISOString(),
+					createdAt: dateTime.toISOString(),
 				};
 				tags.push(newTag);
 				setTagsData(tags);
@@ -283,7 +290,25 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 							value={formData.locations}
 						/>
 
-						{tagType === "sample" && (
+						{/* add time selector and date, combine date and time to set createdAt */}
+						<div className="grid grid-cols-2 gap-4">
+							<FormInput
+								type="date"
+								label="Date"
+								name="date"
+								value={date}
+								onChange={(e) => setDate(e.target.value)}
+							/>
+							<FormInput
+								type="time"
+								label="Time"
+								name="time"
+								value={time}
+								onChange={(e) => setTime(e.target.value)}
+							/>
+						</div>
+
+						{tagType === "sample" ? (
 							<div className="form-control">
 								<FormInput
 									onChange={handleInputChange}
@@ -296,9 +321,9 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 									options={["Salmonella", "Listeria"]}
 								/>
 							</div>
-						)}
+						) : null}
 
-						{tagType === "sample" && (
+						{tagType === "sample" ? (
 							<div className="grid grid-cols-1 md:grid-cols-2 gap-3">
 								<div className="form-control">
 									<label className="mb-1 text-sm font-medium">
@@ -358,9 +383,9 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 									</select>
 								</div>
 							</div>
-						)}
+						) : null}
 
-						{tagType === "incident" && (
+						{tagType === "incident" ? (
 							<div className="form-control">
 								<FormInput
 									onChange={handleInputChange}
@@ -373,8 +398,8 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 									options={["Safety", "Crack", "Spill"]}
 								/>
 							</div>
-						)}
-						{tagType === "sample" && (
+						) : null}
+						{tagType === "sample" ? (
 							<div className="form-control mt-5">
 								<select
 									onChange={handleInputChange}
@@ -396,7 +421,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 									))}
 								</select>
 							</div>
-						)}
+						) : null}
 						<FormInput
 							onChange={handleInputChange}
 							label="Group"
@@ -407,7 +432,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 							value={formData.group}
 							options={tagsGroups || []}
 						/>
-						{["sampling", "incident"].includes(formData.type) && (
+						{["sampling", "incident"].includes(formData.type) ? (
 							<FormInput
 								onChange={handleInputChange}
 								label="Corrective Actions"
@@ -417,7 +442,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 								size="input-sm"
 								value={formData?.action}
 							/>
-						)}
+						) : null}
 						<div className="border-1 input input-sm input-bordered mt-5 flex h-auto min-h-10 flex-col items-center justify-center gap-1">
 							<Button
 								onClick={() => {
@@ -429,7 +454,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 								<CiCirclePlus />
 							</Button>
 						</div>
-						{customData && (
+						{customData ? (
 							<div className="mt-5 flex h-auto w-full flex-col">
 								<textarea
 									className="h-auto w-full rounded-md"
@@ -444,7 +469,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 									value={formData?.text}
 								/>
 							</div>
-						)}
+						) : null}
 						<div className="form-control">
 							<label htmlFor="evidence" className="label">
 								<span className="label-text capitalize">

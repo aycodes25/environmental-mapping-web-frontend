@@ -72,10 +72,9 @@ const AllModels = () => {
 	const itemsPerPage = 6;
 	const endOffset = itemOffset + itemsPerPage;
 
-	// Use filteredModels instead of model
 	const currentItems = useMemo(
-		() => filteredModels.slice(itemOffset, endOffset),
-		[endOffset, itemOffset, filteredModels]
+		() => modelList?.slice(itemOffset, endOffset),
+		[endOffset, itemOffset, modelList]
 	);
 
 	// Use filteredModels for pagination
@@ -88,7 +87,7 @@ const AllModels = () => {
 		setItemOffset(event.selected * itemsPerPage);
 	};
 
-	const user = useSelector(memoize((state) => state.userState.user));
+	const user = useSelector(memoize((state) => state?.userState?.user));
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
 
@@ -310,7 +309,7 @@ const AllModels = () => {
 					</div>
 				</div>
 				<div className="flex flex-wrap justify-start gap-6 p-6">
-					{modelList?.map((item, index) => (
+					{currentItems?.map((item, index) => (
 						<div
 							key={index}
 							className="w-[calc(33.33%-1rem)] min-w-[300px]"

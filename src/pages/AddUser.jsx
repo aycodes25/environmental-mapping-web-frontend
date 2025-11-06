@@ -26,7 +26,32 @@ const AddUser = () => {
 	const [imageName, setImageName] = useState("");
 	const [locations, setLocations] = useState([]);
 	const navigate = useNavigate();
+	const [formData, setFormData] = useState({
+		fullname: "",
+		username: "",
+		email: "",
+		password: "",
+		role: "",
+		image: "",
+		location: "",
+	});
+	const [visible, setVisible] = useState(false);
+	const [showModal, setShowModal] = useState(false);
+	const [isSubmitting, setIsSubmitting] = useState(false);
+	const [imageName, setImageName] = useState("");
+	const [locations, setLocations] = useState([]);
+	const navigate = useNavigate();
 
+	const handleChange = (e) => {
+		const { name, value, files } = e.target;
+		if (name === "image") {
+			setImageName(files[0].name);
+		}
+		setFormData({
+			...formData,
+			[name]: files ? files[0] : value,
+		});
+	};
 	const handleChange = (e) => {
 		const { name, value, files } = e.target;
 		if (name === "image") {
@@ -49,11 +74,32 @@ const AddUser = () => {
 			}
 		});
 	}
+	async function fetchLocations() {
+		await customFetch.get("/location/locations").then(({ data }) => {
+			if (data?.data) {
+				const LocationsNew = data.data.map((item) => ({
+					label: item.name,
+					value: item._id,
+				}));
+				setLocations(LocationsNew);
+			}
+		});
+	}
 
 	useEffect(() => {
 		fetchLocations();
 	}, []);
+	useEffect(() => {
+		fetchLocations();
+	}, []);
 
+	useEffect(() => {
+		const pageViewer = getUserFromLocalStorage();
+		if (pageViewer?.role !== "superAdmin") {
+			toast.error("You are not permitted to view this page");
+			navigate(-1);
+		}
+	}, []);
 	useEffect(() => {
 		const pageViewer = getUserFromLocalStorage();
 		if (pageViewer?.role !== "superAdmin") {
@@ -93,6 +139,23 @@ const AddUser = () => {
 			}
 			formDataForUpload.append("location", formData.location);
 
+			const response = await customFetch.post(
+				"/user/register-tagger",
+				formDataForUpload
+			);
+			if (response.data?.status !== "error") {
+				toast.success(`User added successfully`);
+			} else {
+				toast.error(response.data?.message);
+			}
+			setImageName("");
+		} catch (error) {
+			const errorMessage = error?.response?.data?.msg || "Error adding user";
+			toast.error(errorMessage);
+		} finally {
+			setIsSubmitting(false);
+		}
+	};
 			const response = await customFetch.post(
 				"/user/register-tagger",
 				formDataForUpload
@@ -315,3 +378,4 @@ const AddUser = () => {
 };
 
 export default AddUser;
+
