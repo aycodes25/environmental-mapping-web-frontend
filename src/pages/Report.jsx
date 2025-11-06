@@ -12,7 +12,7 @@ import { toast } from "react-toastify";
 import { useLoaderData } from "react-router-dom";
 import TanstackTable from "../components/TanstackTable";
 import Modal from "../components/ui/modal";
-import ReportOverview from "./new/ReportOverview";
+// import ReportOverview from "./new/ReportOverview";
 import WebIcon from "../components/custom/WebIcons";
 import SearchInput from "../components/ui/search-input";
 import {
@@ -554,16 +554,13 @@ const Report = () => {
 	return (
 		<div className="flex flex-col flex-grow w-auto">
 			{/* Report Overview Section */}
-			<ReportOverview reportData={reportData} />
+			{/* <ReportOverview reportData={reportData} /> */}
 
 			{/* Report Filters and Table Section */}
 			<div className="flex flex-col flex-grow p-5">
-				{/* Report Title and Filters Row */}
 				<div className="flex items-center justify-between mb-6">
-					{/* Report Title */}
 					<h2 className="heading-large font-bold text-primary">Reports</h2>
-
-					{/* Date Range Filters */}
+					]{" "}
 					<div className="flex items-center gap-3">
 						<label className="flex items-center gap-2 text-sm text-gray-700">
 							<WebIcon icon="calendar" className="w-3 h-3" />

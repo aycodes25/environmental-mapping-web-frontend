@@ -23,8 +23,9 @@ import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 // import ModalCard component.
 import { ModelCard } from "../components/ModelCard";
 import { deleteFromDb } from "@/components/SceneComponent";
-import ModelsOverview from "./new/ModelsOverview";
+// import ModelsOverview from "./new/ModelsOverview";
 import SearchInput from "../components/ui/search-input";
+import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
 
 const url = "/model/get-models";
 
@@ -52,9 +53,9 @@ const AllModels = () => {
 
 	// Filter based on the URL query parameter
 	const filteredModels = useMemo(() => {
-		return model.filter((item) =>
-			isCompletedView ? item.isComplete : !item.isComplete
-		);
+		// When viewing completed, filter to completed; otherwise show ALL models
+		if (isCompletedView) return model.filter((item) => item.isComplete);
+		return model; // All Facilities view shows every model
 	}, [model, isCompletedView]);
 
 	const navigate = useNavigate();
@@ -63,7 +64,10 @@ const AllModels = () => {
 	const [searchText, setSearchText] = useState("");
 	const [deleteModel, setDeleteModel] = useState(false);
 	const [modelToDelList, setModelToDelList] = useState([]);
-	const [confirmDelete, setConfirmDelete] = useState(false);
+	const [confirmDelete, setConfirmDelete] = useState(false); // legacy, replaced below
+	const [showDeleteAlert, setShowDeleteAlert] = useState(false);
+	const [showSuccessAlert, setShowSuccessAlert] = useState(false);
+	const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 	const [itemOffset, setItemOffset] = useState(0);
 	const itemsPerPage = 6;
 	const endOffset = itemOffset + itemsPerPage;
@@ -75,7 +79,10 @@ const AllModels = () => {
 	);
 
 	// Use filteredModels for pagination
-	const pageCount = Math.max(1, Math.ceil(filteredModels.length / itemsPerPage));
+	const pageCount = Math.max(
+		1,
+		Math.ceil(filteredModels.length / itemsPerPage)
+	);
 
 	const handlePageClick = (event) => {
 		setItemOffset(event.selected * itemsPerPage);
@@ -88,12 +95,10 @@ const AllModels = () => {
 	const fetchData = async () => {
 		const response = await customFetch(url);
 		if (response.data.status !== "error") {
-			const allModels = response.data.data || [];
-			// Filter based on the current view and respect pagination on first load
-			const filtered = allModels.filter((item) =>
-				isCompletedView ? item.isComplete : !item.isComplete
-			);
-			// Reset to first page then slice
+			const all = response.data.data || [];
+			const filtered = isCompletedView
+				? all.filter((i) => i.isComplete)
+				: all;
 			setItemOffset(0);
 			setModelList(filtered.slice(0, itemsPerPage));
 		} else {
@@ -111,7 +116,7 @@ const AllModels = () => {
 			customFetch.post(`/model/soft-delete-models/`, { modelIds: ids }),
 		{
 			onSuccess: async () => {
-				toast.success("Facility Section(s) deleted successfully");
+				setShowSuccessAlert(true);
 				await queryClient.invalidateQueries("model");
 				const response = await queryClient.fetchQuery(
 					["model"],
@@ -122,6 +127,8 @@ const AllModels = () => {
 				} else {
 					toast.error(response.data.message);
 				}
+				setModelToDelList([]);
+				setDeleteModel(false);
 			},
 			onError: (error) => {
 				toast.error(error.message);
@@ -130,14 +137,13 @@ const AllModels = () => {
 	);
 
 	const handleDeleteModels = () => {
-		setConfirmDelete(false);
-		setDeleteModel(false);
-		mutation.mutate(modelToDelList);
-		modelList.forEach((m) => {
-			if (modelToDelList.includes(m._id)) {
-				deleteFromDb(getRealFileUrl(m.file)).then(console.log);
-			}
-		});
+		// Open confirm modal for selected IDs
+		if (!modelToDelList.length) {
+			toast.error("Please select at least one Facility Section");
+			return;
+		}
+		setPendingDeleteIds(modelToDelList);
+		setShowDeleteAlert(true);
 	};
 
 	useEffect(() => {
@@ -153,9 +159,9 @@ const AllModels = () => {
 	}, [filteredModels, itemsPerPage, itemOffset]);
 
 	const handleDeleteAModel = (id) => {
-		setConfirmDelete(false);
-		setDeleteModel(false);
-		mutation.mutate([id]);
+		// Single delete path uses the same confirm modal
+		setPendingDeleteIds([id]);
+		setShowDeleteAlert(true);
 	};
 
 	const deleteModels = () => {
@@ -163,7 +169,12 @@ const AllModels = () => {
 		setDeleteModel(false);
 	};
 
-	const handleCheckedForSoftDelete = (id) => {
+	const handleCheckedForSoftDelete = (id, e) => {
+		// Prevent card clicks from navigating when selecting checkboxes
+		if (e) {
+			e.preventDefault?.();
+			e.stopPropagation?.();
+		}
 		if (modelToDelList.includes(id)) {
 			setModelToDelList(modelToDelList.filter((item) => item !== id));
 		} else {
@@ -192,14 +203,14 @@ const AllModels = () => {
 	return (
 		<div className="AllModels box-border w-full py-5">
 			{/* Models Overview Section */}
-			<ModelsOverview
+			{/* <ModelsOverview
 				data={{
 					totalModels: model?.length || 0,
 					completedModels: model?.filter((m) => m.isComplete)?.length || 0,
 					activeModels: model?.filter((m) => !m.isComplete)?.length || 0,
 					deletedModels: 0,
 				}}
-			/>
+			/> */}
 
 			<main className="w-full mt-4">
 				{/* Toggle row */}
@@ -246,7 +257,7 @@ const AllModels = () => {
 							</div>
 							<Button
 								className="add btn btn-success btn-sm mr-5 bg-red-900"
-								onClick={() => setConfirmDelete(true)}
+								onClick={handleDeleteModels}
 							>
 								<RemoveIcon style={{ color: "#FFF" }} />
 								<p className="text-white max-md:truncate max-sm:text-sm">
@@ -303,22 +314,35 @@ const AllModels = () => {
 						<div
 							key={index}
 							className="w-[calc(33.33%-1rem)] min-w-[300px]"
+							onClick={(e) => {
+								// In delete mode, swallow clicks to avoid navigation
+								if (deleteModel) {
+									e.preventDefault();
+									e.stopPropagation();
+								}
+							}}
 						>
 							<ModelCard
 								model={item}
 								onDelete={handleDeleteAModel}
-								onEdit={(id) =>
+								onEdit={(id, e) => {
+									if (deleteModel) {
+										e?.preventDefault?.();
+										e?.stopPropagation?.();
+										return;
+									}
 									navigate(
 										`/${
 											["admin", "superAdmin"].includes(user?.role)
 												? "admin"
 												: user?.role
 										}/edit-model/${id}`
-									)
-								}
+									);
+								}}
 								deleteModel={deleteModel}
-								onCheck={handleCheckedForSoftDelete}
+								onCheck={(id, e) => handleCheckedForSoftDelete(id, e)}
 								userRole={user?.role}
+								isChecked={modelToDelList.includes(item._id)}
 							/>
 						</div>
 					))}
@@ -346,30 +370,25 @@ const AllModels = () => {
 						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>
-				{confirmDelete && (
-					<div className="confirmationModalWrapper absolute">
-						<div className="confirmationModal">
-							<h1>Are you sure you want to delete?</h1>
-							<div className="btnWrapper">
-								<button
-									className="Yes"
-									onClick={() => {
-										deleteModels();
-										handleDeleteModels();
-									}}
-								>
-									Yes
-								</button>
-								<button
-									className="No"
-									onClick={() => setConfirmDelete(false)}
-								>
-									No
-								</button>
-							</div>
-						</div>
-					</div>
-				)}
+				{/* Alerts */}
+				<DeleteAlert
+					isOpen={showDeleteAlert}
+					onClose={() => setShowDeleteAlert(false)}
+					onConfirm={() => {
+						setShowDeleteAlert(false);
+						if (pendingDeleteIds.length) {
+							mutation.mutate(pendingDeleteIds);
+						}
+					}}
+					title="Delete Facility Section(s)"
+					message="Are you sure you want to delete the selected Facility Section(s)? This action cannot be undone."
+				/>
+				<SuccessAlert
+					isOpen={showSuccessAlert}
+					onClose={() => setShowSuccessAlert(false)}
+					title="Delete Successful"
+					message="Facility Section(s) were deleted successfully."
+				/>
 			</main>
 		</div>
 	);

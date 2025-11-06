@@ -4,6 +4,7 @@ import { FaTimes, FaBars } from "react-icons/fa";
 import NavLinksNew from "./NavLinksNew";
 import WebIcon from "../../components/custom/WebIcons";
 import SidebarFooter from "./SidebarFooter";
+import logo from "../../assets/logo.png";
 
 const SidebarNew = ({ onCollapse }) => {
 	const [collapsed, setCollapsed] = useState(false);
@@ -22,20 +23,23 @@ const SidebarNew = ({ onCollapse }) => {
 				}`}
 			>
 				<div
-					className={`h-20 relative flex items-center ${
-						collapsed ? "justify-center" : "justify-between px-4"
-					}`}
+					className={`h-20 relative flex items-center justify-center px-4`}
 				>
 					<div className="flex items-center gap-2">
-						{!collapsed && null}
+						<img
+							src={logo}
+							alt="EMP logo"
+							className={`${
+								collapsed
+									? "h-12 w-12"
+									: "w-32 max-w-full h-auto object-contain"
+							} object-contain`}
+						/>
 					</div>
-					{!collapsed && (
-						<div className="absolute left-1/2 -translate-x-1/2 text-white text-lg font-bold pointer-events-none">EMP</div>
-					)}
 					{!collapsed && (
 						<button
 							onClick={toggle}
-							className="text-white text-sm px-2 py-1 hover:bg-white/20 rounded-md transition-colors"
+							className="absolute right-3 text-white text-sm px-2 py-1 hover:bg-white/20 rounded-md transition-colors"
 						>
 							<FaTimes />
 						</button>

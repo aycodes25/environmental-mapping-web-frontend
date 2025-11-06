@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { useLoaderData } from "react-router-dom";
 import { useQueryClient } from "@tanstack/react-query";
 import TanstackTable from "../components/TanstackTable";
-import LocationOverview from "./new/LocationOverview";
+// import LocationOverview from "./new/LocationOverview";
 import WebIcon from "../components/custom/WebIcons";
 import { MoreVertical } from "lucide-react";
 import { Button } from "@mui/material";
@@ -141,7 +141,7 @@ const Location = () => {
 		<>
 			<div className="flex flex-col flex-grow w-auto">
 				{/* Location Overview Section */}
-				<LocationOverview locationData={locationData} />
+				{/* <LocationOverview locationData={locationData} /> */}
 
 				{/* Location Filters and Table Section */}
 				<div className="flex flex-col flex-grow p-5">
@@ -181,7 +181,7 @@ const Location = () => {
 								tableData={data}
 							/>
 						)}
-					</section> 
+					</section>
 				</div>
 			</div>
 

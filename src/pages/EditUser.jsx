@@ -26,7 +26,7 @@ import {
 	SelectTrigger,
 	SelectValue,
 } from "../components/ui/select";
-import GradientHeader from "../components/ui/GradientHeader";
+// import GradientHeader from "../components/ui/GradientHeader";
 
 const singleUserQuery = (id) => {
 	return {
@@ -131,7 +131,7 @@ const EditUser = () => {
 	return (
 		<div className="py-8">
 			{/* Gradient Header to match EditModel pattern */}
-			<GradientHeader />
+			{/* <GradientHeader /> */}
 			<Card className="mx-auto max-w-2xl bg-white shadow-md">
 				<CardHeader className="text-center space-y-1">
 					<div className="flex justify-center mb-2">

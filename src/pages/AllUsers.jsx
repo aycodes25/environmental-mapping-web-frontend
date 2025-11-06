@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate } from "../utils";
 import WebIcon from "../components/custom/WebIcons";
 import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
-import UserOverview from "./new/UserOverview.jsx";
+// import UserOverview from "./new/UserOverview.jsx";
 import TanstackTable from "../components/TanstackTable";
 import SearchInput from "../components/ui/search-input";
 import { Button as ShButton } from "../components/ui/button";
@@ -193,7 +193,7 @@ const AllUsers = () => {
 
 	return (
 		<div className="flex flex-col flex-grow w-auto">
-			<UserOverview
+			{/* <UserOverview
 				dashboardData={{
 					totalTagsThisMonth: users.length,
 					totalModels: 0,
@@ -205,10 +205,10 @@ const AllUsers = () => {
 					).length,
 					todaysModels: 0,
 				}}
-			/>
+			/> */}
 
 			{/* Users Title and Add User Button Row */}
-			<div className="flex items-center justify-between mb-6 px-5">
+			<div className="flex items-center justify-between mb-6 mt-6 px-5">
 				<div>
 					<h2 className="heading-large font-bold text-primary">Users</h2>
 				</div>

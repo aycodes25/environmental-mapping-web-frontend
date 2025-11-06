@@ -22,6 +22,7 @@ export const ModelCard = ({
 	deleteModel,
 	onCheck,
 	userRole,
+	isChecked = false,
 }) => {
 	const { _id, coverPicture, modelName, file } = model;
 
@@ -32,7 +33,15 @@ export const ModelCard = ({
 
 	return (
 		<Card
-			onClick={() => navigate(`/view-model/${_id}`)}
+			onClick={(e) => {
+				// In delete mode, suppress navigation from card clicks
+				if (deleteModel) {
+					e.preventDefault();
+					e.stopPropagation();
+					return;
+				}
+				navigate(`/view-model/${_id}`);
+			}}
 			className="group w-[356px] h-auto max-md:w-full overflow-hidden rounded-2xl bg-white shadow-md transition-all duration-300 hover:shadow-lg cursor-pointer"
 		>
 			{/* Image Container with improved styling */}
@@ -59,9 +68,16 @@ export const ModelCard = ({
 					<div className="absolute right-3 top-3 z-10">
 						<input
 							id={_id}
-							onClick={() => onCheck(_id)}
+							checked={isChecked}
+							onClick={(e) => {
+								e.stopPropagation();
+							}}
+							onChange={(e) => {
+								e.stopPropagation();
+								onCheck(_id, e);
+							}}
 							type="checkbox"
-							className="h-5 w-5 rounded-md border-2 border-white bg-white/20 backdrop-blur-sm"
+							className="h-5 w-5 rounded-md border-2 border-white bg-white/20 backdrop-blur-sm accent-primary"
 						/>
 					</div>
 				)}

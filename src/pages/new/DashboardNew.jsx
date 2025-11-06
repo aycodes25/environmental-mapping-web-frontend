@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate, formatTime } from "../../utils";
 import { toast } from "react-toastify";
-import DashboardOverview from "./DashboardOverview";
+// import DashboardOverview from "./DashboardOverview";
 import { FullDashboard } from "../../components";
 import TanstackTable from "../../components/TanstackTable";
 import WebIcon from "../../components/custom/WebIcons";
@@ -193,7 +193,7 @@ const DashboardNew = () => {
 								isComplete ? "text-green-600" : "text-yellow-500"
 							}`}
 						>
-							{isComplete ? "Completed" : "Not Complete"}
+							{isComplete ? "Complete" : "Not Complete"}
 						</span>
 					);
 				},
@@ -236,12 +236,12 @@ const DashboardNew = () => {
 
 	return (
 		<div className="flex flex-col flex-grow w-auto">
-			<DashboardOverview dashboardData={dashboardData} />
+			{/* <DashboardOverview dashboardData={dashboardData} /> */}
 			<FullDashboard dashboardData={dashboardData} />
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 sm:p-5 md:p-6 mx-2 sm:mx-4 lg:mx-5">
 				<div className="flex items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-3">
 					<h2 className="text-base sm:text-lg md:text-xl font-bold text-gray-900">
-						List of Models
+						Recently Uploaded Facility Sections
 					</h2>
 				</div>
 

@@ -7,7 +7,7 @@ import { getUserFromLocalStorage } from "@/redux/reducers/userReducer";
 import { useNavigate } from "react-router-dom";
 import WebIcons from "../components/custom/WebIcons";
 import { Button } from "../components/ui/button";
-import GradientHeader from "../components/ui/GradientHeader";
+// import GradientHeader from "../components/ui/GradientHeader";
 import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 
 const AddUser = () => {
@@ -114,7 +114,7 @@ const AddUser = () => {
 	return (
 		<section className="grid gap-10 place-items-center py-5 w-full">
 			{/* Gradient Header */}
-			<GradientHeader />
+			{/* <GradientHeader /> */}
 			<form
 				onSubmit={handleSubmit}
 				method="POST"
