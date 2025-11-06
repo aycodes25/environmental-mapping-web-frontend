@@ -36,7 +36,7 @@ const ModelsOverview = ({ data }) => {
 		},
 		{
 			icon: "check_clipboard",
-			title: "Completed Facilities",
+			title: "Complete Facilities",
 			count: completedModels,
 			trend: "+1",
 			trendLabel: "to last month",
