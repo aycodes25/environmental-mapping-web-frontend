@@ -2,7 +2,7 @@ import axios from "axios";
 import { store } from "../redux/store";
 import { Navigate } from "react-router";
 
-const baseURL =
+export const baseURL =
 	import.meta.env.VITE_BACKEND_BASE_URL || "http://localhost:8000";
 const appURL = import.meta.env.VITE_APP_URL;
 const evMappingUrl = `${baseURL}/api`;
@@ -29,7 +29,10 @@ export const customFetch = axios.create({
 
 customFetch.interceptors.request.use((config) => {
 	// Dynamically set the Authorization header before each request
-	config.headers.Authorization = `Bearer ${getPasswordToken()}`;
+	const token = getPasswordToken();
+	if (token && token !== "null" && token !== "undefined") {
+		config.headers.Authorization = `Bearer ${token}`;
+	}
 	return config;
 });
 
