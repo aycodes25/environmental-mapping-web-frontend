@@ -92,12 +92,14 @@ const DashboardNew = () => {
 		try {
 			const response = await customFetch(url);
 			if (response.data.status !== "error") {
-				setDashboardData(response.data);
+				setDashboardData(response.data || {});
 			} else {
 				toast.error(response.data.message);
+				setDashboardData({});
 			}
 		} catch (error) {
 			toast.error("Failed to load dashboard data");
+			setDashboardData({});
 		} finally {
 			setLoading(false);
 		}

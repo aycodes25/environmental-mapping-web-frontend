@@ -131,9 +131,14 @@ const FullDashboard = ({ dashboardData = {} }) => {
 			try {
 				const res = await customFetch("/model/get-models");
 				const list = Array.isArray(res?.data?.data) ? res.data.data : [];
-				if (isMounted) setAllModels(list);
+				if (isMounted) {
+					setAllModels(list);
+				}
 			} catch (_e) {
-				toast.error("Failed to load models for location donut");
+				if (isMounted) {
+					setAllModels([]);
+					toast.error("Failed to load models for dashboard charts.");
+				}
 			}
 		})();
 		return () => {
@@ -276,10 +281,6 @@ const FullDashboard = ({ dashboardData = {} }) => {
 						<h1 className="text-lg md:text-xl lg:text-2xl font-bold text-gray-900">
 							Models by Location
 						</h1>
-						<WebIcon
-							icon="chevron_down"
-							className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5"
-						/>
 					</div>
 				</div>
 
@@ -316,23 +317,28 @@ const FullDashboard = ({ dashboardData = {} }) => {
 						{/* Content inside Donut */}
 						<div className="absolute inset-[15%] flex shadow-lg rounded-full flex-col items-center justify-center pointer-events-none">
 							<div className="flex flex-col gap-1 mb-1 md:mb-2">
-								{computedLeftDonut.map((item) => (
-									<div
-										key={item.name}
-										className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]"
-									>
-										<div className="flex items-center gap-1 md:gap-2">
-											<div
-												className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"
-												style={{ background: item.color }}
-											/>
-											<span className="text-[10px] md:text-xs font-semibold text-gray-900">
-												{item.value}
-											</span>
+								{computedLeftDonut.map((item) => {
+									const percentage = leftDonutTotal > 0
+										? ((item.value / leftDonutTotal) * 100).toFixed(1)
+										: 0;
+									return (
+										<div
+											key={item.name}
+											className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]"
+										>
+											<div className="flex items-center gap-1 md:gap-2">
+												<div
+													className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"
+													style={{ background: item.color }}
+												/>
+												<span className="text-[10px] md:text-xs font-semibold text-gray-900">
+													{percentage}%
+												</span>
+											</div>
+											<div className="flex items-center gap-1" />
 										</div>
-										<div className="flex items-center gap-1" />
-									</div>
-								))}
+									);
+								})}
 							</div>
 							<div className="text-sm md:text-base font-bold text-gray-900">
 								Total: {leftDonutTotal}
@@ -374,10 +380,7 @@ const FullDashboard = ({ dashboardData = {} }) => {
 								? "Samples by Organism"
 								: "Incidents by Type"}
 						</h1>
-						<WebIcon
-							icon="chevron_down"
-							className="hidden sm:block text-gray-600 w-4 h-4 md:w-5 md:h-5"
-						/>
+
 					</div>
 					<div className="flex items-center gap-3" />
 
@@ -445,23 +448,28 @@ const FullDashboard = ({ dashboardData = {} }) => {
 						{/* Content inside Donut */}
 						<div className="absolute inset-[15%] flex shadow-lg rounded-full flex-col items-center justify-center pointer-events-none">
 							<div className="flex flex-col gap-1 mb-1 md:mb-2">
-								{computedDonut.map((item) => (
-									<div
-										key={item.name}
-										className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]"
-									>
-										<div className="flex items-center gap-1 md:gap-2">
-											<div
-												className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"
-												style={{ background: item.color }}
-											/>
-											<span className="text-[10px] md:text-xs font-semibold text-gray-900">
-												{item.value}
-											</span>
+								{computedDonut.map((item) => {
+									const percentage = donutTotal > 0
+										? ((item.value / donutTotal) * 100).toFixed(1)
+										: 0;
+									return (
+										<div
+											key={item.name}
+											className="flex items-center justify-between gap-2 md:gap-3 min-w-[120px] md:min-w-[140px]"
+										>
+											<div className="flex items-center gap-1 md:gap-2">
+												<div
+													className="w-1.5 h-1.5 md:w-2 md:h-2 rounded-full"
+													style={{ background: item.color }}
+												/>
+												<span className="text-[10px] md:text-xs font-semibold text-gray-900">
+													{percentage}%
+												</span>
+											</div>
+											<div className="flex items-center gap-1" />
 										</div>
-										<div className="flex items-center gap-1" />
-									</div>
-								))}
+									);
+								})}
 							</div>
 							<div className="text-sm md:text-base font-bold text-gray-900">
 								Total: {donutTotal}

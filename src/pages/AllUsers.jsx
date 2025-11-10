@@ -158,12 +158,6 @@ const AllUsers = () => {
 			},
 			{
 				accessorFn: (row) =>
-					Array.isArray(row?.models) ? row.models.length : 0,
-				header: "Models",
-				cell: (info) => info.getValue(),
-			},
-			{
-				accessorFn: (row) =>
 					row?.createdAt ? formatDate(row.createdAt) : "",
 				header: "Created",
 				cell: (info) => info.getValue(),
