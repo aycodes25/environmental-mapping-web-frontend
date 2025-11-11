@@ -313,7 +313,10 @@ const AllModels = () => {
 				</div>
 				<DeleteAlert
 					isOpen={showDeleteAlert}
-					onClose={() => setShowDeleteAlert(false)}
+					onClose={() => {
+						setShowDeleteAlert(false);
+						window?.location.reload();
+					}}
 					onConfirm={() => {
 						setShowDeleteAlert(false);
 						if (pendingDeleteIds.length) {
