@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate, formatTime } from "../../utils";
 import { toast } from "react-toastify";
-// import DashboardOverview from "./DashboardOverview";
+import DashboardOverview from "./DashboardOverview";
 import { FullDashboard } from "../../components";
 import TanstackTable from "../../components/TanstackTable";
 import WebIcon from "../../components/custom/WebIcons";
@@ -222,7 +222,7 @@ const DashboardNew = () => {
 
 	return (
 		<div className="flex flex-col flex-grow w-auto">
-			{/* <DashboardOverview dashboardData={dashboardData} /> */}
+			<DashboardOverview dashboardData={dashboardData} />
 			<FullDashboard dashboardData={dashboardData} />
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 sm:p-5 md:p-6 mx-2 sm:mx-4 lg:mx-5">
 				<div className="flex items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-3">
@@ -250,12 +250,12 @@ const DashboardNew = () => {
 							Loading...
 						</div>
 					) : (
-							<TanstackTable
-								columns={columns}
-								tableData={filteredModels}
-								initialPageSize={5}
-								pageSizeOptions={[5, 10, 20, 30]}
-							/>
+						<TanstackTable
+							columns={columns}
+							tableData={filteredModels}
+							initialPageSize={10}
+							pageSizeOptions={[5, 10, 20, 30]}
+						/>
 					)}
 				</div>
 			</div>

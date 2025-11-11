@@ -29,10 +29,16 @@ import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
 import ModelsOverview from "./new/ModelsOverview";
 
 const url = "/model/get-models";
+const deletedModelsUrl = "/model/get-softed-models";
 
 const modelQuery = {
 	queryKey: ["model"],
 	queryFn: () => customFetch(url),
+};
+
+export const deletedModelQuery = {
+	queryKey: ["deleted_model"],
+	queryFn: () => customFetch(deletedModelsUrl),
 };
 
 export const loader = (queryClient) => async () => {
@@ -44,11 +50,20 @@ export const loader = (queryClient) => async () => {
 	} else {
 		toast.error(response.data.message);
 	}
-	return { model };
+
+	let deletedModels = [];
+	const deletedResponse = await queryClient.ensureQueryData(deletedModelQuery);
+	if (deletedResponse.data.status !== "error") {
+		deletedModels = deletedResponse.data.data || [];
+	} else {
+		toast.error(deletedResponse.data.message);
+	}
+
+	return { model, deletedModels };
 };
 
 const AllModels = () => {
-	const { model } = useLoaderData();
+	const { model, deletedModels } = useLoaderData();
 	const [searchParams] = useSearchParams();
 	const isCompletedView = searchParams.get("type") === "completed";
 
@@ -70,10 +85,17 @@ const AllModels = () => {
 		const completedModels = Array.isArray(model)
 			? model.filter((m) => m?.isComplete).length
 			: 0;
-		const activeModels = Math.max(0, totalModels - completedModels);
+		const deleted = Array.isArray(deletedModels)
+			? deletedModels.filter((m) => m?.delete).length
+			: 0;
+		const activeModels = Math.max(0, totalModels);
 		// Deleted facilities are not present in this list; show 0 here
-		const deletedModels = 0;
-		return { totalModels, activeModels, completedModels, deletedModels };
+		return {
+			totalModels,
+			activeModels,
+			completedModels,
+			deletedModels: deleted,
+		};
 	}, [model]);
 
 	const modelsAfterViewAndSearch = useMemo(() => {
@@ -173,7 +195,7 @@ const AllModels = () => {
 				{/* Facilities Overview Cards */}
 				<ModelsOverview data={statsData} />
 
-				<div className="mb-2 w-full px-1 lg:px-3 xl:px-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+				<div className="mb-2 w-full lg:px-3 xl:px-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
 					<button
 						onClick={() => navigate("/admin/models")}
 						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${

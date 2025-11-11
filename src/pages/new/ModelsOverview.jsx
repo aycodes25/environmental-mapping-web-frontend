@@ -14,33 +14,25 @@ const ModelsOverview = ({ data }) => {
 		deletedModels = 0,
 	} = data || {};
 
-	const generateMockChartData = (baseValue) => {
-		const points = [];
-		for (let i = 0; i < 7; i++) {
-			points.push(baseValue + Math.random() * 20 - 10);
-		}
-		return points;
-	};
-
 	const statsCards = [
 		{
 			icon: "activity",
-			title: "Total Facilities",
+			title: "Total Facility Sections",
 			count: totalModels,
 			trend: "+34",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalModels),
+			chartData: [],
 			iconBgColor: "bg-purple-100",
 			iconColor: "text-purple-600",
 			trendColor: "text-green-500",
 		},
 		{
 			icon: "check_clipboard",
-			title: "Complete Facilities",
+			title: "Complete Facility",
 			count: completedModels,
 			trend: "+1",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(completedModels),
+			chartData: [],
 			iconBgColor: "bg-red-100",
 			iconColor: "text-red-600",
 			trendColor: "text-red-500",
@@ -49,11 +41,11 @@ const ModelsOverview = ({ data }) => {
 		},
 		{
 			icon: "activity",
-			title: "Active Facilities",
+			title: "Active Facility Sections",
 			count: activeModels,
 			trend: "+200",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(activeModels),
+			chartData: [],
 			iconBgColor: "bg-green-100",
 			iconColor: "text-green-600",
 			trendColor: "text-green-500",
@@ -62,11 +54,11 @@ const ModelsOverview = ({ data }) => {
 		},
 		{
 			icon: "Trash",
-			title: "Deleted Facilities",
+			title: "Deleted Facility Sections",
 			count: deletedModels,
 			trend: "+0",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(deletedModels),
+			chartData: [],
 			iconBgColor: "bg-orange-100",
 			iconColor: "text-orange-600",
 			trendColor: "text-red-500",

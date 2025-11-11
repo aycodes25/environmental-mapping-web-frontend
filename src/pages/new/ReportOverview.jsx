@@ -12,15 +12,6 @@ const ReportOverview = ({ reportData }) => {
 		approvedReports = 0,
 	} = reportData;
 
-	// Mock chart data for trend visualization
-	const generateMockChartData = (baseValue) => {
-		const data = [];
-		for (let i = 0; i < 7; i++) {
-			data.push(baseValue + Math.random() * 20 - 10);
-		}
-		return data;
-	};
-
 	// Report-specific stats cards
 	const statsCards = [
 		{
@@ -29,7 +20,7 @@ const ReportOverview = ({ reportData }) => {
 			count: totalReports,
 			trend: "+34",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalReports),
+			chartData: [],
 			iconBgColor: "bg-purple-100",
 			iconColor: "text-purple-600",
 			trendColor: "text-green-500",
@@ -40,7 +31,7 @@ const ReportOverview = ({ reportData }) => {
 			count: sampleReports,
 			trend: "+0",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(sampleReports),
+			chartData: [],
 			iconBgColor: "bg-blue-100",
 			iconColor: "text-blue-600",
 			trendColor: "text-red-500",
@@ -53,7 +44,7 @@ const ReportOverview = ({ reportData }) => {
 			count: incidentReports,
 			trend: "+200",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(incidentReports),
+			chartData: [],
 			iconBgColor: "bg-green-100",
 			iconColor: "text-green-600",
 			trendColor: "text-green-500",
@@ -66,7 +57,7 @@ const ReportOverview = ({ reportData }) => {
 			count: approvedReports,
 			trend: "+1",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(approvedReports),
+			chartData: [],
 			iconBgColor: "bg-orange-100",
 			iconColor: "text-orange-600",
 			trendColor: "text-red-500",
