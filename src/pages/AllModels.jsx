@@ -315,7 +315,7 @@ const AllModels = () => {
 					isOpen={showDeleteAlert}
 					onClose={() => {
 						setShowDeleteAlert(false);
-						window?.location.reload();
+						setTimeout(() => window?.location.reload(), 2000);
 					}}
 					onConfirm={() => {
 						setShowDeleteAlert(false);
