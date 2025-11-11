@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { customFetch, formatDate, formatTime } from "../../utils";
 import { toast } from "react-toastify";
-// import DashboardOverview from "./DashboardOverview";
+import DashboardOverview from "./DashboardOverview";
 import { FullDashboard } from "../../components";
 import TanstackTable from "../../components/TanstackTable";
 import WebIcon from "../../components/custom/WebIcons";
@@ -92,12 +92,14 @@ const DashboardNew = () => {
 		try {
 			const response = await customFetch(url);
 			if (response.data.status !== "error") {
-				setDashboardData(response.data);
+				setDashboardData(response.data || {});
 			} else {
 				toast.error(response.data.message);
+				setDashboardData({});
 			}
 		} catch (error) {
 			toast.error("Failed to load dashboard data");
+			setDashboardData({});
 		} finally {
 			setLoading(false);
 		}
@@ -183,22 +185,6 @@ const DashboardNew = () => {
 				),
 			},
 			{
-				accessorKey: "isComplete",
-				header: () => <span>Status</span>,
-				cell: ({ row }) => {
-					const isComplete = row.original.isComplete;
-					return (
-						<span
-							className={`font-medium ${
-								isComplete ? "text-green-600" : "text-yellow-500"
-							}`}
-						>
-							{isComplete ? "Complete" : "Not Complete"}
-						</span>
-					);
-				},
-			},
-			{
 				accessorKey: "action",
 				header: () => <span>Action</span>,
 				cell: ({ row }) => (
@@ -236,7 +222,7 @@ const DashboardNew = () => {
 
 	return (
 		<div className="flex flex-col flex-grow w-auto">
-			{/* <DashboardOverview dashboardData={dashboardData} /> */}
+			<DashboardOverview dashboardData={dashboardData} />
 			<FullDashboard dashboardData={dashboardData} />
 			<div className="bg-white rounded-xl md:rounded-2xl shadow-xl md:shadow-2xl p-4 sm:p-5 md:p-6 mx-2 sm:mx-4 lg:mx-5">
 				<div className="flex items-center justify-between mb-3 md:mb-4 gap-2 sm:gap-3">
@@ -264,7 +250,12 @@ const DashboardNew = () => {
 							Loading...
 						</div>
 					) : (
-						<TanstackTable columns={columns} tableData={filteredModels} />
+						<TanstackTable
+							columns={columns}
+							tableData={filteredModels}
+							initialPageSize={10}
+							pageSizeOptions={[5, 10, 20, 30]}
+						/>
 					)}
 				</div>
 			</div>

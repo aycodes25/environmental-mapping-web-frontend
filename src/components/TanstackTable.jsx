@@ -21,11 +21,13 @@ export default function TanstackTable({
 	tableData,
 	columns = [],
 	autoHeight = false,
+	initialPageSize = 10,
+	pageSizeOptions = [10, 20, 30, 40, 50],
 }) {
 	const [sorting, setSorting] = useState([]);
 	const [pagination, setPagination] = useState({
 		pageIndex: 0,
-		pageSize: 10,
+		pageSize: initialPageSize,
 	});
 	const [rowSelection, setRowSelection] = useState({});
 	const tableRef = useRef();
@@ -48,12 +50,23 @@ export default function TanstackTable({
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
 		getPaginationRowModel: getPaginationRowModel(),
+		manualPagination: false,
 	});
 	const { rows } = table.getRowModel();
 
 	useEffect(() => {
 		setData(Array.isArray(tableData) ? tableData : []);
 	}, [tableData]);
+
+	// Ensure page index is valid when data changes
+	useEffect(() => {
+		const pageCount = table.getPageCount();
+		const currentPage = table.getState().pagination.pageIndex;
+		if (pageCount > 0 && currentPage >= pageCount) {
+			table.setPageIndex(Math.max(0, pageCount - 1));
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [data.length]);
 
 	return (
 		// eslint-disable-next-line react/prop-types
@@ -154,6 +167,7 @@ export default function TanstackTable({
 									width: "100%",
 								}}
 								totalCount={rows.length}
+										initialTopMostItemIndex={0}
 								components={{
 									Scroller: CustomScrollbar,
 									Table: ({ style, ...props }) => (
@@ -258,10 +272,11 @@ export default function TanstackTable({
 				{/* Always render pagination controls, even when there are no rows */}
 				{(() => {
 					const displayPageCount = Math.max(1, table.getPageCount());
-					const currentPageIndex = Math.min(
+					const currentPageIndex = Math.max(0, Math.min(
 						table.getState().pagination.pageIndex,
 						displayPageCount - 1
-					);
+					));
+
 					return (
 						<div className="flex flex-wrap w-full items-center justify-center gap-2 pt-[5px] text-xs sm:text-sm">
 							<button
@@ -304,12 +319,19 @@ export default function TanstackTable({
 								| Go to page:
 								<input
 									type="number"
-									defaultValue={currentPageIndex + 1}
+									value={currentPageIndex + 1}
+									min={1}
+									max={displayPageCount}
 									onChange={(e) => {
 										const page = e.target.value
-											? Number(e.target.value) - 1
+											? Math.max(1, Math.min(Number(e.target.value), displayPageCount)) - 1
 											: 0;
 										table.setPageIndex(page);
+									}}
+									onBlur={(e) => {
+										if (!e.target.value || Number(e.target.value) < 1) {
+											table.setPageIndex(0);
+										}
 									}}
 									className="w-16 rounded border p-1"
 								/>
@@ -321,7 +343,7 @@ export default function TanstackTable({
 								}}
 								className="border rounded px-2 py-1"
 							>
-								{[10, 20, 30, 40, 50].map((pageSize) => (
+								{pageSizeOptions.map((pageSize) => (
 									<option key={pageSize} value={pageSize}>
 										Show {pageSize}
 									</option>

@@ -559,8 +559,7 @@ const Report = () => {
 			{/* Report Filters and Table Section */}
 			<div className="flex flex-col flex-grow p-5">
 				<div className="flex items-center justify-between mb-6">
-					<h2 className="heading-large font-bold text-primary">Reports</h2>
-					]{" "}
+					<h2 className="heading-large font-bold text-primary">Reports</h2>{" "}
 					<div className="flex items-center gap-3">
 						<label className="flex items-center gap-2 text-sm text-gray-700">
 							<WebIcon icon="calendar" className="w-3 h-3" />

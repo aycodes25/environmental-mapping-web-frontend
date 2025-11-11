@@ -14,15 +14,6 @@ const UserOverview = ({ dashboardData }) => {
 		todaysModels = 0,
 	} = dashboardData || {};
 
-	// Mock chart data for tiny sparkline-like trend
-	const generateMockChartData = (baseValue) => {
-		const data = [];
-		for (let i = 0; i < 7; i++) {
-			data.push(baseValue + Math.random() * 20 - 10);
-		}
-		return data;
-	};
-
 	// Only one card: Total Users
 	const statsCards = [
 		// -------------------------- user profile overview card --------------------------
@@ -32,7 +23,7 @@ const UserOverview = ({ dashboardData }) => {
 			count: totalTagsThisMonth,
 			trend: "+1",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTagsThisMonth),
+			chartData: [],
 			iconBgColor: "bg-purple-100",
 			iconColor: "text-purple-600",
 			trendColor: "text-red-500",
@@ -43,7 +34,7 @@ const UserOverview = ({ dashboardData }) => {
 			count: totalModels,
 			trend: "+34",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalModels),
+			chartData: [],
 			iconBgColor: "bg-blue-100",
 			iconColor: "text-blue-600",
 			trendColor: "text-green-500",
@@ -56,7 +47,7 @@ const UserOverview = ({ dashboardData }) => {
 			count: totalReviewers,
 			trend: "+200",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalReviewers),
+			chartData: [],
 			iconBgColor: "bg-green-100",
 			iconColor: "text-green-600",
 			trendColor: "text-green-500",
@@ -69,7 +60,7 @@ const UserOverview = ({ dashboardData }) => {
 			count: totalTaggers,
 			trend: "+0",
 			trendLabel: "to last month",
-			chartData: generateMockChartData(totalTaggers),
+			chartData: [],
 			iconBgColor: "bg-orange-100",
 			iconColor: "text-orange-600",
 			trendColor: "text-red-500",

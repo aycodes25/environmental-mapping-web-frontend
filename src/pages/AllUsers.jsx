@@ -98,10 +98,7 @@ const AllUsers = () => {
 	}, [users, search, activeTab]);
 
 	const endOffset = itemOffset + itemsPerPage;
-	const currentItems = useMemo(
-		() => filtered.slice(itemOffset, endOffset),
-		[filtered, itemOffset, endOffset]
-	);
+	const currentItems = useMemo(() => filtered, [filtered]);
 	const pageCount = Math.ceil(filtered.length / itemsPerPage) || 1;
 
 	const handlePageClick = (event) => {
@@ -155,12 +152,6 @@ const AllUsers = () => {
 				accessorKey: "role",
 				header: "Role",
 				cell: (info) => info.getValue() || "",
-			},
-			{
-				accessorFn: (row) =>
-					Array.isArray(row?.models) ? row.models.length : 0,
-				header: "Models",
-				cell: (info) => info.getValue(),
 			},
 			{
 				accessorFn: (row) =>
@@ -266,6 +257,8 @@ const AllUsers = () => {
 							autoHeight
 							columns={columns}
 							tableData={currentItems}
+							initialPageSize={10}
+							pageSizeOptions={[5, 10, 20, 30]}
 						/>
 					)}
 				</div>
