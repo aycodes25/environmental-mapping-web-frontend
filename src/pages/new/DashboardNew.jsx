@@ -185,22 +185,6 @@ const DashboardNew = () => {
 				),
 			},
 			{
-				accessorKey: "isComplete",
-				header: () => <span>Status</span>,
-				cell: ({ row }) => {
-					const isComplete = row.original.isComplete;
-					return (
-						<span
-							className={`font-medium ${
-								isComplete ? "text-green-600" : "text-yellow-500"
-							}`}
-						>
-							{isComplete ? "Complete" : "Not Complete"}
-						</span>
-					);
-				},
-			},
-			{
 				accessorKey: "action",
 				header: () => <span>Action</span>,
 				cell: ({ row }) => (
@@ -266,7 +250,12 @@ const DashboardNew = () => {
 							Loading...
 						</div>
 					) : (
-						<TanstackTable columns={columns} tableData={filteredModels} />
+							<TanstackTable
+								columns={columns}
+								tableData={filteredModels}
+								initialPageSize={5}
+								pageSizeOptions={[5, 10, 20, 30]}
+							/>
 					)}
 				</div>
 			</div>

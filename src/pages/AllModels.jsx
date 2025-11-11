@@ -26,6 +26,7 @@ import { deleteFromDb } from "@/components/SceneComponent";
 // import ModelsOverview from "./new/ModelsOverview";
 import SearchInput from "../components/ui/search-input";
 import { DeleteAlert, SuccessAlert } from "../components/ui/alert";
+import ModelsOverview from "./new/ModelsOverview";
 
 const url = "/model/get-models";
 
@@ -62,6 +63,18 @@ const AllModels = () => {
 	const [pendingDeleteIds, setPendingDeleteIds] = useState([]);
 	const [itemOffset, setItemOffset] = useState(0);
 	const itemsPerPage = 6;
+
+	// Compute stats for Facilities overview cards
+	const statsData = useMemo(() => {
+		const totalModels = Array.isArray(model) ? model.length : 0;
+		const completedModels = Array.isArray(model)
+			? model.filter((m) => m?.isComplete).length
+			: 0;
+		const activeModels = Math.max(0, totalModels - completedModels);
+		// Deleted facilities are not present in this list; show 0 here
+		const deletedModels = 0;
+		return { totalModels, activeModels, completedModels, deletedModels };
+	}, [model]);
 
 	const modelsAfterViewAndSearch = useMemo(() => {
 		const viewFiltered = isCompletedView
@@ -155,9 +168,12 @@ const AllModels = () => {
 	};
 
 	return (
-		<div className="AllModels box-border w-full py-5">
-			<main className="w-full mt-4">
-				<div className="mb-4 w-full px-1 lg:px-3 xl:px-5 flex items-center gap-3">
+		<div className="AllModels box-border w-full py-3">
+			<main className="w-full mt-2">
+				{/* Facilities Overview Cards */}
+				<ModelsOverview data={statsData} />
+
+				<div className="mb-2 w-full px-1 lg:px-3 xl:px-5 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
 					<button
 						onClick={() => navigate("/admin/models")}
 						className={`h-[46px] rounded-[100px] px-5 text-sm font-medium border ${

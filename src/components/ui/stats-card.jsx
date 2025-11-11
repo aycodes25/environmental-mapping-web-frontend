@@ -12,10 +12,10 @@ const StatsCard = ({
 	isClickable = false,
 }) => {
 	const CardContent = () => (
-		<div className="bg-white rounded-2xl p-4 w-[262px] shadow-md flex flex-col gap-5">
+		<div className="bg-white rounded-2xl p-2 w-full shadow-md flex flex-col gap-2">
 			<div className="flex justify-between items-center">
 				<div className="flex items-center gap-3">
-					<div className={`bg-purple-100 p-2 rounded-full`}>
+					<div className={`${iconBgColor} p-2 rounded-full`}>
 						<WebIcon icon={icon} className={`w-5 h-5 ${iconColor}`} />
 					</div>
 					<h3 className="text-bold text-primary font-normal">{title}</h3>
