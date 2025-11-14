@@ -19,7 +19,7 @@ const Modal = ({ children, isVisible, onClose, title }) => {
                 <div className="mb-6">{children}</div>
                 <div className="flex justify-end">
                     <button
-                        className="px-4 py-2 bg-red-500 text-white rounded-md hover:bg-red-600"
+                        className="px-4 py-2 bg-[rgb(45,27,61)] text-white rounded-2xl hover:bg-red-600"
                         onClick={onClose}
                     >
                         Close

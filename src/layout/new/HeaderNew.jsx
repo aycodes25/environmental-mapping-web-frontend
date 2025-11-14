@@ -18,6 +18,7 @@ const HeaderNew = () => {
 			users: "Users",
 			location: "Facility",
 			report: "Report",
+			feedback: "Feedback",
 			trash: "Recycle Bin",
 		};
 
