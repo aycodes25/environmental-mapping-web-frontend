@@ -21,6 +21,9 @@ const STATUS_STYLES = {
 	resolved: "text-emerald-700 bg-emerald-100",
 };
 
+const ATTACHMENT_ACCEPT =
+	".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.mp4,.mov,.avi,.webm";
+
 const Feedback = () => {
 	const user = useSelector(memoize((state) => state.userState.user));
 	const localUser = getUserFromLocalStorage();
@@ -389,7 +392,7 @@ const Feedback = () => {
 							<div className="mt-2 border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center">
 								<input
 									type="file"
-									accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt"
+									accept={ATTACHMENT_ACCEPT}
 									onChange={(e) => setAttachment(e.target.files?.[0] || null)}
 									className="hidden"
 									id="feedback-attachment"
@@ -401,7 +404,8 @@ const Feedback = () => {
 									Click to upload files
 								</label>
 								<p className="text-xs text-gray-400 mt-1">
-									Images (JPG, PNG, GIF, WEBP), PDF or text files. Max 10MB.
+									Images (JPG, PNG, GIF, WEBP), video (MP4, MOV, AVI, WEBM), PDF or
+									text files. Max 10MB.
 								</p>
 								{attachment && (
 									<div className="mt-2 flex items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-xl px-3 py-2">
@@ -506,7 +510,7 @@ const Feedback = () => {
 							<div className="mt-2 border-2 border-dashed border-gray-200 rounded-2xl p-4 text-center">
 								<input
 									type="file"
-									accept=".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt"
+									accept={ATTACHMENT_ACCEPT}
 									onChange={(e) => setAttachment(e.target.files?.[0] || null)}
 									className="hidden"
 									id="feedback-attachment-modal"
@@ -518,7 +522,8 @@ const Feedback = () => {
 									Click to upload files
 								</label>
 								<p className="text-xs text-gray-400 mt-1">
-									Images (JPG, PNG, GIF, WEBP), PDF or text files. Max 10MB.
+									Images (JPG, PNG, GIF, WEBP), video (MP4, MOV, AVI, WEBM), PDF or
+									text files. Max 10MB.
 								</p>
 								{attachment && (
 									<div className="mt-2 flex items-center justify-between text-xs text-gray-600 bg-gray-50 rounded-xl px-3 py-2">
