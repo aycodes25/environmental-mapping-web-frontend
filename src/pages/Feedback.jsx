@@ -150,13 +150,71 @@ const Feedback = () => {
 		}
 	};
 
-	const downloadAttachment = (attachmentObj) => {
+	const isVideoAttachment = (attachmentObj) => {
+		const mimeType = (attachmentObj?.mimetype || "").toLowerCase();
+		if (mimeType.startsWith("video/")) {
+			return true;
+		}
+		const fileIdentifier =
+			attachmentObj?.filename || attachmentObj?.url || attachmentObj?.name || "";
+		return /\.(mp4|mov|avi|webm|mkv)$/i.test(fileIdentifier);
+	};
+
+	const escapeHtml = (value = "") =>
+		value
+			.replace(/&/g, "&amp;")
+			.replace(/</g, "&lt;")
+			.replace(/>/g, "&gt;")
+			.replace(/"/g, "&quot;")
+			.replace(/'/g, "&#39;");
+
+	const openAttachmentInNewTab = (attachmentObj) => {
 		if (!attachmentObj?.url) return;
-		const link = document.createElement("a");
-		link.href = getRealFileUrl(attachmentObj.url);
-		link.target = "_blank";
-		link.rel = "noreferrer";
-		link.click();
+		const url = getRealFileUrl(attachmentObj.url);
+
+		if (!isVideoAttachment(attachmentObj)) {
+			window.open(url, "_blank", "noopener,noreferrer");
+			return;
+		}
+
+		const previewWindow = window.open("about:blank", "_blank");
+		if (!previewWindow) {
+			toast.error("Please allow pop-ups to preview the video.");
+			return;
+		}
+
+		const title = escapeHtml(attachmentObj?.filename || "Video Preview");
+		const safeUrl = encodeURI(url);
+
+		try {
+			previewWindow.document.open();
+			previewWindow.document.write(`<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8" />
+		<title>${title}</title>
+		<style>
+			* { box-sizing: border-box; }
+			body { margin: 0; background: #000; color: #fff; font-family: sans-serif; display: flex; flex-direction: column; height: 100vh; }
+			header { padding: 12px 16px; background: rgba(0,0,0,0.75); font-size: 14px; }
+			video { flex: 1; width: 100%; height: 100%; background: #000; }
+		</style>
+	</head>
+	<body>
+		<header>${title}</header>
+		<video controls autoplay src="${safeUrl}"></video>
+	</body>
+</html>`);
+			previewWindow.document.close();
+		} catch (err) {
+			console.error("Unable to render preview window:", err);
+			previewWindow.close();
+			window.open(url, "_blank");
+		} finally {
+			if (previewWindow) {
+				previewWindow.opener = null;
+			}
+		}
 	};
 
 	const StatCard = ({ label, value, accentClass }) => (
@@ -174,7 +232,7 @@ const Feedback = () => {
 		}
 		return (
 			<button
-				onClick={() => downloadAttachment(attachment)}
+				onClick={() => openAttachmentInNewTab(attachment)} 
 				className="text-xs font-semibold text-primary underline"
 			>
 				Open file
