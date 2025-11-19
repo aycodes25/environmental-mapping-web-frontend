@@ -22,7 +22,7 @@ const STATUS_STYLES = {
 };
 
 const ATTACHMENT_ACCEPT =
-	".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.mp4,.mov,.avi,.webm";
+	".png,.jpg,.jpeg,.gif,.webp,.pdf,.txt,.doc,.docx,.mp4,.mov,.avi,.webm";
 
 const Feedback = () => {
 	const user = useSelector(memoize((state) => state.userState.user));
