@@ -44,6 +44,7 @@ const NavLinks = () => {
     { id: 4, url: 'location', text: 'Facility' },
     // { id: 5, url: 'form-features', text: 'Form Features' },
     { id: 6, url: 'report', text: 'Report' },
+    { id: 9, url: 'feedback', text: 'Feedback' },
     { id: 7, url: 'trash', text: 'Recycle Bin' },
   ];
 
@@ -62,7 +63,10 @@ const NavLinks = () => {
   }
 
   if (currentUser.role === "reviewer") {
-    links = [{ id: 1, url: 'report', text: 'Report' },]
+    links = [
+      { id: 1, url: 'report', text: 'Report' },
+      { id: 9, url: 'feedback', text: 'Feedback' }
+    ]
   }
 
   return (

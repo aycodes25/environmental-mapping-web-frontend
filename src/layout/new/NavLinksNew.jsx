@@ -31,6 +31,7 @@ const NavLinksNew = ({ collapsed }) => {
 		{ id: 3, url: "users", text: "Users", icon: "activity" },
 		{ id: 4, url: "location", text: "Facility", icon: "facility" },
 		{ id: 6, url: "report", text: "Report", icon: "report" },
+		{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
 		{ id: 7, url: "trash", text: "Recycle Bin", icon: "settings" },
 	];
 
@@ -40,7 +41,10 @@ const NavLinksNew = ({ collapsed }) => {
 		);
 	}
 	if (currentUser.role === "reviewer") {
-		links = [{ id: 6, url: "report", text: "Report" }];
+		links = [
+			{ id: 6, url: "report", text: "Report", icon: "report" },
+			{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
+		];
 	}
 
 	if (collapsed) {

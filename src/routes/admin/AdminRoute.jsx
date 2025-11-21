@@ -47,6 +47,7 @@ const ViewSafety = Loadable(React.lazy(() => import("../../pages/ViewSafety")));
 const ViewIncidences = Loadable(
 	React.lazy(() => import("../../pages/ViewIncidences"))
 );
+const Feedback = Loadable(React.lazy(() => import("../../pages/Feedback")));
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -125,6 +126,11 @@ const adminRoutes = [
 		path: "report",
 		element: <Report />,
 		loader: ReportLoader(),
+		errorElement: <ErrorElement />,
+	},
+	{
+		path: "feedback",
+		element: <Feedback />,
 		errorElement: <ErrorElement />,
 	},
 	{

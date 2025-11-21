@@ -18,6 +18,7 @@ const UserProfile = Loadable(React.lazy(() => import('../../pages/UserProfile'))
 const ViewSafety = Loadable(React.lazy(() => import('../../pages/ViewSafety')));
 const ViewIncidences = Loadable(React.lazy(() => import('../../pages/ViewIncidences')));
 const Report = Loadable(React.lazy(() => import('../../pages/Report')));
+const Feedback = Loadable(React.lazy(() => import('../../pages/Feedback')));
 
 
 const queryClient = new QueryClient({
@@ -69,6 +70,11 @@ const reviewersRoutes = [
     path: 'report',
     element: <Report />,
     loader: ReportLoader(),
+    errorElement: <ErrorElement />,
+  },
+  {
+    path: 'feedback',
+    element: <Feedback />,
     errorElement: <ErrorElement />,
   },
 ];

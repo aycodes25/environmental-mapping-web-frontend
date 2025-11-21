@@ -29,6 +29,7 @@ const Trash = Loadable(React.lazy(() => import('../../pages/Trash')));
 const GranularTaggingList = Loadable(React.lazy(() => import('../../pages/GranularTaggingList')));
 const ViewSafety = Loadable(React.lazy(() => import('../../pages/ViewSafety')));
 const ViewIncidences = Loadable(React.lazy(() => import('../../pages/ViewIncidences')));
+const Feedback = Loadable(React.lazy(() => import('../../pages/Feedback')));
 
 
 
@@ -103,6 +104,11 @@ const taggersRoutes = [
     path: 'report',
     element: <Report />,
     loader: ReportLoader(),
+    errorElement: <ErrorElement />,
+  },
+  {
+    path: 'feedback',
+    element: <Feedback />,
     errorElement: <ErrorElement />,
   },
   {
