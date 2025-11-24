@@ -249,8 +249,17 @@ export function SceneComponent({
 			scene
 		);
 		applyMeshOptimizations(arrow);
-		arrow.material = new BABYLON.StandardMaterial("arrowMat", scene);
-		arrow.material.diffuseColor = BABYLON.Color3.Red();
+		const arrowMaterial = new BABYLON.StandardMaterial("arrowMat", scene);
+		arrowMaterial.diffuseColor = BABYLON.Color3.Red();
+		arrowMaterial.emissiveColor = BABYLON.Color3.Red();
+		arrowMaterial.disableLighting = true;
+		arrowMaterial.backFaceCulling = false;
+		arrowMaterial.disableDepthWrite = true;
+		arrowMaterial.depthFunction = BABYLON.Engine.ALWAYS;
+		arrow.material = arrowMaterial;
+		arrow.renderingGroupId = 1;
+		arrow.isPickable = false;
+		arrow.alwaysSelectAsActiveMesh = true;
 		arrow.rotation.x = Math.PI / 2;
 
 		scene.onBeforeRenderObservable.add(() => {

@@ -176,3 +176,14 @@
 	box-sizing: border-box;
 	/* overflow: hidden;  Uncomment if you actually want to hide scrollbars */
 }
+
+/* Ensure Recharts tooltips overlay charts in all builds */
+.recharts-wrapper,
+.recharts-responsive-container {
+	overflow: visible !important;
+}
+
+.recharts-tooltip-wrapper {
+	z-index: 9999 !important;
+	pointer-events: none;
+}
