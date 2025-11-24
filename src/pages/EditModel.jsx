@@ -6,15 +6,18 @@ import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
 import { SubmitBtn } from "../components";
-import { useLoaderData, useParams } from "react-router-dom";
+import { useLoaderData, useNavigate, useParams } from "react-router-dom";
 import WebIcons from "../components/custom/WebIcons";
 import { Button } from "../components/ui/button";
 import { CustomCheckbox } from "../components/custom/CustomCheckbox";
 import GradientHeader from "../components/ui/GradientHeader";
+import { useQueryClient } from "@tanstack/react-query";
 
 const EditModel = () => {
 	const { model } = useLoaderData();
 	const { id } = useParams();
+	const navigate = useNavigate();
+	const queryClient = useQueryClient();
 	const [isSubmitting, setIsSubmitting] = useState(false);
 	const [locations, setLocations] = useState();
 	const [imageName, setImageName] = useState("");
@@ -79,6 +82,12 @@ const EditModel = () => {
 			if (response.data?.status !== "error") {
 				toast.success(`Facility Section edited successfully`);
 				setImageName("");
+				set2d("");
+				await Promise.all([
+					queryClient.invalidateQueries({ queryKey: ["model"] }),
+					queryClient.invalidateQueries({ queryKey: ["deleted_model"] }),
+				]);
+				navigate(-1);
 			} else {
 				toast.error(response.data?.message);
 			}
