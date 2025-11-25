@@ -178,7 +178,7 @@ const ReviewerDashBoard = () => {
             pageRangeDisplayed={5}
             onPageChange={handlePageClick}
             containerClassName='flex flex-row items-center justify-center gap-2 py-10 text-center text-xl'
-            activeclassname='active'
+            activeClassName='m-1 rounded-full bg-primary text-white font-semibold'
             forcePage={Math.floor(itemOffset / itemsPerPage)}
           />
         </div>
