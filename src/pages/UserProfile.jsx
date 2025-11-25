@@ -100,8 +100,8 @@ const UserProfile = () => {
 							)}
 						</div>
 
-						{/* Edit button (only for self) */}
-						{user._id === currentUser._id && (
+						{/* Edit button (only for self and non-tagger roles) */}
+						{user._id === currentUser._id && currentUser.role !== "tagger" && (
 							<div className="mt-6">
 								<Button
 									className="w-full text-regular font-semibold bg-primary hover:bg-secondaryAlt text-white transition-colors rounded-2xl"

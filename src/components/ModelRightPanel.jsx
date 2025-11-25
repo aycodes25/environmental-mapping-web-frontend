@@ -243,7 +243,7 @@ const ModelRightPanel = ({
 														fontSize="small"
 														className="date"
 													/>
-													<p className="truncate text-[4px]">
+													<p className="break-words text-[10px] leading-tight">
 														{formatDate(startDate)}
 													</p>
 												</div>
@@ -252,7 +252,7 @@ const ModelRightPanel = ({
 														className="time"
 														fontSize="small"
 													/>
-													<p className="truncate text-[4px]">
+													<p className="break-words text-[10px] leading-tight">
 														{startTime ?? "00:00"}
 													</p>
 												</div>
@@ -264,7 +264,7 @@ const ModelRightPanel = ({
 														fontSize="small"
 														className="date"
 													/>
-													<p className="truncate text-[4px]">
+													<p className="break-words text-[10px] leading-tight">
 														{formatDate(endDate)}
 													</p>
 												</div>
@@ -273,7 +273,7 @@ const ModelRightPanel = ({
 														className="time"
 														fontSize="small"
 													/>
-													<p className="truncate text-[4px]">
+													<p className="break-words text-[10px] leading-tight">
 														{endTime ?? "24:00"}
 													</p>
 												</div>
