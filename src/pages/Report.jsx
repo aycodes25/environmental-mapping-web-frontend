@@ -557,29 +557,33 @@ const Report = () => {
 			{/* <ReportOverview reportData={reportData} /> */}
 
 			{/* Report Filters and Table Section */}
-			<div className="flex flex-col flex-grow p-5">
-				<div className="flex items-center justify-between mb-6">
-					<h2 className="heading-large font-bold text-primary">Reports</h2>{" "}
-					<div className="flex items-center gap-3">
-						<label className="flex items-center gap-2 text-sm text-gray-700">
-							<WebIcon icon="calendar" className="w-3 h-3" />
-							<span>Start</span>
+			<div className="flex flex-col flex-grow gap-6 p-4 lg:p-6">
+				<div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
+					<h2 className="heading-large font-bold text-primary">Reports</h2>
+					<div className="flex w-full flex-wrap items-end gap-3 rounded-2xl border border-dashed border-gray-200 bg-white/70 p-3 shadow-sm lg:w-auto lg:justify-end">
+						<label className="flex w-full flex-col gap-1 text-sm text-gray-700 sm:w-auto sm:flex-row sm:items-center">
+							<span className="flex items-center gap-2">
+								<WebIcon icon="calendar" className="w-3 h-3" />
+								Start
+							</span>
 							<input
 								type="date"
 								value={startDate || ""}
 								onChange={(e) => setStartDate(e.target.value)}
-								className="border border-gray-300 rounded px-2 py-1 h-[24px]"
+								className="w-full rounded border border-gray-300 px-2 py-1 text-sm sm:w-[160px]"
 							/>
 						</label>
-						<label className="flex items-center gap-2 text-sm text-gray-700">
-							<WebIcon icon="calendar" className="w-3 h-3" />
-							<span>End</span>
+						<label className="flex w-full flex-col gap-1 text-sm text-gray-700 sm:w-auto sm:flex-row sm:items-center">
+							<span className="flex items-center gap-2">
+								<WebIcon icon="calendar" className="w-3 h-3" />
+								End
+							</span>
 							<input
 								type="date"
 								value={endDate || ""}
 								min={startDate || undefined}
 								onChange={(e) => setEndDate(e.target.value)}
-								className="border border-gray-300 rounded px-2 py-1 h-[24px]"
+								className="w-full rounded border border-gray-300 px-2 py-1 text-sm sm:w-[160px]"
 							/>
 						</label>
 						<button
@@ -587,24 +591,18 @@ const Report = () => {
 								setStartDate(null);
 								setEndDate(null);
 							}}
-							className="px-3 py-1 bg-white border border-gray-300 rounded text-sm text-gray-700 hover:bg-gray-50"
+							className="w-full rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-50 sm:w-auto"
 						>
 							Clear
 						</button>
 
 						{/* All Filter - Using Shadcn Select */}
 						<Select value={activeFilter} onValueChange={setActiveFilter}>
-							<SelectTrigger
-								className="bg-primary text-white border-primary rounded-[20px] flex items-center gap-1"
-								style={{ width: "63px", height: "24px" }}
-							>
+							<SelectTrigger className="h-9 w-full rounded-full border border-primary bg-primary text-white transition hover:bg-gray-500 lg:w-28">
 								<SelectValue placeholder="All" />
 							</SelectTrigger>
 							<SelectContent className="bg-white border border-gray-200 rounded-lg shadow-lg">
-								<SelectItem
-									value="All"
-									className="bg-white hover:bg-gray-100"
-								>
+								<SelectItem value="All" className="bg-white hover:bg-gray-100">
 									All
 								</SelectItem>
 								<SelectItem
@@ -624,54 +622,51 @@ const Report = () => {
 					</div>
 				</div>
 
-				{/* Search Bar and Action Buttons Row - All flexed to the right */}
-				<div className="flex items-center justify-end mb-6">
-					<div className="flex items-center gap-3">
-						{/* Search Bar */}
-						<SearchInput
-							value={searchText}
-							onChange={(v) => {
-								setSearchText(v);
-								handleFilterTags(v);
-							}}
-							placeholder="Search by name, status, class...."
-						/>
+				{/* Search Bar and Action Buttons Row */}
+				<div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+					<SearchInput
+						className="w-full md:max-w-md lg:max-w-xl"
+						inputClassName="text-sm"
+						value={searchText}
+						onChange={(v) => {
+							setSearchText(v);
+							handleFilterTags(v);
+						}}
+						placeholder="Search by name, status, class...."
+					/>
 
-						{/* Action Buttons */}
-						<div className="flex items-center gap-2">
-							<button
-								onClick={handleExportPDF}
-								className="p-1 hover:bg-gray-100 transition-colors rounded"
-								title="Export PDF"
-							>
-								<WebIcon
-									icon="printer"
-									className="text-gray-600"
-									style={{ width: "16px", height: "16px" }}
-								/>
-							</button>
-							<button
-								onClick={handleExportCSV}
-								className="p-1 hover:bg-gray-100 transition-colors rounded"
-								title="Export CSV"
-							>
-								<WebIcon
-									icon="download"
-									className="text-gray-600"
-									style={{ width: "16px", height: "16px" }}
-								/>
-							</button>
-						</div>
+					{/* Action Buttons */}
+					<div className="flex w-full items-center justify-start gap-2 md:w-auto md:justify-end">
+						<button
+							onClick={handleExportPDF}
+							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
+							title="Export PDF"
+						>
+							<WebIcon icon="printer" className="h-4 w-4 text-gray-600" />
+							<span className="md:hidden">PDF</span>
+						</button>
+						<button
+							onClick={handleExportCSV}
+							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
+							title="Export CSV"
+						>
+							<WebIcon icon="download" className="h-4 w-4 text-gray-600" />
+							<span className="md:hidden">CSV</span>
+						</button>
 					</div>
 				</div>
 
 				{/* Table Section */}
-				<section className="flex justify-center items-center">
-					<TanstackTable
-						autoHeight
-						columns={getColumns()}
-						tableData={getFilteredData()}
-					/>
+				<section className="flex w-full flex-1 flex-col">
+					<div className="w-full flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
+						<div className="w-full overflow-x-auto">
+							<TanstackTable
+								autoHeight
+								columns={getColumns()}
+								tableData={getFilteredData()}
+							/>
+						</div>
+					</div>
 				</section>
 			</div>
 		</div>

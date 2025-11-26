@@ -31,23 +31,40 @@ export const modelloader = (queryClient) => async () => {
 const ReviewerDashBoard = () => {
   const { model } = useLoaderData();
   const navigate = useNavigate();
-  const [modelList, setModelList] = useState([]);
   const [deleteModel, setDeleteModel] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [filterStatus, setFilterStatus] = useState('all');
+  const [showFilterPanel, setShowFilterPanel] = useState(false);
   // eslint-disable-next-line no-unused-vars
   const user = useSelector(memoize((state) => state.userState.user));
   const [itemOffset, setItemOffset] = useState(0);
   const itemsPerPage = 6;
+  const sanitizedModels = Array.isArray(model) ? model : [];
+  const filteredModels = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return sanitizedModels.filter((item) => {
+      const name = (item?.modelName || '').toLowerCase();
+      const matchesSearch = term.length ? name.includes(term) : true;
+      const isComplete = Boolean(item?.isComplete);
+
+      if (filterStatus === 'completed') return matchesSearch && isComplete;
+      if (filterStatus === 'incomplete') return matchesSearch && !isComplete;
+      return matchesSearch;
+    });
+  }, [sanitizedModels, searchTerm, filterStatus]);
+
   const endOffset = itemOffset + itemsPerPage;
   const currentItems = useMemo(
-    () => model.slice(itemOffset, endOffset),
-    [endOffset, itemOffset, model]
+    () => filteredModels.slice(itemOffset, endOffset),
+    [filteredModels, endOffset, itemOffset]
   );
-  const pageCount = Math.max(1, Math.ceil(model.length / itemsPerPage));
+  const pageCount = Math.max(1, Math.ceil(filteredModels.length / itemsPerPage));
 
   // Invoke when user click to request another page.
   const handlePageClick = (event) => {
-    const newOffset = (event.selected * itemsPerPage) % Math.max(model.length, 1);
+    const total = Math.max(filteredModels.length, 1);
+    const newOffset = (event.selected * itemsPerPage) % total;
     setItemOffset(newOffset);
   };
   const deleteModels = () => {
@@ -55,51 +72,80 @@ const ReviewerDashBoard = () => {
     setDeleteModel(false);
   };
 
-  useEffect(() => {
-    setModelList(currentItems);
-  }, [currentItems]);
-
   // Clamp itemOffset when list shrinks
   useEffect(() => {
-    const total = model.length;
+    const total = filteredModels.length;
     const maxPageIndex = Math.max(0, Math.ceil(total / itemsPerPage) - 1);
     const desiredOffset = Math.min(itemOffset, maxPageIndex * itemsPerPage);
     if (itemOffset !== desiredOffset) setItemOffset(desiredOffset);
-  }, [model, itemsPerPage, itemOffset]);
+  }, [filteredModels, itemsPerPage, itemOffset]);
 
-  const handleFilterModels = useCallback(
-    (search) => {
-      const regex = new RegExp(`.*${search.toLowerCase()}.*`, 'i');
+  useEffect(() => {
+    setItemOffset(0);
+  }, [searchTerm]);
 
-      const searchResult = model.filter((item) => {
-        return regex.test(item.name?.toLowerCase());
-      });
-
-      setModelList(searchResult);
-    },
-    [model, setModelList]
-  );
+  const handleFilterChange = useCallback((value) => {
+    setFilterStatus(value);
+    setItemOffset(0);
+  }, []);
 
   return (
     <div className='AllModels container box-border w-full py-5'>
       <main className='w-full'>
-        <div className='searchBarContainer md:mx-10'>
+        <div className='searchBarContainer md:mx-10 mx-5'>
           <div className='searchIconWrapper'>
             <div className='img searchImg ml-2'>
               <img src='/img/search (2).png' alt='icon' />
             </div>
           </div>
-          <input type='text' name='search' placeholder='Search Facility Section' onClick={(e) => handleFilterModels(e.target.value)} />
-          <div className='filter'>
-            <div className='img'>
-              <img src='/img/edit.png' alt='icon' />
+          <input
+            type='text'
+            name='search'
+            placeholder='Search Facility Section'
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className='filterSection md:mx-10 mt-4 flex flex-col gap-3 rounded-2xl border border-dashed border-gray-300 p-4'>
+          <button
+            type='button'
+            className='flex w-full items-center justify-between rounded-full bg-gradient-to-r from-gray-100 to-gray-200 px-4 py-2 text-left text-sm font-medium text-gray-700 shadow'
+            onClick={() => setShowFilterPanel((prev) => !prev)}>
+            <span className='flex items-center gap-2'>
+              <span className='img flex h-6 w-6 items-center justify-center rounded-full bg-white shadow'>
+                <img src='/img/edit.png' alt='icon' className='h-4 w-4' />
+              </span>
+              Filter results
+            </span>
+            <KeyboardArrowUpIcon className={`${showFilterPanel ? '' : 'rotate-180'} transition-transform`} />
+          </button>
+
+          {showFilterPanel && (
+            <div className='flex flex-col gap-3 sm:flex-row sm:items-center'>
+              <label className='text-sm font-semibold text-gray-600'>Facility status</label>
+              <select
+                className='select select-bordered max-w-xs rounded-full bg-white/90 text-gray-800 shadow-inner'
+                value={filterStatus}
+                onChange={(e) => handleFilterChange(e.target.value)}>
+                <option value='all'>All facilities</option>
+                <option value='completed'>Completed</option>
+                <option value='incomplete'>In progress</option>
+              </select>
+              {filterStatus !== 'all' && (
+                <button
+                  type='button'
+                  className='btn btn-ghost btn-sm rounded-full'
+                  onClick={() => handleFilterChange('all')}>
+                  Clear filter
+                </button>
+              )}
             </div>
-            <p>Filter</p>
-          </div>
+          )}
         </div>
 
         <div className='allModelsWrapper flex-row flex-wrap gap-5 max-sm:flex max-sm:w-full max-sm:flex-col max-sm:content-center max-sm:gap-5 sm:flex'>
-          {modelList?.map((item, index) => {
+          {currentItems?.map((item, index) => {
             // eslint-disable-next-line no-unused-vars
             const { _id, coverPicture, modelName } = item;
             return (
