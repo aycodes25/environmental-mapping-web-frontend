@@ -192,7 +192,7 @@ export default function ObjectGroups({
 				<div className="flex flex-col">
 					{/* Search Input */}
 					<input
-						className="h-12 w-full rounded-lg border border-gray-500 bg-gray-700 placeholder-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
+						className="h-12 w-full rounded-lg border border-gray-500 bg-gray-700 text-white placeholder-gray-300 px-4 focus:outline-none focus:ring-2 focus:ring-blue-500"
 						type="text"
 						name="search"
 						value={searchQuery}

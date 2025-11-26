@@ -545,6 +545,8 @@ const ModelRightPanel = ({
 								setTagsData={setTagsData}
 								tagsData={tagsData}
 								tagType={tagType}
+								onCancel={() => setActivePane("view-tags")}
+								objectGroups={objectGroups}
 							/>
 						)}
 

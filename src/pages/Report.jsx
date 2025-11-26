@@ -591,7 +591,7 @@ const Report = () => {
 								setStartDate(null);
 								setEndDate(null);
 							}}
-							className="w-full rounded-full border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-50 sm:w-auto"
+							className="w-full rounded-full bg-primary text-white border border-gray-300 px-3 py-1 text-sm text-gray-700 transition hover:bg-gray-500 sm:w-auto"
 						>
 							Clear
 						</button>
