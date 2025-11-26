@@ -42,6 +42,12 @@ const NavLinksNew = ({ collapsed }) => {
 	}
 	if (currentUser.role === "reviewer") {
 		links = [
+			{
+				id: 1,
+				url: `/${currentUser.role}`,
+				text: "Dashboard",
+				icon: "activity",
+			},
 			{ id: 6, url: "report", text: "Report", icon: "report" },
 			{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
 		];

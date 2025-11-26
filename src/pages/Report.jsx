@@ -630,7 +630,10 @@ const Report = () => {
 						{/* Search Bar */}
 						<SearchInput
 							value={searchText}
-							onChange={(v) => handleFilterTags(v)}
+							onChange={(v) => {
+								setSearchText(v);
+								handleFilterTags(v);
+							}}
 							placeholder="Search by name, status, class...."
 						/>
 
