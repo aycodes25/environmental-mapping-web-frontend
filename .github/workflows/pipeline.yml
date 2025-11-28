@@ -1,10 +1,11 @@
-name: CI/CD Pipeline EMP-V2-FE
+# Changed to Mics Credentia
+name: CI/CD Pipeline EMP-Typescript
 
 on:
   push:
-    branches: [ development ]
+    branches: [ staging ]
   pull_request:
-    branches: [ development ]
+    branches: [ staging ]
 
 jobs:
   build:
@@ -24,10 +25,10 @@ jobs:
         with:
           context: .
           push: true
-          tags: oriontechmen/env-v2-fe:dev
+          tags: oriontechmen/env-typescript:staging
 
   deploy:
-    needs: build
+    needs: [build]
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
@@ -35,16 +36,17 @@ jobs:
     - name: Deploy to Ec2 Instance
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST_DEV }}
+        host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.PRIVATE_KEY }}
         script: |
-          sudo chmod 666 /var/run/docker.sock
           sh prune.sh
-          cd environmental-mapping-web-frontend-001/
-          git checkout development
-          git pull origin development
-          docker-compose stop
-          docker-compose rm -f
-          docker-compose pull   
-          docker-compose up -d
+          sudo chmod 666 /var/run/docker.sock
+          cd environmental-mapping-web-backend-001/
+          git checkout staging
+          git fetch origin staging
+           git reset --hard origin/staging
+          docker-compose -f docker-compose.yml stop
+          docker-compose -f docker-compose.yml rm -f
+          docker-compose -f docker-compose.yml pull   
+          docker-compose -f docker-compose.yml up -d
