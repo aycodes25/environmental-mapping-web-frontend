@@ -3,9 +3,9 @@ name: CI/CD Pipeline EMP-Typescript
 
 on:
   push:
-    branches: [ staging ]
+    branches: [ developement ]
   pull_request:
-    branches: [ staging ]
+    branches: [ developement ]
 
 jobs:
   build:
@@ -25,7 +25,7 @@ jobs:
         with:
           context: .
           push: true
-          tags: oriontechmen/env-typescript:staging
+          tags: oriontechmen/env-typescript:dev
 
   deploy:
     needs: [build]
@@ -43,10 +43,10 @@ jobs:
           sh prune.sh
           sudo chmod 666 /var/run/docker.sock
           cd environmental-mapping-web-backend-001/
-          git checkout staging
-          git fetch origin staging
-           git reset --hard origin/staging
-          docker-compose -f docker-compose.yml stop
-          docker-compose -f docker-compose.yml rm -f
-          docker-compose -f docker-compose.yml pull   
-          docker-compose -f docker-compose.yml up -d
+          git checkout developement
+          git fetch origin developement
+           git reset --hard origin/developement
+          docker-compose -f docker-compose.dev.yml stop
+          docker-compose -f docker-compose.dev.yml rm -f
+          docker-compose -f docker-compose.dev.yml pull   
+          docker-compose -f docker-compose.dev.yml up -d
