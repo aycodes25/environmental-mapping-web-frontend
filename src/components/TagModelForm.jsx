@@ -1,5 +1,5 @@
 // eslint-disable-next-line no-unused-vars
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useMemo, useState } from "react";
 // eslint-disable-next-line no-unused-vars
 import { useNavigate } from "react-router-dom";
 import "../styles/singleModel.css";
@@ -15,7 +15,14 @@ import { useQueryClient } from "@tanstack/react-query";
 import { dispatchSelectedMeshTags } from "../redux/actions/meshActions";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 
-const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
+const TagModelForm = ({
+	model,
+	setTagsData,
+	tagsData,
+	tagType,
+	onCancel,
+	objectGroups = [],
+}) => {
 	const dispatch = useDispatch();
 
 	const [samples, setSamples] = useState([]);
@@ -40,10 +47,18 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 		navigate(-1);
 	};
 
-	let tagsGroups = (tagsData || []).map(
-		(tag) => tag.group?.toLowerCase().trim() || ""
-	);
-	tagsGroups = Array.from(new Set(tagsGroups.filter((group) => group))); // filter out falsy groups
+	const availableGroups = useMemo(() => {
+		const names = new Set();
+		(objectGroups || []).forEach((group) => {
+			const name = (group?.name || "").trim();
+			if (name) names.add(name);
+		});
+		(tagsData || []).forEach((tag) => {
+			const name = (tag?.group || "").trim();
+			if (name) names.add(name);
+		});
+		return Array.from(names);
+	}, [objectGroups, tagsData]);
 
 	async function fetchSamples() {
 		await customFetch.get("/sample/samples").then(({ data }) => {
@@ -149,6 +164,39 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 		});
 	};
 
+	const resetFormState = () => {
+		setFormData({
+			fullname: currentUser.fullname,
+			incident: "",
+			evidence: "",
+			type: "",
+			action: "",
+			zone: "",
+			sampleDetails: "",
+			locations: "",
+			presence: "",
+			sample: "",
+			group: "",
+			user: currentUser?._id,
+			model: model?._id,
+			text: "",
+			objectName: "",
+			taggedInfo: "",
+		});
+		setEvidenceName("");
+		setCustomData(false);
+		setNewTaggedInfo(undefined);
+		setNewTaggedInfoName("");
+		setNewTaggedInfoPosition(undefined);
+		setDate(new Date().toISOString().split("T")[0]);
+		setTime(
+			new Date().toLocaleTimeString("it-IT", {
+				hour: "2-digit",
+				minute: "2-digit",
+			})
+		);
+	};
+
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		const dateTime = new Date(`${date}T${time}`);
@@ -226,23 +274,7 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 			} else {
 				toast.error(response.data?.message);
 			}
-			setFormData({
-				fullname: user?.data?.fullname,
-				incident: "",
-				evidence: "",
-				type: "",
-				action: "",
-				locations: "",
-				presence: "",
-				sample: "",
-				user: user?._id,
-				model: model?._id,
-				text: "",
-				group: "",
-				objectName: newTaggedInfoName,
-				taggedInfo: newTaggedInfoPosition,
-			});
-			setEvidenceName("");
+			resetFormState();
 		} catch (error) {
 			console.log(error);
 			const errorMessage = error?.response?.data?.msg || "Error adding Tag";
@@ -422,16 +454,26 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 								</select>
 							</div>
 						) : null}
-						<FormInput
-							onChange={handleInputChange}
-							label="Group"
-							type="text"
-							name="group"
-							placeholder="enter group"
-							size="input-sm"
-							value={formData.group}
-							options={tagsGroups || []}
-						/>
+						<div className="form-control">
+							<label className="mb-1 text-sm font-medium">Group</label>
+							<select
+								name="group"
+								value={formData.group}
+								onChange={handleInputChange}
+								className="w-full rounded border border-gray-300 px-3 py-2 text-sm"
+							>
+								<option value="">
+									{availableGroups.length
+										? "Select group"
+										: "No groups available"}
+								</option>
+								{availableGroups.map((group) => (
+									<option key={group} value={group}>
+										{group}
+									</option>
+								))}
+							</select>
+						</div>
 						{["sampling", "incident"].includes(formData.type) ? (
 							<FormInput
 								onChange={handleInputChange}
@@ -503,7 +545,11 @@ const TagModelForm = ({ model, setTagsData, tagsData, tagType }) => {
 						</Button>
 						<Button
 							className="btn btn-outline btn-neutral btn-sm h-10 w-full border-solid"
-							onClick={() => setFormData(formData)}
+							type="button"
+							onClick={() => {
+								resetFormState();
+								onCancel?.();
+							}}
 						>
 							Cancel
 						</Button>

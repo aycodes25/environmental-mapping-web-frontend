@@ -7,7 +7,7 @@ import { toast } from "react-toastify";
 import { customFetch, getRealFileUrl } from "../utils";
 import { Button, Card } from "@mui/material";
 import ReactPaginate from "react-paginate";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueryClient, useQuery } from "@tanstack/react-query";
 
 const url = "/model/get-softed-models";
 const modelQuery = {
@@ -28,9 +28,13 @@ export const modelTrashLoader = (queryClient) => async () => {
 };
 
 const Trash = () => {
-	const { model } = useLoaderData();
+	const { model: initialModel } = useLoaderData();
+	const { data: modelsResponse } = useQuery({
+		...modelQuery,
+		initialData: { data: { data: initialModel } },
+	});
+	const model = modelsResponse?.data?.data || initialModel || [];
 	const queryClient = useQueryClient();
-	const [modelList, setModelList] = useState([]);
 	const [deleteModel, setDeleteModel] = useState(false);
 	const [confirmDelete, setConfirmDelete] = useState(false);
 	// eslint-disable-next-line no-unused-vars
@@ -49,34 +53,12 @@ const Trash = () => {
 		setItemOffset(event.selected * itemsPerPage);
 	};
 
-	const fetchData = async () => {
-		const response = await queryClient.fetchQuery(
-			["model_soft_deleted"],
-			modelQuery
-		);
-		if (response.data.status !== "error") {
-			setModelList(response.data.data);
-		} else {
-			toast.error(response.data.message);
-		}
-	};
-	useEffect(() => {
-		fetchData();
-	}, []);
-
 	const handleRestore = async (id) => {
 		const response = await customFetch.get(
 			`/model/restore-softed-models/${id}`
 		);
 		if (response.data.status !== "error") {
 			await queryClient.invalidateQueries("model_soft_deleted");
-			const response = await queryClient.fetchQuery(
-				["model_soft_deleted"],
-				modelQuery
-			);
-			if (response.data.status !== "error") {
-				setModelList(response.data.data);
-			}
 			toast.success(
 				response.data.message || "Facility Section restored successfully"
 			);
@@ -89,13 +71,6 @@ const Trash = () => {
 		const response = await customFetch.delete(`/model/delete-a-models/${id}`);
 		if (response.data.status !== "error") {
 			await queryClient.invalidateQueries("model_soft_deleted");
-			const response = await queryClient.fetchQuery(
-				["model_soft_deleted"],
-				modelQuery
-			);
-			if (response.data.status !== "error") {
-				setModelList(response.data.data);
-			}
 			toast.success(
 				response.data.message || "Facility Section deleted successfully"
 			);
@@ -108,10 +83,6 @@ const Trash = () => {
 		setConfirmDelete(false);
 		setDeleteModel(false);
 	};
-
-	useEffect(() => {
-		setModelList(currentItems);
-	}, [currentItems]);
 
 	// Clamp itemOffset when list shrinks
 	useEffect(() => {
@@ -126,7 +97,7 @@ const Trash = () => {
 			<main className="w-full">
 				<div className="allModelsWrapper flex justify-center items-center flex gap-3 max-md:w-full max-md:flex-col max-sm:flex max-sm:p-3">
 					{" "}
-					{modelList?.map((item, index) => {
+					{currentItems?.map((item, index) => {
 						// eslint-disable-next-line no-unused-vars
 						const { _id, coverPicture, modelName } = item;
 						return (
@@ -222,7 +193,7 @@ const Trash = () => {
 						pageRangeDisplayed={5}
 						onPageChange={handlePageClick}
 						containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
-						activeclassname="m-1 rounded-full bg-black p-0 text-white"
+						activeClassName="m-1 rounded-full bg-primary text-white font-semibold"
 						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>

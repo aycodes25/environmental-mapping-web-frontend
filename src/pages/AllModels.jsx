@@ -2,7 +2,6 @@
 import React, { useEffect, useMemo, useState } from "react";
 import {
 	Link,
-	useLoaderData,
 	useNavigate,
 	useSearchParams,
 } from "react-router-dom";
@@ -16,7 +15,7 @@ import { Button, Card } from "@mui/material";
 import { Button as ShButton } from "../components/ui/button";
 import ReactPaginate from "react-paginate";
 import { useCallback } from "react";
-import { useQueryClient, useMutation } from "@tanstack/react-query";
+import { useQueryClient, useMutation, useQuery } from "@tanstack/react-query";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import KeyboardArrowUpIcon from "@mui/icons-material/KeyboardArrowUp";
 
@@ -63,7 +62,10 @@ export const loader = (queryClient) => async () => {
 };
 
 const AllModels = () => {
-	const { model, deletedModels } = useLoaderData();
+	const { data: modelsResponse } = useQuery(modelQuery);
+	const { data: deletedModelsResponse } = useQuery(deletedModelQuery);
+	const model = modelsResponse?.data?.data || [];
+	const deletedModels = deletedModelsResponse?.data?.data || [];
 	const [searchParams] = useSearchParams();
 	const isCompletedView = searchParams.get("type") === "completed";
 
@@ -345,7 +347,7 @@ const AllModels = () => {
 						pageRangeDisplayed={5}
 						onPageChange={handlePageClick}
 						containerClassName="flex flex-row items-center justify-center gap-2 py-10 text-center text-xl"
-						activeclassname="m-1 rounded-full bg-black p-0 text-white"
+						activeClassName="m-1 rounded-full bg-primary text-white font-semibold"
 						forcePage={Math.floor(itemOffset / itemsPerPage)}
 					/>
 				</div>

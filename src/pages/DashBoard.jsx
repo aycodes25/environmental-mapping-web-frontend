@@ -596,7 +596,7 @@ const DashBoard = () => {
 							<TooltipTrigger asChild>
 								<div>
 									<DashboardCard title="Recently Uploaded Facility Sections">
-										<div className="h-[600px]">
+										<div className="max-h-[600px] w-full overflow-y-auto pr-1">
 											<ModelList
 												text="Recently Uploaded Facility Sections"
 												users={recentModels}

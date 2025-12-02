@@ -36,12 +36,20 @@ const NavLinksNew = ({ collapsed }) => {
 	];
 
 	if (currentUser.role !== "superAdmin") {
-		links = links.filter(
-			(l) => !["users", "location", "trash"].includes(l.url)
-		);
+		links = links
+			.slice(1)
+			.filter(
+				(l) => !["users", "location", "trash", "report"].includes(l.url)
+			);
 	}
 	if (currentUser.role === "reviewer") {
 		links = [
+			{
+				id: 1,
+				url: `/${currentUser.role}`,
+				text: "Dashboard",
+				icon: "activity",
+			},
 			{ id: 6, url: "report", text: "Report", icon: "report" },
 			{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
 		];

@@ -32,17 +32,15 @@ const OverviewSection = ({
 			)}
 
 			{/* Overview Heading and Filters */}
-			<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
-				{/* Title - show different title if no welcome message */}
-				{!welcomeMessage && (
-					<h2 className="text-lg sm:text-xl md:text-2xl font-bold text-primary">{title}</h2>
-				)}
-				{welcomeMessage && (
-					<h2 className="text-lg sm:text-xl md:text-2xl font-bold text-primary">Overview</h2>
-				)}
+			{!welcomeMessage && (
+				<div className="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 sm:gap-2">
+					<h2 className="text-lg sm:text-xl md:text-2xl font-bold text-primary">
+						{title}
+					</h2>
 
-				{/* Filters removed as requested */}
-			</div>
+					{/* Filters removed as requested */}
+				</div>
+			)}
 
 			{/* Stats Cards Grid */}
 			{statsCards.length > 0 && (

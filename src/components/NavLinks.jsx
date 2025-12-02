@@ -78,8 +78,11 @@ const NavLinks = () => {
             <Tooltip>
               <TooltipTrigger asChild>
                 <NavLink
-                  className='listItem overflow-hidden text-ellipsis truncate max-w-[150px] block'
-                  activeclassname='active'
+                  className={({ isActive }) =>
+                    `listItem overflow-hidden text-ellipsis truncate max-w-[150px] block ${
+                      isActive ? "active font-bold text-white" : ""
+                    }`
+                  }
                   end
                   to={url}
                 >

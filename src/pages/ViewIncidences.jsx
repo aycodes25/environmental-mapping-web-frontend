@@ -156,7 +156,7 @@ const ViewIncidences = () => {
             pageRangeDisplayed={5}
             onPageChange={handlePageClick}
             containerClassName='flex flex-row items-center justify-center gap-2 py-10 text-center text-xl'
-            activeclassname='m-1 rounded-full bg-black p-0 text-white'
+            activeClassName='m-1 rounded-full bg-primary text-white font-semibold'
             forcePage={Math.floor(itemOffset / itemsPerPage)}
           />
         </div>
