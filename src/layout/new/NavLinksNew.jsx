@@ -29,8 +29,8 @@ const NavLinksNew = ({ collapsed }) => {
 		},
 		{ id: 2, url: "models", text: "Facility Sections", icon: "report" },
 		{ id: 3, url: "users", text: "Users", icon: "activity" },
-		{ id: 4, url: "location", text: "Facility", icon: "facility" },
-		{ id: 6, url: "report", text: "Report", icon: "report" },
+		// { id: 4, url: "location", text: "Facility", icon: "facility" }, // removed from sidebar
+		{ id: 6, url: "Report", text: "Report", icon: "report" },
 		{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
 		{ id: 7, url: "trash", text: "Recycle Bin", icon: "settings" },
 	];

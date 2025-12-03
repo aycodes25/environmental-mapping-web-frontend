@@ -46,17 +46,13 @@ const AddUser = () => {
 					value: item._id,
 				}));
 				setLocations(LocationsNew);
-			}
-		});
-	}
-	async function fetchLocations() {
-		await customFetch.get("/location/locations").then(({ data }) => {
-			if (data?.data) {
-				const LocationsNew = data.data.map((item) => ({
-					label: item.name,
-					value: item._id,
-				}));
-				setLocations(LocationsNew);
+				// Default the user's location to the first available location
+				if (LocationsNew.length > 0) {
+					setFormData((prev) => ({
+						...prev,
+						location: LocationsNew[0].value,
+					}));
+				}
 			}
 		});
 	}
@@ -247,32 +243,10 @@ const AddUser = () => {
 						</Select>
 					</FormControl>
 
-					{/* Location Selection */}
-					<FormControl fullWidth className="border-0 shadow-none">
-						<InputLabel id="location-select-label">
-							Select location
-						</InputLabel>
-						<Select
-							className="w-full h-12 border-0 shadow-none"
-							labelId="location-select-label"
-							id="location-select"
-							onChange={handleChange}
-							fullWidth
-							label="Select location"
-							value={formData.location || ""}
-							name="location"
-						>
-							<MenuItem value="">
-								<em>None</em>
-							</MenuItem>
-							{Array.isArray(locations) &&
-								locations.map((item, index) => (
-									<MenuItem key={index} value={item.value}>
-										{item.label}
-									</MenuItem>
-								))}
-						</Select>
-					</FormControl>
+					{/* Location selection UI removed.
+						The first available location from the API is automatically
+						set in formData.location before submission so the payload
+						continues to include a valid location. */}
 
 					{/* Profile Image Upload */}
 					<div className="flex w-full flex-col items-center gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4">

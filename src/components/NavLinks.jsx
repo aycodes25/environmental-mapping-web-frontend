@@ -41,7 +41,7 @@ const NavLinks = () => {
     },
     { id: 2, url: 'models', text: 'Facility Sections' },
     { id: 3, url: 'users', text: 'Users' },
-    { id: 4, url: 'location', text: 'Facility' },
+    // { id: 4, url: 'location', text: 'Facility' }, // removed from sidebar for admin
     // { id: 5, url: 'form-features', text: 'Form Features' },
     { id: 6, url: 'report', text: 'Report' },
     { id: 9, url: 'feedback', text: 'Feedback' },
