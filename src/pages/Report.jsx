@@ -362,16 +362,7 @@ const Report = () => {
 			header: "Facility",
 			cell: (info) => info.getValue(),
 		},
-		{
-			accessorKey: "locations",
-			header: "Location",
-			cell: (info) => info.getValue() || "",
-		},
-		{
-			accessorFn: (row) => row.model?.location?.name,
-			header: "Factory location",
-			cell: (info) => info.getValue() || "",
-		},
+		// Location fields kept in data but hidden from UI
 		{
 			accessorFn: (row) => row?.sample || "",
 			header: "Sample Type",
@@ -462,16 +453,7 @@ const Report = () => {
 				header: "Facility",
 				cell: (info) => info.getValue(),
 			},
-			{
-				accessorKey: "locations",
-				header: "Location",
-				cell: (info) => info.getValue() || "",
-			},
-			{
-				accessorFn: (row) => row.model?.location?.name,
-				header: "Factory location",
-				cell: (info) => info.getValue() || "",
-			},
+			// Location fields kept in data but hidden from UI
 			{
 				accessorFn: (row) => row?.incident || "",
 				header: "Incident Type",
@@ -642,7 +624,7 @@ const Report = () => {
 							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
 							title="Export PDF"
 						>
-							<WebIcon icon="printer" className="h-4 w-4 text-gray-600" />
+							<WebIcon icon="printer" className="h-6 w-6 text-gray-600" />
 							<span className="md:hidden">PDF</span>
 						</button>
 						<button
@@ -650,7 +632,7 @@ const Report = () => {
 							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
 							title="Export CSV"
 						>
-							<WebIcon icon="download" className="h-4 w-4 text-gray-600" />
+							<WebIcon icon="download" className="h-6 w-6 text-gray-600" />
 							<span className="md:hidden">CSV</span>
 						</button>
 					</div>

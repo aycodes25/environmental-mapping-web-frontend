@@ -2,7 +2,6 @@
 // eslint-disable-next-line no-unused-vars
 import React from "react";
 import { loader as modelLoader } from "../../pages/AllModels";
-import { loader as dashboardLoader } from "../../pages/DashBoard";
 import { singleUserLoader } from "../../pages/EditUser";
 import { LocationLoader } from "../../pages/Location";
 import { ReportLoader } from "../../pages/Report";
@@ -18,7 +17,9 @@ const AddModelSample = Loadable(
 );
 const AllModels = Loadable(React.lazy(() => import("../../pages/AllModels")));
 const AllUsers = Loadable(React.lazy(() => import("../../pages/AllUsers")));
-const DashBoard = Loadable(React.lazy(() => import("../../pages/DashBoard")));
+const DashboardNew = Loadable(
+	React.lazy(() => import("../../pages/new/DashboardNew"))
+);
 const EditModel = Loadable(React.lazy(() => import("../../pages/EditModel")));
 const FeatureForm = Loadable(
 	React.lazy(() => import("../../pages/FeatureForm"))
@@ -54,6 +55,12 @@ const queryClient = new QueryClient({
 });
 
 const taggersRoutes = [
+	{
+		index: true,
+		element: <DashboardNew />,
+		// loader: dashboardLoader(queryClient),
+		errorElement: <ErrorElement />,
+	},
 	{
 		path: "models",
 		element: <AllModels />,
@@ -105,6 +112,12 @@ const taggersRoutes = [
 		element: <UserProfile />,
 		errorElement: <ErrorElement />,
 		loader: singleUserLoader(queryClient),
+	},
+	{
+		path: "report",
+		element: <Report />,
+		loader: ReportLoader(),
+		errorElement: <ErrorElement />,
 	},
 	{
 		path: "feedback",

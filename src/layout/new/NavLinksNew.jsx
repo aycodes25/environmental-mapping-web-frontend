@@ -30,17 +30,17 @@ const NavLinksNew = ({ collapsed }) => {
 		{ id: 2, url: "models", text: "Facility Sections", icon: "report" },
 		{ id: 3, url: "users", text: "Users", icon: "activity" },
 		// { id: 4, url: "location", text: "Facility", icon: "facility" }, // removed from sidebar
-		{ id: 6, url: "Report", text: "Report", icon: "report" },
+		{ id: 6, url: "report", text: "Report", icon: "report" },
 		{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
 		{ id: 7, url: "trash", text: "Recycle Bin", icon: "settings" },
 	];
 
 	if (currentUser.role !== "superAdmin") {
-		links = links
-			.slice(1)
-			.filter(
-				(l) => !["users", "location", "trash", "report"].includes(l.url)
-			);
+		// For non-superAdmin roles (e.g. tagger, sampler), keep Dashboard and Report
+		// but hide admin-only links like Users, Locations, and Trash.
+		links = links.filter((l) =>
+			!["users", "location", "trash"].includes(l.url)
+		);
 	}
 	if (currentUser.role === "reviewer") {
 		links = [
