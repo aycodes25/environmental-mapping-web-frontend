@@ -37,7 +37,7 @@ const RootLayout = () => {
 	if (currentUser?.role === "superAdmin" || currentUser?.role === "admin") {
 		targetRoute = "/admin";
 	} else if (["sampler", "tagger"].includes(currentUser?.role)) {
-		targetRoute = "/tagger";
+		targetRoute = "/tagger/models";
 	} else if (currentUser?.role === "reviewer") {
 		targetRoute = "/reviewer";
 	} else {

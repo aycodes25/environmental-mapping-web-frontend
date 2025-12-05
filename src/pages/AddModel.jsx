@@ -40,6 +40,13 @@ const AddModel = () => {
 					value: item._id,
 				}));
 				setLocations(locationsNew);
+				// Default the model location to the first available location
+				if (locationsNew.length > 0) {
+					setFormData((prev) => ({
+						...prev,
+						location: locationsNew[0].value,
+					}));
+				}
 			}
 		});
 	}
@@ -148,36 +155,9 @@ const AddModel = () => {
 						onChange={handleInputChange}
 						required
 					/>
-					{/* <div className='form-control'> */}
-					<FormControl fullWidth className="border-0 shadow-none">
-						<InputLabel id="demo-simple-select-label ">
-							Select a location
-						</InputLabel>
-						<Select
-							className="w-full h-12 border-0 shadow-none"
-							labelId="demo-simple-select-label"
-							id="demo-simple-select"
-							onChange={handleInputChange}
-							fullWidth
-							label="Select a location"
-							placeholder="Select a location"
-							// required
-							value={formData.location || ""}
-							name="location"
-						>
-							{" "}
-							<MenuItem value="">
-								<em>None</em>
-							</MenuItem>
-							{Array.isArray(locations) &&
-								locations.map((items, index) => (
-									<MenuItem key={index} value={items.value}>
-										{items.label}
-									</MenuItem>
-								))}
-						</Select>
-					</FormControl>
-					{/* </div> */}
+					{/* Location selection removed from UI.
+						The first available location from the API is automatically
+						set in formData.location before submission. */}
 					<div className="flex w-full flex-col items-center gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4">
 						<WebIcons icon="Cloud" />
 						<div className="text-center">

@@ -41,7 +41,7 @@ const Login = () => {
 				rerouteUrl = "/admin";
 				break;
 			case "tagger":
-				rerouteUrl = "/tagger";
+				rerouteUrl = "/tagger/models";
 				break;
 			case "sampler":
 				rerouteUrl = "/sampler";

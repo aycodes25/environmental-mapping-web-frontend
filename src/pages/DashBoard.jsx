@@ -35,42 +35,100 @@ export const loader = (queryClient) => async () => {
 
 const DashBoard = () => {
 	const navigate = useNavigate();
+	const { items } = useLoaderData() || {};
 	const [activeItem, setActiveItem] = useState("Overview");
-	const [item, setItem] = useState([]);
+	// Seed initial state from loader data so we don't refetch on first paint
+	const [item, setItem] = useState(items || null);
+	const [isLoading, setIsLoading] = useState(!items);
+	const [error, setError] = useState("");
+
 	const fetchData = async () => {
-		const response = await customFetch(url);
-		if (response.data.status !== "error") {
-			setItem(response.data);
-		} else {
-			toast.error(response.data.message);
+		try {
+			setIsLoading(true);
+			const response = await customFetch(url);
+
+			if (response.data?.status !== "error") {
+				setItem(response.data || {});
+				setError("");
+			} else {
+				const message =
+					response.data?.message || "Unable to load dashboard data.";
+				setError(message);
+				toast.error(message);
+			}
+		} catch (err) {
+			console.error("Error loading dashboard:", err);
+			const message =
+				err?.response?.data?.message ||
+				"Unable to load dashboard data. Please try again.";
+			setError(message);
+			toast.error(message);
+		} finally {
+			setIsLoading(false);
 		}
 	};
+
 	useEffect(() => {
-		fetchData();
-	}, []);
+		// If loader already gave us data, just stop loading; otherwise fetch
+		if (items) {
+			setIsLoading(false);
+			setItem(items || {});
+		} else {
+			fetchData();
+		}
+		// eslint-disable-next-line react-hooks/exhaustive-deps
+	}, [items]);
 
 	const handleItemClick = (item) => {
 		setActiveItem(item);
 	};
 
+	if (isLoading) {
+		return (
+			<div className="flex flex-1 items-center justify-center p-5">
+				<p className="text-gray-500 text-sm">Loading dashboard...</p>
+			</div>
+		);
+	}
+
+	if (error) {
+		return (
+			<div className="flex flex-1 items-center justify-center p-5">
+				<p className="text-red-500 text-sm text-center max-w-md">
+					{error}
+				</p>
+			</div>
+		);
+	}
+
+	if (!item) {
+		return (
+			<div className="flex flex-1 items-center justify-center p-5">
+				<p className="text-gray-500 text-sm text-center">
+					No dashboard data available yet.
+				</p>
+			</div>
+		);
+	}
+
 	const {
-		tagsThisMonth,
-		tagsLastMonth,
-		totalTagsThisMonth,
-		positivityRateThisMonth,
-		positiveTagsThisMonth,
-		tagsYearToDate,
-		positivityRateYearToDate,
-		positivityRatePerMonthYearToDate,
-		totalReviewers,
-		totalTaggers,
-		totalModels,
-		todaysModels,
-		modelsInEachLocation,
-		TotalTagsBySampleAndDay: dailyData,
-		TotalTagsBySampleAndMonth: monthlyData,
-		recentModels,
-	} = item;
+		tagsThisMonth = 0,
+		tagsLastMonth = 0,
+		totalTagsThisMonth = 0,
+		positivityRateThisMonth = 0,
+		positiveTagsThisMonth = 0,
+		tagsYearToDate = 0,
+		positivityRateYearToDate = 0,
+		positivityRatePerMonthYearToDate = [],
+		totalReviewers = 0,
+		totalTaggers = 0,
+		totalModels = 0,
+		todaysModels = 0,
+		modelsInEachLocation = [],
+		TotalTagsBySampleAndDay: dailyData = [],
+		TotalTagsBySampleAndMonth: monthlyData = [],
+		recentModels = [],
+	} = item || {};
 
 	const dailyModels = {
 		title: "Today(s) Facilities",

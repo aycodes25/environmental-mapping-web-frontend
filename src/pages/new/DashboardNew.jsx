@@ -139,16 +139,6 @@ const DashboardNew = () => {
 				),
 			},
 			{
-				id: "locationName",
-				accessorFn: (row) => row?.location?.name || "N/A",
-				header: () => <span>Location</span>,
-				cell: ({ row }) => (
-					<span className="text-gray-800">
-						{row.original.location?.name || "N/A"}
-					</span>
-				),
-			},
-			{
 				id: "uploadedBy",
 				accessorFn: (row) => row?.user?.username || "N/A",
 				header: () => <span>Uploaded By</span>,

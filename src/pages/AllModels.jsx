@@ -277,7 +277,7 @@ const AllModels = () => {
 									>
 										<ShButton className="w-[206px] h-[48px] rounded-[20px] bg-primary text-white border border-primary shadow-none">
 											<p className="max-sm:text-sm">
-												Add Facility Model
+											Add Facility Section
 											</p>
 										</ShButton>
 									</Link>
