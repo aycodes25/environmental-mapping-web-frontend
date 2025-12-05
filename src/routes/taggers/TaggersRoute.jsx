@@ -57,11 +57,6 @@ const queryClient = new QueryClient({
 const taggersRoutes = [
 	{
 		index: true,
-		element: <DashboardNew />,
-		// loader: dashboardLoader(queryClient),
-		errorElement: <ErrorElement />,
-	},
-	{
 		path: "models",
 		element: <AllModels />,
 		loader: modelLoader(queryClient),

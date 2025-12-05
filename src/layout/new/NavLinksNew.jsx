@@ -38,8 +38,8 @@ const NavLinksNew = ({ collapsed }) => {
 	if (currentUser.role !== "superAdmin") {
 		// For non-superAdmin roles (e.g. tagger, sampler), keep Dashboard and Report
 		// but hide admin-only links like Users, Locations, and Trash.
-		links = links.filter((l) =>
-			!["users", "location", "trash"].includes(l.url)
+		links = links.filter(
+			(l) => !["users", "location", "trash", "/tagger"].includes(l.url)
 		);
 	}
 	if (currentUser.role === "reviewer") {
