@@ -11,6 +11,7 @@ import { Button } from "../components/ui/button";
 import { CustomCheckbox } from "../components/custom/CustomCheckbox";
 import GradientHeader from "../components/ui/GradientHeader";
 import { useNavigate } from "react-router-dom";
+import { useQueryClient } from "@tanstack/react-query";
 
 const AddModel = () => {
 	const [showModal, setShowModal] = useState(false);
@@ -31,6 +32,7 @@ const AddModel = () => {
 	const user = useSelector((state) => state.userState.user);
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
+	const queryClient = useQueryClient();
 	const navigate = useNavigate();
 	async function fetchLocations() {
 		await customFetch.get("/location/locations").then(({ data }) => {
@@ -98,6 +100,13 @@ const AddModel = () => {
 			);
 			if (response.data?.status !== "error") {
 				toast.success(`Model added successfully`);
+				// Invalidate and refetch queries to automatically update the models list
+				await Promise.all([
+					queryClient.invalidateQueries({ queryKey: ["model"] }),
+					queryClient.invalidateQueries({ queryKey: ["deleted_model"] }),
+					queryClient.refetchQueries({ queryKey: ["model"] }),
+					queryClient.refetchQueries({ queryKey: ["deleted_model"] }),
+				]).catch(() => {});
 				setFormData({
 					modelName: "",
 					description: "",
@@ -110,8 +119,12 @@ const AddModel = () => {
 				setModelName("");
 				setImageName("");
 				set2d("");
-				// Navigate back to Facility Sections
-				navigate("/admin/models");
+				// Navigate back to Facility Sections with automatic data refresh
+				// Dynamic navigation based on user role
+				const basePath = ["admin", "superAdmin"].includes(currentUser?.role)
+					? "/admin"
+					: `/${currentUser?.role}`;
+				navigate(`${basePath}/models`);
 			} else {
 				toast.error(response.data?.message);
 			}
