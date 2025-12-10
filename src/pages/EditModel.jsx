@@ -1,7 +1,6 @@
 // eslint-disable-next-line no-unused-vars
 import React, { useEffect, useState } from "react";
 import { useSelector } from "react-redux";
-import { FormControl, InputLabel, MenuItem, Select } from "@mui/material";
 import { getUserFromLocalStorage } from "../redux/reducers/userReducer";
 import { customFetch } from "../utils";
 import { toast } from "react-toastify";
@@ -19,7 +18,6 @@ const EditModel = () => {
 	const navigate = useNavigate();
 	const queryClient = useQueryClient();
 	const [isSubmitting, setIsSubmitting] = useState(false);
-	const [locations, setLocations] = useState();
 	const [imageName, setImageName] = useState("");
 	const [twoD, set2d] = useState("");
 	const [formData, setFormData] = useState({
@@ -33,21 +31,6 @@ const EditModel = () => {
 	const user = useSelector((state) => state.userState.user);
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
-	async function fetchLocations() {
-		await customFetch.get("/location/locations").then(({ data }) => {
-			if (data?.data) {
-				const locationsNew = data.data.map((item) => ({
-					label: item.name,
-					value: item._id,
-				}));
-				setLocations(locationsNew);
-			}
-		});
-	}
-
-	useEffect(() => {
-		fetchLocations();
-	}, []);
 
 	const handleInputChange = (e) => {
 		const { name, value, files, type, checked } = e.target;
@@ -143,32 +126,6 @@ const EditModel = () => {
 							onChange={handleInputChange}
 							required
 						/>
-					</div>
-					<div className="flex flex-col justify-center items-start w-full">
-						<p>Location</p>
-						<FormControl fullWidth className="border-0 shadow-none">
-							<Select
-								className="p-1 w-full h-11 border-0 shadow-none"
-								labelId="demo-simple-select-label"
-								id="demo-simple-select"
-								onChange={handleInputChange}
-								fullWidth
-								placeholder="Select a location"
-								required
-								value={formData.location}
-								name="location"
-							>
-								<MenuItem value="">
-									<em>None</em>
-								</MenuItem>
-								{Array.isArray(locations) &&
-									locations.map((items, index) => (
-										<MenuItem key={index} value={items.value}>
-											{items.label}
-										</MenuItem>
-									))}
-							</Select>
-						</FormControl>
 					</div>
 					<div
 						className={`flex flex-col items-center w-full gap-y-2 rounded-lg border-2 border-dashed border-[#E6E6E6] bg-[#f4f4f4] p-4`}
