@@ -100,6 +100,13 @@ const TagModelForm = ({
 	const localUser = getUserFromLocalStorage();
 	const currentUser = localUser || user;
 	const [isSubmitting, setIsSubmitting] = useState(false);
+	// ensure type is set from tagType immediately so conditional fields render before submit
+	useEffect(() => {
+		setFormData((prev) => ({
+			...prev,
+			type: tagType === "sample" ? "sampling" : "incident",
+		}));
+	}, [tagType]);
 
 	// eslint-disable-next-line no-unused-vars
 	const modelInterationData = useSelector(
