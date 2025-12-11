@@ -175,15 +175,15 @@
     "@babel/helper-string-parser" "^7.27.1"
     "@babel/helper-validator-identifier" "^7.28.5"
 
-"@babylonjs/core@^7.0.0", "@babylonjs/core@^7.4.0", "@babylonjs/core@4.x||>5.0.0-rc||5.x":
-  version "7.54.3"
-  resolved "https://registry.npmjs.org/@babylonjs/core/-/core-7.54.3.tgz"
-  integrity sha512-P5ncXVd8GEUJLhwloP9V0oVwQYIrvZztguVeLlvd5Rx+9aQnenKjpV8auJ6SRsUlAmNZU4pFTKzwF6o2EUfhAw==
+"@babylonjs/core@^7.0.0", "@babylonjs/core@4.x||>5.0.0-rc||5.x", "@babylonjs/core@7.4.0":
+  version "7.4.0"
+  resolved "https://registry.npmjs.org/@babylonjs/core/-/core-7.4.0.tgz"
+  integrity sha512-HwFDX7AMw03uo0QeUymtjTF1y8tedbJCMlx0Y1bZQHaBW0+OR7w1yEPclaM160SG9OaSwemJwG/EvD48ykzSDA==
 
-"@babylonjs/materials@^7.4.0":
-  version "7.54.3"
-  resolved "https://registry.npmjs.org/@babylonjs/materials/-/materials-7.54.3.tgz"
-  integrity sha512-WYqvpX6+iR0/h/X0SaoFZH2hD1nDIzu9Qo86/yEK8R+whhShgpkJ9VDdTE1yYNBxf5azFoUrxWcMy3OXNn3Z3w==
+"@babylonjs/materials@7.4.0":
+  version "7.4.0"
+  resolved "https://registry.npmjs.org/@babylonjs/materials/-/materials-7.4.0.tgz"
+  integrity sha512-a3GezPA/7XvDbaKlNUgeG169aYVeyg7Bogp0sOKFZwuMrR7zfIwaZYgmPgJVzh0eOCFpqTP7/owP/vF6q3D65g==
 
 "@cspotcode/source-map-support@^0.8.0":
   version "0.8.1"
@@ -2074,32 +2074,32 @@ babel-plugin-macros@^3.1.0:
     cosmiconfig "^7.0.0"
     resolve "^1.19.0"
 
-babylonjs-gltf2interface@^6.49.0:
+babylonjs-gltf2interface@^6.45.1:
   version "6.49.0"
   resolved "https://registry.npmjs.org/babylonjs-gltf2interface/-/babylonjs-gltf2interface-6.49.0.tgz"
   integrity sha512-4qzKCgEayti/YUaeMgAAZxZJlx/kLqXxoC+G8gODYz9wOV9UjnHF09wREZ5cuELzzY/rjSJMqkgDfYbUQIQ6/A==
 
-babylonjs-gui@^6.46.0:
-  version "6.49.0"
-  resolved "https://registry.npmjs.org/babylonjs-gui/-/babylonjs-gui-6.49.0.tgz"
-  integrity sha512-EUm+GD+1rb++Tu4ouMxOIAp+2QAzHrAcDfGa8ghnCET3Dn+icJaHa8b+iXTfG4OXRUM2N2Mnp5F/3kHXmyfxsQ==
+babylonjs-gui@6.46.0:
+  version "6.46.0"
+  resolved "https://registry.npmjs.org/babylonjs-gui/-/babylonjs-gui-6.46.0.tgz"
+  integrity sha512-9TnPdQEky0clh4OYLYkjnocyPiYY/TIoDCUs2lc7THq7ZVUx1EBzBjbIhHqusuT4Ce0fpuc/ZZ5oWjExeA0tYQ==
   dependencies:
-    babylonjs "^6.49.0"
+    babylonjs "^6.46.0"
 
-babylonjs-hook@^0.1.1:
+babylonjs-hook@0.1.1:
   version "0.1.1"
   resolved "https://registry.npmjs.org/babylonjs-hook/-/babylonjs-hook-0.1.1.tgz"
   integrity sha512-uLcaX08NJy/1DeI+3GNQWQ2lQazhCR4U4jC6V+xy9rEvCCeFml3EWlwEwZv+8+oSHnMMV761jeQGjn9dVzgfMQ==
 
-babylonjs-loaders@^6.45.1:
-  version "6.49.0"
-  resolved "https://registry.npmjs.org/babylonjs-loaders/-/babylonjs-loaders-6.49.0.tgz"
-  integrity sha512-kuGbt1hONx0rMOyKEcMkjdorQSZFt5VTONum1Fg2vtVhJ1VnzbKAcFCSfh9TudcqWVQrCJWVsFOiXGZcgCwKrQ==
+babylonjs-loaders@6.45.1:
+  version "6.45.1"
+  resolved "https://registry.npmjs.org/babylonjs-loaders/-/babylonjs-loaders-6.45.1.tgz"
+  integrity sha512-GvNDc05i3W9JJQcHipnBz6RYCvMvWu3yv77R9HokRAoIDaieOHeRNRvWEAQkf7BJLDGQj7dmBr1TGrX6u+QTwA==
   dependencies:
-    babylonjs "^6.49.0"
-    babylonjs-gltf2interface "^6.49.0"
+    babylonjs "^6.45.1"
+    babylonjs-gltf2interface "^6.45.1"
 
-babylonjs@^6.49.0:
+babylonjs@^6.45.1, babylonjs@^6.46.0:
   version "6.49.0"
   resolved "https://registry.npmjs.org/babylonjs/-/babylonjs-6.49.0.tgz"
   integrity sha512-KYGpELn2osBvB8UqGuk6gfJBrriojwisw/egXaiBZNQaNuURjjogI1mgwAz4/KJB14JJwELNw3JNB4sp3Rh5Ng==
@@ -6572,7 +6572,7 @@ yallist@^4.0.0:
   resolved "https://registry.npmjs.org/yallist/-/yallist-4.0.0.tgz"
   integrity sha512-3wdGidZyq5PB084XLES5TpOSRA3wjXAlIWMhum2kRcv/41Sn2emQ0dycQW4uZXLejwKvg6EsvbdlVL+FYEct7A==
 
-yaml@^1.10.0, yaml@^2.4.2:
+yaml@^1.10.0:
   version "1.10.2"
   resolved "https://registry.npmjs.org/yaml/-/yaml-1.10.2.tgz"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
