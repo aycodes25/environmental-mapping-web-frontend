@@ -28,24 +28,48 @@ import { MoreVertical } from "lucide-react";
 
 export const ReportLoader = () => async () => {
 	let tags = [];
+	let total = 0;
+	let page = 1;
+	let limit = 50;
 
-	const the_tags = await customFetch.get("/tag/all-tags");
-	if (tags.data?.status !== "error") {
-		tags = the_tags.data.data.filter((tag) => tag.model && !tag.model.delete);
-	} else {
-		toast.error(the_tags.data.message);
+	try {
+		const response = await customFetch.get(
+			`/tag/paginated-tags?page=${page}&limit=${limit}`
+		);
+
+		if (response.data?.status !== "error") {
+			const payload = response.data.data || {};
+			const items = payload.items || [];
+			tags = items.filter((tag) => tag.model && !tag.model.delete);
+			total = payload.total || tags.length;
+			page = payload.page || page;
+			limit = payload.limit || limit;
+		} else {
+			toast.error(response.data?.message || "Failed to fetch reports");
+		}
+	} catch (error) {
+		console.error(error);
+		const message =
+			error?.response?.data?.message || "Error fetching paginated reports";
+		toast.error(message);
 	}
 
-	return { tags };
+	return { tags, total, page, limit };
 };
 
 const Report = () => {
-	const { tags } = useLoaderData();
+	const { tags, total, page: initialPage, limit: initialLimit } =
+		useLoaderData();
 	const [activeFilter, setActiveFilter] = useState("All"); // Changed from activeItem to activeFilter
 	const [searchText, setSearchText] = useState("");
 	const [startDate, setStartDate] = useState(null);
 	const [endDate, setEndDate] = useState(null);
 	const [tagsData, setTagsData] = useState(tags);
+	const [totalCount, setTotalCount] = useState(total || 0);
+	const [page, setPage] = useState(initialPage || 1);
+	const [limit, setLimit] = useState(initialLimit || 50);
+	const [isLoadingPage, setIsLoadingPage] = useState(false);
+	const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
 	const handleFilterClick = (filter) => {
 		if (
@@ -88,8 +112,40 @@ const Report = () => {
 		}
 	};
 
+	// Fetch full dataset for export (respects current search & active filter)
+	const getExportData = async () => {
+		const exportPage = 1;
+		const exportLimit = totalCount || limit || 50;
+		const searchParam = searchText
+			? `&search=${encodeURIComponent(searchText)}`
+			: "";
+
+		const response = await customFetch.get(
+			`/tag/paginated-tags?page=${exportPage}&limit=${exportLimit}${searchParam}`
+		);
+
+		if (response.data?.status === "error") {
+			throw new Error(response.data?.message || "Failed to fetch export data");
+		}
+
+		const payload = response.data.data || {};
+		const items = (payload.items || []).filter(
+			(tag) => tag.model && !tag.model.delete
+		);
+
+		// Apply the same type filter used in the table (All / Sample / Incident)
+		let exportRows = items;
+		if (activeFilter === "Sample") {
+			exportRows = items.filter((item) => item.type === "sampling");
+		} else if (activeFilter === "Incident") {
+			exportRows = items.filter((item) => item.type === "incident");
+		}
+
+		return exportRows;
+	};
+
 	// Export PDF function
-	const handleExportPDF = () => {
+	const handleExportPDF = async () => {
 		const options = {
 			weekday: "long",
 			year: "numeric",
@@ -230,26 +286,39 @@ const Report = () => {
 			});
 		};
 
-		let currentY = marginTop;
+		(async () => {
+			try {
+				const rows = await getExportData();
+				let currentY = marginTop;
 
-		for (let i = 0; i < getFilteredData().length; i += rowsPerPage) {
-			const slicedData = getFilteredData().slice(i, i + rowsPerPage);
+				for (let i = 0; i < rows.length; i += rowsPerPage) {
+					const slicedData = rows.slice(i, i + rowsPerPage);
 
-			if (i > 0) {
-				doc.addPage();
-				currentY = marginTop;
+					if (i > 0) {
+						doc.addPage();
+						currentY = marginTop;
+					}
+
+					addTableToPDF(slicedData, currentY);
+				}
+
+				doc.save(
+					`exported_data_${new Date().toLocaleString(
+						"en-US",
+						options
+					)}.pdf`
+				);
+			} catch (error) {
+				console.error(error);
+				const message =
+					error?.message || "Error fetching data for PDF export";
+				toast.error(message);
 			}
-
-			addTableToPDF(slicedData, currentY);
-		}
-
-		doc.save(
-			`exported_data_${new Date().toLocaleString("en-US", options)}.pdf`
-		);
+		})();
 	};
 
 	// Export CSV function
-	const handleExportCSV = () => {
+	const handleExportCSV = async () => {
 		const csvContent = [];
 
 		// Header row
@@ -258,22 +327,32 @@ const Report = () => {
 			.map((column) => column.header);
 		csvContent.push(headers.join(","));
 
-		// Data rows
-		getFilteredData().forEach((row, rowIndex) => {
-			let currentRow = [];
-			for (let i = 0; i < getColumns().length; i++) {
-				let column = getColumns()[i];
-				if (column.excludeFromReport) {
-					continue;
+		try {
+			const rows = await getExportData();
+
+			// Data rows
+			rows.forEach((row, rowIndex) => {
+				let currentRow = [];
+				for (let i = 0; i < getColumns().length; i++) {
+					let column = getColumns()[i];
+					if (column.excludeFromReport) {
+						continue;
+					}
+					if (column.accessorFn) {
+						currentRow.push(column.accessorFn(row, rowIndex) || "");
+					} else {
+						currentRow.push(row[column.accessorKey] || "");
+					}
 				}
-				if (column.accessorFn) {
-					currentRow.push(column.accessorFn(row, rowIndex) || "");
-				} else {
-					currentRow.push(row[column.accessorKey] || "");
-				}
-			}
-			csvContent.push(currentRow.join(","));
-		});
+				csvContent.push(currentRow.join(","));
+			});
+		} catch (error) {
+			console.error(error);
+			const message =
+				error?.message || "Error fetching data for CSV export";
+			toast.error(message);
+			return;
+		}
 
 		// Join rows with newline character
 		const csvString = csvContent.join("\n");
@@ -300,7 +379,45 @@ const Report = () => {
 
 	useEffect(() => {
 		setTagsData(tags);
-	}, [tags]);
+		setTotalCount(total || 0);
+		setPage(initialPage || 1);
+		setLimit(initialLimit || 50);
+	}, [tags, total, initialPage, initialLimit]);
+
+	const fetchPage = async (nextPage, searchQuery = searchText) => {
+		setIsLoadingPage(true);
+		try {
+			const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+			const response = await customFetch.get(
+				`/tag/paginated-tags?page=${nextPage}&limit=${limit}${searchParam}`
+			);
+			if (response.data?.status !== "error") {
+				const payload = response.data.data || {};
+				const items = payload.items || [];
+				const filtered = items.filter(
+					(tag) => tag.model && !tag.model.delete
+				);
+				setTagsData(filtered);
+				setTotalCount(payload.total || filtered.length);
+				setPage(payload.page || nextPage);
+				setLimit(payload.limit || limit);
+			} else {
+				toast.error(response.data?.message || "Failed to fetch reports");
+			}
+		} catch (error) {
+			console.error(error);
+			const message =
+				error?.response?.data?.message || "Error fetching paginated reports";
+			toast.error(message);
+		} finally {
+			setIsLoadingPage(false);
+		}
+	};
+
+	const totalPages = useMemo(
+		() => (limit ? Math.max(1, Math.ceil(totalCount / limit)) : 1),
+		[totalCount, limit]
+	);
 
 	useEffect(() => {
 		if (startDate && endDate && new Date(startDate) <= new Date(endDate)) {
@@ -317,29 +434,17 @@ const Report = () => {
 
 	const handleFilterTags = (search) => {
 		setSearchText(search);
-		if (!search.length) {
-			setTagsData(tags || []);
-			return;
-		}
-		const regex = new RegExp(`.*${search.toLowerCase()}.*`, "i");
-
-		const searchResult = (tags || []).filter((item) => {
-			return (
-				regex.test(item.model?.modelName) ||
-				regex.test(item.objectName?.toLowerCase()) ||
-				regex.test(item.incident?.toLowerCase()) ||
-				regex.test(item.presence?.toLowerCase()) ||
-				regex.test(item.sample?.toLowerCase()) ||
-				regex.test(item.locations?.toLowerCase()) ||
-				regex.test(item.text?.toLowerCase()) ||
-				regex.test(item.type?.toLowerCase()) ||
-				regex.test(item.group?.toLowerCase()) ||
-				regex.test(item.slug?.toLowerCase())
-			);
-		});
-
-		setTagsData(searchResult);
+		setDebouncedSearchText(search);
 	};
+
+	// Debounce search to avoid too many API calls
+	useEffect(() => {
+		const timer = setTimeout(() => {
+			fetchPage(1, debouncedSearchText);
+		}, 500); // 500ms debounce
+
+		return () => clearTimeout(timer);
+	}, [debouncedSearchText]);
 
 	const columnSample = [
 		{
@@ -611,7 +716,6 @@ const Report = () => {
 						inputClassName="text-sm"
 						value={searchText}
 						onChange={(v) => {
-							setSearchText(v);
 							handleFilterTags(v);
 						}}
 						placeholder="Search by name, status, class...."
@@ -639,7 +743,7 @@ const Report = () => {
 				</div>
 
 				{/* Table Section */}
-				<section className="flex w-full flex-1 flex-col">
+				<section className="flex w-full flex-1 flex-col gap-3">
 					<div className="w-full flex-1 overflow-hidden rounded-2xl border border-gray-100 bg-white shadow-sm">
 						<div className="w-full overflow-x-auto">
 							<TanstackTable
@@ -647,6 +751,39 @@ const Report = () => {
 								columns={getColumns()}
 								tableData={getFilteredData()}
 							/>
+						</div>
+					</div>
+
+					{/* Pagination controls */}
+					<div className="flex items-center justify-between gap-3 rounded-2xl border border-gray-100 bg-white px-3 py-2 text-sm text-gray-700 shadow-sm">
+						<div>
+							<span>
+								Page{" "}
+								<strong>
+									{page} of {totalPages}
+								</strong>
+							</span>
+							<span className="ml-2 text-xs text-gray-500">
+								({totalCount} reports)
+							</span>
+						</div>
+						<div className="flex items-center gap-2">
+							<button
+								type="button"
+								onClick={() => page > 1 && fetchPage(page - 1, searchText)}
+								disabled={page <= 1 || isLoadingPage}
+								className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								Previous
+							</button>
+							<button
+								type="button"
+								onClick={() => page < totalPages && fetchPage(page + 1, searchText)}
+								disabled={page >= totalPages || isLoadingPage}
+								className="rounded-full border border-gray-300 px-3 py-1 text-xs font-medium text-gray-700 hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50"
+							>
+								Next
+							</button>
 						</div>
 					</div>
 				</section>
