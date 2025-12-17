@@ -69,6 +69,8 @@ const Report = () => {
 	const [page, setPage] = useState(initialPage || 1);
 	const [limit, setLimit] = useState(initialLimit || 50);
 	const [isLoadingPage, setIsLoadingPage] = useState(false);
+	const [isExportingPDF, setIsExportingPDF] = useState(false);
+	const [isExportingCSV, setIsExportingCSV] = useState(false);
 	const [debouncedSearchText, setDebouncedSearchText] = useState("");
 
 	const handleFilterClick = (filter) => {
@@ -146,188 +148,187 @@ const Report = () => {
 
 	// Export PDF function
 	const handleExportPDF = async () => {
-		const options = {
-			weekday: "long",
-			year: "numeric",
-			month: "long",
-			day: "numeric",
-			hour: "2-digit",
-			minute: "2-digit",
-			second: "2-digit",
-			hour12: true,
-		};
+		setIsExportingPDF(true);
+		try {
+			const options = {
+				weekday: "long",
+				year: "numeric",
+				month: "long",
+				day: "numeric",
+				hour: "2-digit",
+				minute: "2-digit",
+				second: "2-digit",
+				hour12: true,
+			};
 
-		const unit = "pt";
-		const size = "A3";
-		const orientation = "landscape";
+			const unit = "pt";
+			const size = "A3";
+			const orientation = "landscape";
 
-		const marginLeft = 20;
-		const marginRight = 20;
-		const marginTop = 40;
-		const rowsPerPage = 30;
+			const marginLeft = 20;
+			const marginRight = 20;
+			const marginTop = 40;
+			const rowsPerPage = 30;
 
-		const doc = new jsPDF(orientation, unit, size);
+			const doc = new jsPDF(orientation, unit, size);
 
-		// Get available width for table
-		const pageWidth = doc.internal.pageSize.getWidth();
-		const availableWidth = pageWidth - marginLeft - marginRight;
+			// Get available width for table
+			const pageWidth = doc.internal.pageSize.getWidth();
+			const availableWidth = pageWidth - marginLeft - marginRight;
 
-		doc.setFontSize(12);
+			doc.setFontSize(12);
 
-		const title = `Exported Data - ${new Date().toLocaleString(
-			"en-US",
-			options
-		)}`;
+			const title = `Exported Data - ${new Date().toLocaleString(
+				"en-US",
+				options
+			)}`;
 
-		const visibleColumns = getColumns().filter((c) => !c.excludeFromReport);
-		const headers = visibleColumns.map((column) => column.header);
+			const visibleColumns = getColumns().filter((c) => !c.excludeFromReport);
+			const headers = visibleColumns.map((column) => column.header);
 
-		// Calculate column widths proportionally to fill the entire width
-		const totalColumns = headers.length;
-		const columnWidths = {};
+			// Calculate column widths proportionally to fill the entire width
+			const totalColumns = headers.length;
+			const columnWidths = {};
 
-		// Assign proportional width values based on content type
-		let totalProportions = 0;
-		const proportions = headers.map((header, index) => {
-			let proportion;
-			if (header === "SN") {
-				proportion = 2; // Smallest
-			} else if (["Ref", "Group", "Result"].includes(header)) {
-				proportion = 4;
-			} else if (["Facility", "Location", "Time"].includes(header)) {
-				proportion = 5;
-			} else if (
-				[
-					"Object Name",
-					"Factory location",
-					"Sample Type",
-					"Added By",
-					"Date",
-				].includes(header)
-			) {
-				proportion = 6;
-			} else if (["Note"].includes(header)) {
-				proportion = 7;
-			} else if (["Corrective Actions", "Evidence"].includes(header)) {
-				proportion = 10; // Largest for content-heavy columns
-			} else {
-				proportion = 5; // Default
-			}
-			totalProportions += proportion;
-			return proportion;
-		});
-
-		// Calculate actual width in points for each column
-		headers.forEach((header, index) => {
-			const widthPercentage = proportions[index] / totalProportions;
-			columnWidths[index] = Math.floor(availableWidth * widthPercentage);
-		});
-
-		const generateTableRows = (rows) => {
-			return rows.map((row, rowIndex) => {
-				let currentRow = [];
-				for (let i = 0; i < visibleColumns.length; i++) {
-					let column = visibleColumns[i];
-					if (column.accessorFn) {
-						currentRow.push(column.accessorFn(row, rowIndex) || "");
-					} else {
-						currentRow.push(row[column.accessorKey] || "");
-					}
+			// Assign proportional width values based on content type
+			let totalProportions = 0;
+			const proportions = headers.map((header, index) => {
+				let proportion;
+				if (header === "SN") {
+					proportion = 2; // Smallest
+				} else if (["Ref", "Group", "Result"].includes(header)) {
+					proportion = 4;
+				} else if (["Facility", "Location", "Time"].includes(header)) {
+					proportion = 5;
+				} else if (
+					[
+						"Object Name",
+						"Factory location",
+						"Sample Type",
+						"Added By",
+						"Date",
+					].includes(header)
+				) {
+					proportion = 6;
+				} else if (["Note"].includes(header)) {
+					proportion = 7;
+				} else if (["Corrective Actions", "Evidence"].includes(header)) {
+					proportion = 10; // Largest for content-heavy columns
+				} else {
+					proportion = 5; // Default
 				}
-				return currentRow;
+				totalProportions += proportion;
+				return proportion;
 			});
-		};
 
-		// Clear space for title
-		doc.text(title, marginLeft, 25);
-
-		const addTableToPDF = (rows, startY) => {
-			const tableRows = generateTableRows(rows);
-
-			doc.autoTable({
-				head: [headers],
-				body: tableRows,
-				startY: startY,
-				margin: { left: marginLeft, right: marginRight },
-				columnStyles: Object.fromEntries(
-					Object.entries(columnWidths).map(([index, width]) => [
-						index,
-						{ cellWidth: width },
-					])
-				),
-				styles: {
-					cellPadding: 5,
-					fontSize: 9,
-					overflow: "linebreak",
-					valign: "middle",
-					lineWidth: 0.1,
-					lineColor: [0, 0, 0],
-				},
-				headStyles: {
-					fillColor: [173, 216, 230], // Original light blue color
-					textColor: [0, 0, 0],
-					fontStyle: "bold",
-					fontSize: 10,
-					halign: "center",
-					cellPadding: { top: 5, right: 2, bottom: 5, left: 2 }, // Smaller padding for headers
-					minCellHeight: 20,
-					overflow: "ellipsize", // Prevent header wrapping
-				},
-				pageBreak: "auto",
-				tableLineColor: [0, 0, 0],
-				tableLineWidth: 0.1,
-				tableWidth: availableWidth, // Use full available width
-				didDrawPage: (data) => {
-					if (data.pageNumber > 1) {
-						doc.setFontSize(12);
-						doc.text(title, marginLeft, 25);
-					}
-				},
+			// Calculate actual width in points for each column
+			headers.forEach((header, index) => {
+				const widthPercentage = proportions[index] / totalProportions;
+				columnWidths[index] = Math.floor(availableWidth * widthPercentage);
 			});
-		};
 
-		(async () => {
-			try {
-				const rows = await getExportData();
-				let currentY = marginTop;
-
-				for (let i = 0; i < rows.length; i += rowsPerPage) {
-					const slicedData = rows.slice(i, i + rowsPerPage);
-
-					if (i > 0) {
-						doc.addPage();
-						currentY = marginTop;
+			const generateTableRows = (rows) => {
+				return rows.map((row, rowIndex) => {
+					let currentRow = [];
+					for (let i = 0; i < visibleColumns.length; i++) {
+						let column = visibleColumns[i];
+						if (column.accessorFn) {
+							currentRow.push(column.accessorFn(row, rowIndex) || "");
+						} else {
+							currentRow.push(row[column.accessorKey] || "");
+						}
 					}
+					return currentRow;
+				});
+			};
 
-					addTableToPDF(slicedData, currentY);
+			// Clear space for title
+			doc.text(title, marginLeft, 25);
+
+			const addTableToPDF = (rows, startY) => {
+				const tableRows = generateTableRows(rows);
+
+				doc.autoTable({
+					head: [headers],
+					body: tableRows,
+					startY: startY,
+					margin: { left: marginLeft, right: marginRight },
+					columnStyles: Object.fromEntries(
+						Object.entries(columnWidths).map(([index, width]) => [
+							index,
+							{ cellWidth: width },
+						])
+					),
+					styles: {
+						cellPadding: 5,
+						fontSize: 9,
+						overflow: "linebreak",
+						valign: "middle",
+						lineWidth: 0.1,
+						lineColor: [0, 0, 0],
+					},
+					headStyles: {
+						fillColor: [173, 216, 230], // Original light blue color
+						textColor: [0, 0, 0],
+						fontStyle: "bold",
+						fontSize: 10,
+						halign: "center",
+						cellPadding: { top: 5, right: 2, bottom: 5, left: 2 }, // Smaller padding for headers
+						minCellHeight: 20,
+						overflow: "ellipsize", // Prevent header wrapping
+					},
+					pageBreak: "auto",
+					tableLineColor: [0, 0, 0],
+					tableLineWidth: 0.1,
+					tableWidth: availableWidth, // Use full available width
+					didDrawPage: (data) => {
+						if (data.pageNumber > 1) {
+							doc.setFontSize(12);
+							doc.text(title, marginLeft, 25);
+						}
+					},
+				});
+			};
+
+			const rows = await getExportData();
+			let currentY = marginTop;
+
+			for (let i = 0; i < rows.length; i += rowsPerPage) {
+				const slicedData = rows.slice(i, i + rowsPerPage);
+
+				if (i > 0) {
+					doc.addPage();
+					currentY = marginTop;
 				}
 
-				doc.save(
-					`exported_data_${new Date().toLocaleString(
-						"en-US",
-						options
-					)}.pdf`
-				);
-			} catch (error) {
-				console.error(error);
-				const message =
-					error?.message || "Error fetching data for PDF export";
-				toast.error(message);
+				addTableToPDF(slicedData, currentY);
 			}
-		})();
+
+			doc.save(
+				`exported_data_${new Date().toLocaleString("en-US", options)}.pdf`
+			);
+		} catch (error) {
+			console.error(error);
+			const message =
+				error?.message || "Error fetching data for PDF export";
+			toast.error(message);
+		} finally {
+			setIsExportingPDF(false);
+		}
 	};
 
 	// Export CSV function
 	const handleExportCSV = async () => {
-		const csvContent = [];
-
-		// Header row
-		const headers = getColumns()
-			.filter((c) => !c.excludeFromReport)
-			.map((column) => column.header);
-		csvContent.push(headers.join(","));
-
+		setIsExportingCSV(true);
 		try {
+			const csvContent = [];
+
+			// Header row
+			const headers = getColumns()
+				.filter((c) => !c.excludeFromReport)
+				.map((column) => column.header);
+			csvContent.push(headers.join(","));
+
 			const rows = await getExportData();
 
 			// Data rows
@@ -346,35 +347,36 @@ const Report = () => {
 				}
 				csvContent.push(currentRow.join(","));
 			});
+
+			// Join rows with newline character
+			const csvString = csvContent.join("\n");
+
+			// Create a Blob object with the CSV data
+			const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
+
+			// Create a temporary URL for the Blob
+			const url = URL.createObjectURL(blob);
+
+			// Create a link element to trigger the download
+			const link = document.createElement("a");
+			link.setAttribute("href", url);
+			link.setAttribute("download", "export.csv");
+
+			// Trigger the download
+			document.body.appendChild(link);
+			link.click();
+
+			// Clean up
+			document.body.removeChild(link);
+			URL.revokeObjectURL(url);
 		} catch (error) {
 			console.error(error);
 			const message =
 				error?.message || "Error fetching data for CSV export";
 			toast.error(message);
-			return;
+		} finally {
+			setIsExportingCSV(false);
 		}
-
-		// Join rows with newline character
-		const csvString = csvContent.join("\n");
-
-		// Create a Blob object with the CSV data
-		const blob = new Blob([csvString], { type: "text/csv;charset=utf-8;" });
-
-		// Create a temporary URL for the Blob
-		const url = URL.createObjectURL(blob);
-
-		// Create a link element to trigger the download
-		const link = document.createElement("a");
-		link.setAttribute("href", url);
-		link.setAttribute("download", "export.csv");
-
-		// Trigger the download
-		document.body.appendChild(link);
-		link.click();
-
-		// Clean up
-		document.body.removeChild(link);
-		URL.revokeObjectURL(url);
 	};
 
 	useEffect(() => {
@@ -725,19 +727,33 @@ const Report = () => {
 					<div className="flex w-full items-center justify-start gap-2 md:w-auto md:justify-end">
 						<button
 							onClick={handleExportPDF}
-							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
+							disabled={isExportingPDF || isExportingCSV}
+							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto md:px-4"
 							title="Export PDF"
 						>
-							<WebIcon icon="printer" className="h-6 w-6 text-gray-600" />
-							<span className="md:hidden">PDF</span>
+							{isExportingPDF ? (
+								<span className="loading loading-spinner loading-sm"></span>
+							) : (
+									<WebIcon icon="printer" className="h-6 w-6 text-gray-600" />
+							)}
+							<span className="md:hidden">
+								{isExportingPDF ? "Generating..." : "PDF"}
+							</span>
 						</button>
 						<button
 							onClick={handleExportCSV}
-							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 md:w-auto md:px-4"
+							disabled={isExportingPDF || isExportingCSV}
+							className="flex h-10 w-full items-center justify-center gap-2 rounded-full border border-gray-200 bg-white text-sm font-medium text-gray-700 transition hover:bg-gray-50 disabled:cursor-not-allowed disabled:opacity-50 md:w-auto md:px-4"
 							title="Export CSV"
 						>
-							<WebIcon icon="download" className="h-6 w-6 text-gray-600" />
-							<span className="md:hidden">CSV</span>
+							{isExportingCSV ? (
+								<span className="loading loading-spinner loading-sm"></span>
+							) : (
+									<WebIcon icon="download" className="h-6 w-6 text-gray-600" />
+							)}
+							<span className="md:hidden">
+								{isExportingCSV ? "Generating..." : "CSV"}
+							</span>
 						</button>
 					</div>
 				</div>
