@@ -30,7 +30,7 @@ export const ReportLoader = () => async () => {
 	let tags = [];
 	let total = 0;
 	let page = 1;
-	let limit = 50;
+	let limit = 25;
 
 	try {
 		const response = await customFetch.get(
@@ -67,7 +67,7 @@ const Report = () => {
 	const [tagsData, setTagsData] = useState(tags);
 	const [totalCount, setTotalCount] = useState(total || 0);
 	const [page, setPage] = useState(initialPage || 1);
-	const [limit, setLimit] = useState(initialLimit || 50);
+	const [limit, setLimit] = useState(initialLimit || 25);
 	const [isLoadingPage, setIsLoadingPage] = useState(false);
 	const [isExportingPDF, setIsExportingPDF] = useState(false);
 	const [isExportingCSV, setIsExportingCSV] = useState(false);
