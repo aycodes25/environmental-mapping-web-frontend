@@ -734,7 +734,7 @@ const Report = () => {
 							{isExportingPDF ? (
 								<span className="loading loading-spinner loading-sm"></span>
 							) : (
-									<WebIcon icon="printer" className="h-6 w-6 text-gray-600" />
+								<WebIcon icon="printer" className="h-6 w-6 text-gray-600" />
 							)}
 							<span className="md:hidden">
 								{isExportingPDF ? "Generating..." : "PDF"}
@@ -749,7 +749,7 @@ const Report = () => {
 							{isExportingCSV ? (
 								<span className="loading loading-spinner loading-sm"></span>
 							) : (
-									<WebIcon icon="download" className="h-6 w-6 text-gray-600" />
+								<WebIcon icon="download" className="h-6 w-6 text-gray-600" />
 							)}
 							<span className="md:hidden">
 								{isExportingCSV ? "Generating..." : "CSV"}
@@ -766,6 +766,7 @@ const Report = () => {
 								autoHeight
 								columns={getColumns()}
 								tableData={getFilteredData()}
+								enablePagination={false}
 							/>
 						</div>
 					</div>
@@ -780,7 +781,7 @@ const Report = () => {
 								</strong>
 							</span>
 							<span className="ml-2 text-xs text-gray-500">
-								({totalCount} reports)
+								({totalCount} tags)
 							</span>
 						</div>
 						<div className="flex items-center gap-2">
