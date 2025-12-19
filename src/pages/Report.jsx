@@ -30,7 +30,7 @@ export const ReportLoader = () => async () => {
 	let tags = [];
 	let total = 0;
 	let page = 1;
-	let limit = 25;
+	let limit = 10;
 
 	try {
 		const response = await customFetch.get(
@@ -67,7 +67,7 @@ const Report = () => {
 	const [tagsData, setTagsData] = useState(tags);
 	const [totalCount, setTotalCount] = useState(total || 0);
 	const [page, setPage] = useState(initialPage || 1);
-	const [limit, setLimit] = useState(initialLimit || 25);
+	const [limit, setLimit] = useState(initialLimit || 10);
 	const [isLoadingPage, setIsLoadingPage] = useState(false);
 	const [isExportingPDF, setIsExportingPDF] = useState(false);
 	const [isExportingCSV, setIsExportingCSV] = useState(false);
@@ -121,9 +121,11 @@ const Report = () => {
 		const searchParam = searchText
 			? `&search=${encodeURIComponent(searchText)}`
 			: "";
+		const dateParam =
+			startDate && endDate ? `&startDate=${startDate}&endDate=${endDate}` : "";
 
 		const response = await customFetch.get(
-			`/tag/paginated-tags?page=${exportPage}&limit=${exportLimit}${searchParam}`
+			`/tag/paginated-tags?page=${exportPage}&limit=${exportLimit}${searchParam}${dateParam}`
 		);
 
 		if (response.data?.status === "error") {
@@ -386,26 +388,34 @@ const Report = () => {
 		setLimit(initialLimit || 50);
 	}, [tags, total, initialPage, initialLimit]);
 
+	// Trigger fetch when dates change
+	useEffect(() => {
+		fetchPage(1);
+	}, [startDate, endDate]);
+
 	const fetchPage = async (nextPage, searchQuery = searchText) => {
 		setIsLoadingPage(true);
 		try {
-			const searchParam = searchQuery ? `&search=${encodeURIComponent(searchQuery)}` : "";
+			const searchParam = searchQuery
+				? `&search=${encodeURIComponent(searchQuery)}`
+				: "";
+			const dateParam =
+				startDate && endDate ? `&startDate=${startDate}&endDate=${endDate}` : "";
 			const response = await customFetch.get(
-				`/tag/paginated-tags?page=${nextPage}&limit=${limit}${searchParam}`
+				`/tag/paginated-tags?page=${nextPage}&limit=${limit}${searchParam}${dateParam}`
 			);
 			if (response.data?.status !== "error") {
 				const payload = response.data.data || {};
 				const items = payload.items || [];
-				const filtered = items.filter(
-					(tag) => tag.model && !tag.model.delete
-				);
-				setTagsData(filtered);
-				setTotalCount(payload.total || filtered.length);
+				// Backend now handles model deletion filtering
+				setTagsData(items);
+				setTotalCount(payload.total || items.length);
 				setPage(payload.page || nextPage);
 				setLimit(payload.limit || limit);
 			} else {
 				toast.error(response.data?.message || "Failed to fetch reports");
 			}
+
 		} catch (error) {
 			console.error(error);
 			const message =
@@ -421,6 +431,8 @@ const Report = () => {
 		[totalCount, limit]
 	);
 
+	/*
+	// Removed client-side date filtering in favor of server-side filtering
 	useEffect(() => {
 		if (startDate && endDate && new Date(startDate) <= new Date(endDate)) {
 			const result = filterDataByDateRange(tags, startDate, endDate);
@@ -433,6 +445,7 @@ const Report = () => {
 			setTagsData(tags);
 		}
 	}, [startDate, endDate, tags]);
+	*/
 
 	const handleFilterTags = (search) => {
 		setSearchText(search);
@@ -450,7 +463,7 @@ const Report = () => {
 
 	const columnSample = [
 		{
-			accessorFn: (row, i) => i + 1,
+			accessorFn: (row, i) => (page - 1) * limit + i + 1,
 			header: "SN",
 			cell: (info) => info.getValue(),
 		},
@@ -541,7 +554,7 @@ const Report = () => {
 	const columnIncident = useMemo(
 		() => [
 			{
-				accessorFn: (row, i) => i + 1,
+				accessorFn: (row, i) => (page - 1) * limit + i + 1,
 				header: "SN",
 				cell: (info) => info.getValue(),
 			},
