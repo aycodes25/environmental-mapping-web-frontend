@@ -23,6 +23,7 @@ export default function TanstackTable({
 	autoHeight = false,
 	initialPageSize = 10,
 	pageSizeOptions = [10, 20, 30, 40, 50],
+	enablePagination = true,
 }) {
 	const [sorting, setSorting] = useState([]);
 	const [pagination, setPagination] = useState({
@@ -49,8 +50,9 @@ export default function TanstackTable({
 		onSortingChange: (e) => setSorting(e),
 		getCoreRowModel: getCoreRowModel(),
 		getSortedRowModel: getSortedRowModel(),
-		getPaginationRowModel: getPaginationRowModel(),
-		manualPagination: false,
+		// Only use pagination model if pagination is enabled
+		...(enablePagination ? { getPaginationRowModel: getPaginationRowModel() } : {}),
+		manualPagination: !enablePagination, // If not enabling internal pagination, we might be doing it manually or not at all
 	});
 	const { rows } = table.getRowModel();
 
@@ -108,9 +110,9 @@ export default function TanstackTable({
 															style={
 																header.column.getCanSort()
 																	? {
-																			cursor: "pointer",
-																			userSelect: "none",
-																	  }
+																		cursor: "pointer",
+																		userSelect: "none",
+																	}
 																	: {}
 															}
 															onClick={header.column.getToggleSortingHandler()}
@@ -167,7 +169,7 @@ export default function TanstackTable({
 									width: "100%",
 								}}
 								totalCount={rows.length}
-										initialTopMostItemIndex={0}
+								initialTopMostItemIndex={0}
 								components={{
 									Scroller: CustomScrollbar,
 									Table: ({ style, ...props }) => (
@@ -242,9 +244,9 @@ export default function TanstackTable({
 															style={
 																header.column.getCanSort()
 																	? {
-																			cursor: "pointer",
-																			userSelect: "none",
-																	  }
+																		cursor: "pointer",
+																		userSelect: "none",
+																	}
 																	: {}
 															}
 															onClick={header.column.getToggleSortingHandler()}
@@ -269,8 +271,8 @@ export default function TanstackTable({
 						)}
 					</>
 				)}
-				{/* Always render pagination controls, even when there are no rows */}
-				{(() => {
+				{/* Only render pagination controls if enabled */}
+				{enablePagination && (() => {
 					const displayPageCount = Math.max(1, table.getPageCount());
 					const currentPageIndex = Math.max(0, Math.min(
 						table.getState().pagination.pageIndex,
