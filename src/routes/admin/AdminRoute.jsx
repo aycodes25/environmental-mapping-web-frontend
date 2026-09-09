@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+﻿/* eslint-disable react-refresh/only-export-components */
 // eslint-disable-next-line no-unused-vars
 import React, { Suspense } from "react";
 import { QueryClient } from "@tanstack/react-query";
@@ -48,6 +48,7 @@ const ViewIncidences = Loadable(
 	React.lazy(() => import("../../pages/ViewIncidences"))
 );
 const Feedback = Loadable(React.lazy(() => import("../../pages/Feedback")));
+const Notifications = Loadable(React.lazy(() => import("../../pages/Notifications")));
 
 const queryClient = new QueryClient({
 	defaultOptions: {
@@ -131,6 +132,11 @@ const adminRoutes = [
 	{
 		path: "feedback",
 		element: <Feedback />,
+		errorElement: <ErrorElement />,
+	},
+	{
+		path: "notifications",
+		element: <Notifications />,
 		errorElement: <ErrorElement />,
 	},
 	{

@@ -1,8 +1,8 @@
-import React from "react";
+﻿import React from "react";
 import { useSelector } from "react-redux";
 import { useLocation } from "react-router-dom";
 import { getUserFromLocalStorage } from "../../redux/reducers/userReducer";
-import WebIcon from "../../components/custom/WebIcons";
+import NotificationBell from "../../components/notifications/NotificationBell";
 
 const HeaderNew = () => {
 	const user = useSelector((s) => s.userState.user);
@@ -19,6 +19,7 @@ const HeaderNew = () => {
 			location: "Facility",
 			report: "Report",
 			feedback: "Feedback",
+			notifications: "Notifications",
 			trash: "Recycle Bin",
 		};
 
@@ -38,10 +39,13 @@ const HeaderNew = () => {
 
 	return (
 		<div
-			className="h-20 flex items-center px-6 border-b-2 border-lightGrey bg-surface"
+			className="h-20 flex items-center justify-between px-6 border-b-2 border-lightGrey bg-surface"
 			style={{ boxShadow: "0 6px 24px rgba(0, 0, 0, 0.5)" }}
 		>
 			<div className="text-xl font-bold text-primary">{getPageTitle()}</div>
+			<div className="flex items-center gap-4">
+				<NotificationBell />
+			</div>
 		</div>
 	);
 };

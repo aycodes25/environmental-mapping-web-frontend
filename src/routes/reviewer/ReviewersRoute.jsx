@@ -1,4 +1,4 @@
-/* eslint-disable react-refresh/only-export-components */
+﻿/* eslint-disable react-refresh/only-export-components */
 // eslint-disable-next-line no-unused-vars
 import React, { Suspense } from 'react';
 /* eslint-disable no-unused-vars */
@@ -9,7 +9,6 @@ import { ReportLoader } from '../../pages/Report';
 import { modelloader } from '../../pages/ReviewerDashboad';
 import { singleUserLoader } from '../../pages/EditUser';
 
-// const AllModels = Loadable(React.lazy(() => import('../../pages/AllModels')));
 const ViewEvidences = Loadable(React.lazy(() => import('../../pages/ViewEvidences')));
 const ErrorElement = Loadable(React.lazy(() => import('../../components/ErrorElement')));
 const ReviewerDashBoard = Loadable(React.lazy(() => import('../../pages/ReviewerDashboad')));
@@ -19,7 +18,7 @@ const ViewSafety = Loadable(React.lazy(() => import('../../pages/ViewSafety')));
 const ViewIncidences = Loadable(React.lazy(() => import('../../pages/ViewIncidences')));
 const Report = Loadable(React.lazy(() => import('../../pages/Report')));
 const Feedback = Loadable(React.lazy(() => import('../../pages/Feedback')));
-
+const Notifications = Loadable(React.lazy(() => import('../../pages/Notifications')));
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -75,6 +74,11 @@ const reviewersRoutes = [
   {
     path: 'feedback',
     element: <Feedback />,
+    errorElement: <ErrorElement />, 
+  },
+  {
+    path: 'notifications',
+    element: <Notifications />,
     errorElement: <ErrorElement />, 
   },
 ];

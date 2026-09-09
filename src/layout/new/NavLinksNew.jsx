@@ -1,4 +1,4 @@
-import React from "react";
+﻿import React from "react";
 import { NavLink } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { memoize } from "proxy-memoize";
@@ -32,11 +32,12 @@ const NavLinksNew = ({ collapsed }) => {
 		// { id: 4, url: "location", text: "Facility", icon: "facility" }, // removed from sidebar
 		{ id: 6, url: "report", text: "Report", icon: "report" },
 		{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
+		{ id: 9, url: "notifications", text: "Notifications", icon: "notification" },
 		{ id: 7, url: "trash", text: "Recycle Bin", icon: "settings" },
 	];
 
 	if (currentUser.role !== "superAdmin") {
-		// For non-superAdmin roles (e.g. tagger, sampler), keep Dashboard and Report
+		// For non-superAdmin roles (e.g. tagger, sampler), keep Dashboard, Report, Feedback, Notifications
 		// but hide admin-only links like Users, Locations, and Trash.
 		links = links.filter(
 			(l) => !["users", "location", "trash", "/tagger"].includes(l.url)
@@ -52,6 +53,7 @@ const NavLinksNew = ({ collapsed }) => {
 			},
 			{ id: 6, url: "report", text: "Report", icon: "report" },
 			{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
+			{ id: 9, url: "notifications", text: "Notifications", icon: "notification" },
 		];
 	}
 

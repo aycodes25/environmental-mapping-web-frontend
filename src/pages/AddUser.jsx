@@ -39,22 +39,40 @@ const AddUser = () => {
 	};
 
 	async function fetchLocations() {
-		await customFetch.get("/location/locations").then(({ data }) => {
-			if (data?.data) {
-				const LocationsNew = data.data.map((item) => ({
+		try {
+			const { data } = await customFetch.get("/location/locations");
+			let locationsList = [];
+			if (data?.data && Array.isArray(data.data) && data.data.length > 0) {
+				locationsList = data.data.map((item) => ({
 					label: item.name,
 					value: item._id,
 				}));
-				setLocations(LocationsNew);
-				// Default the user's location to the first available location
-				if (LocationsNew.length > 0) {
-					setFormData((prev) => ({
-						...prev,
-						location: LocationsNew[0].value,
-					}));
+			} else {
+				// No locations found: create a default facility so user registration always succeeds
+				const pageViewer = getUserFromLocalStorage();
+				const createRes = await customFetch.post("/location/create-location", {
+					name: "Main Facility",
+					user: pageViewer?._id || "system",
+				});
+				if (createRes.data?.data?._id) {
+					locationsList = [
+						{
+							label: createRes.data.data.name || "Main Facility",
+							value: createRes.data.data._id,
+						},
+					];
 				}
 			}
-		});
+			setLocations(locationsList);
+			if (locationsList.length > 0) {
+				setFormData((prev) => ({
+					...prev,
+					location: prev.location || locationsList[0].value,
+				}));
+			}
+		} catch (error) {
+			console.error("Error fetching locations in AddUser:", error);
+		}
 	}
 
 	useEffect(() => {
@@ -71,6 +89,36 @@ const AddUser = () => {
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
+
+		// Auto-assign location from available locations if not yet set
+		let activeLocation = formData.location;
+		if (!activeLocation && locations.length > 0) {
+			activeLocation = locations[0].value;
+			setFormData((prev) => ({ ...prev, location: activeLocation }));
+		}
+
+		// If still no location, fetch or create on-the-fly
+		if (!activeLocation) {
+			try {
+				const { data } = await customFetch.get("/location/locations");
+				if (data?.data && data.data.length > 0) {
+					activeLocation = data.data[0]._id;
+				} else {
+					const pageViewer = getUserFromLocalStorage();
+					const createRes = await customFetch.post("/location/create-location", {
+						name: "Main Facility",
+						user: pageViewer?._id,
+					});
+					activeLocation = createRes.data?.data?._id;
+				}
+				if (activeLocation) {
+					setFormData((prev) => ({ ...prev, location: activeLocation }));
+				}
+			} catch (err) {
+				console.error("Error resolving location on submit:", err);
+			}
+		}
+
 		// Frontend validation: ensure required fields are present (image optional)
 		const requiredFields = [
 			{ key: "fullname", label: "Full name" },
@@ -78,7 +126,6 @@ const AddUser = () => {
 			{ key: "email", label: "Email" },
 			{ key: "password", label: "Password" },
 			{ key: "role", label: "Role" },
-			{ key: "location", label: "Location" },
 		];
 		for (const field of requiredFields) {
 			if (!String(formData[field.key] || "").trim()) {
@@ -86,6 +133,12 @@ const AddUser = () => {
 				return;
 			}
 		}
+
+		if (!activeLocation) {
+			toast.error("Unable to resolve facility location. Please try again.");
+			return;
+		}
+
 		setIsSubmitting(true);
 		try {
 			const formDataForUpload = new FormData();
@@ -94,11 +147,11 @@ const AddUser = () => {
 			formDataForUpload.append("email", formData.email);
 			formDataForUpload.append("password", formData.password);
 			formDataForUpload.append("role", formData.role);
+			formDataForUpload.append("location", activeLocation);
 			// Image is optional; append only if provided
 			if (formData.image) {
 				formDataForUpload.append("image", formData.image);
 			}
-			formDataForUpload.append("location", formData.location);
 
 			const response = await customFetch.post(
 				"/user/register-tagger",
