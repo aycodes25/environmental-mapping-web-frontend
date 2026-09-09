@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useRef } from "react";
 import { useSelector } from "react-redux";
+import { useLocation } from "react-router-dom";
 import { Bell } from "lucide-react";
 import { getUserFromLocalStorage } from "../../redux/reducers/userReducer";
 import {
@@ -16,13 +17,24 @@ const NotificationBell = () => {
 	const [notifications, setNotifications] = useState([]);
 	const [loading, setLoading] = useState(false);
 	const dropdownRef = useRef(null);
+	const location = useLocation();
 
 	const user = useSelector((state) => state.userState?.user);
 	const currentUser = getUserFromLocalStorage() || user;
-	const rawRole = currentUser?.role || "admin";
-	const userRole = ["admin", "superadmin"].includes(rawRole.toLowerCase())
-		? "admin"
-		: rawRole.toLowerCase();
+
+	// Determine role context from active path first, then fall back to user role
+	const pathname = location.pathname.toLowerCase();
+	let userRole = "admin";
+	if (pathname.startsWith("/reviewer")) {
+		userRole = "reviewer";
+	} else if (pathname.startsWith("/tagger")) {
+		userRole = "tagger";
+	} else if (pathname.startsWith("/admin")) {
+		userRole = "admin";
+	} else if (currentUser?.role) {
+		const rawRole = String(currentUser.role).toLowerCase();
+		userRole = ["admin", "superadmin"].includes(rawRole) ? "admin" : rawRole;
+	}
 
 	const fetchUnread = async () => {
 		try {

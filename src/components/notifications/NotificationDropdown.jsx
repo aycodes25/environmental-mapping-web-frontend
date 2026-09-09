@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { CheckCheck, Bell, MessageSquare, AlertTriangle, Tag, FileText, UserCheck, Settings } from "lucide-react";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
@@ -50,9 +50,21 @@ const NotificationDropdown = ({
 	userRole = "admin"
 }) => {
 	const navigate = useNavigate();
-	const safeRole = ["admin", "superadmin"].includes(String(userRole).toLowerCase())
-		? "admin"
-		: String(userRole).toLowerCase();
+	const location = useLocation();
+
+	const pathLower = (location.pathname || "").toLowerCase();
+	let safeRole = "admin";
+	if (pathLower.startsWith("/reviewer")) {
+		safeRole = "reviewer";
+	} else if (pathLower.startsWith("/tagger")) {
+		safeRole = "tagger";
+	} else if (pathLower.startsWith("/admin")) {
+		safeRole = "admin";
+	} else {
+		safeRole = ["admin", "superadmin"].includes(String(userRole).toLowerCase())
+			? "admin"
+			: String(userRole).toLowerCase();
+	}
 
 	const handleNotificationClick = (item) => {
 		if (!item.isRead) {

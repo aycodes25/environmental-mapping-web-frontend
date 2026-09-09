@@ -44,26 +44,29 @@ const Login = () => {
 				rerouteUrl = "/tagger/models";
 				break;
 			case "sampler":
-				rerouteUrl = "/sampler";
+				rerouteUrl = "/tagger/models";
 				break;
 			case "reviewer":
 				rerouteUrl = "/reviewer";
 				break;
+			default:
+				rerouteUrl = "/login";
+				break;
 		}
-		navigate(rerouteUrl);
+		navigate(rerouteUrl, { replace: true });
 	}
 
 	useEffect(() => {
-		if (currentUser?.role) {
-			reRouteByRole(currentUser.role);
+		const storedUser = getUserFromLocalStorage();
+		const token = getAccessTokenFromLocalStorage();
+		if (storedUser?.role && token) {
+			reRouteByRole(storedUser.role);
 		}
-	}, [isLoggedin]);
+	}, []);
 
 	const handleSubmit = async (e) => {
 		e.preventDefault();
 		setIsSubmitting(true);
-
-		console.log("Login attempt with:", { email, password });
 
 		try {
 			// Try with direct axios call to bypass customFetch issues
@@ -81,17 +84,15 @@ const Login = () => {
 				}
 			);
 
-			console.log("Login response:", response.data);
-
 			const userData =
 				response.data.status !== "error" ? response.data : null;
-			if (response.data.status !== "error") {
+			if (response.data.status !== "error" && userData?.data?.user) {
 				dispatch(loginUser(userData));
 				toast.success("logged in successfully");
-				setIsLoggedin(true);
+				reRouteByRole(userData.data.user.role);
 			} else {
-				console.log("Login error:", response.data.message);
-				toast.error(`${response.data.message}`);
+				console.log("Login error:", response.data?.message);
+				toast.error(`${response.data?.message || "Login failed"}`);
 			}
 		} catch (err) {
 			console.error("Login catch error:", err);

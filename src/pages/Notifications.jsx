@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import {
 	Bell,
 	CheckCheck,
@@ -76,12 +76,22 @@ const Notifications = () => {
 	const [totalCount, setTotalCount] = useState(0);
 
 	const navigate = useNavigate();
+	const location = useLocation();
 	const user = useSelector((state) => state.userState?.user);
 	const currentUser = getUserFromLocalStorage() || user;
-	const rawRole = currentUser?.role || "admin";
-	const userRole = ["admin", "superadmin"].includes(rawRole.toLowerCase())
-		? "admin"
-		: rawRole.toLowerCase();
+
+	const pathLower = (location.pathname || "").toLowerCase();
+	let userRole = "admin";
+	if (pathLower.startsWith("/reviewer")) {
+		userRole = "reviewer";
+	} else if (pathLower.startsWith("/tagger")) {
+		userRole = "tagger";
+	} else if (pathLower.startsWith("/admin")) {
+		userRole = "admin";
+	} else if (currentUser?.role) {
+		const rawRole = String(currentUser.role).toLowerCase();
+		userRole = ["admin", "superadmin"].includes(rawRole) ? "admin" : rawRole;
+	}
 
 	const fetchNotificationsData = async (currentPage = page, category = activeCategory) => {
 		setLoading(true);

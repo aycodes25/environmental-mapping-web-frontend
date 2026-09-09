@@ -22,9 +22,6 @@ export const getPasswordToken = () => {
 
 export const customFetch = axios.create({
 	baseURL: evMappingUrl,
-	headers: {
-		"Access-Control-Allow-Origin": `${appURL}`,
-	},
 });
 
 customFetch.interceptors.request.use((config) => {

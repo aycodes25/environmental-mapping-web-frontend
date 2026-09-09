@@ -1,5 +1,5 @@
-﻿import React from "react";
-import { NavLink } from "react-router-dom";
+import React from "react";
+import { NavLink, useLocation } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { memoize } from "proxy-memoize";
 import { getUserFromLocalStorage } from "../../redux/reducers/userReducer";
@@ -12,48 +12,51 @@ import {
 } from "../../components/ui/tooltip";
 
 const NavLinksNew = ({ collapsed }) => {
-	const user = useSelector(memoize((state) => state.userState.user));
+	const user = useSelector(memoize((state) => state.userState?.user));
 	const localUser = getUserFromLocalStorage();
-	const currentUser = localUser || user;
+	const currentUser = localUser || user || {};
+	const location = useLocation();
 
-	let links = [
-		{
-			id: 1,
-			url: `${
-				["admin", "superAdmin"].includes(currentUser.role)
-					? "/admin"
-					: `/${currentUser.role}`
-			}`,
-			text: "Dashboard",
-			icon: "activity",
-		},
-		{ id: 2, url: "models", text: "Facility Sections", icon: "report" },
-		{ id: 3, url: "users", text: "Users", icon: "activity" },
-		// { id: 4, url: "location", text: "Facility", icon: "facility" }, // removed from sidebar
-		{ id: 6, url: "report", text: "Report", icon: "report" },
-		{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
-		{ id: 9, url: "notifications", text: "Notifications", icon: "notification" },
-		{ id: 7, url: "trash", text: "Recycle Bin", icon: "settings" },
-	];
-
-	if (currentUser.role !== "superAdmin") {
-		// For non-superAdmin roles (e.g. tagger, sampler), keep Dashboard, Report, Feedback, Notifications
-		// but hide admin-only links like Users, Locations, and Trash.
-		links = links.filter(
-			(l) => !["users", "location", "trash", "/tagger"].includes(l.url)
-		);
+	const pathLower = (location.pathname || "").toLowerCase();
+	let baseRole = "admin";
+	if (pathLower.startsWith("/reviewer")) {
+		baseRole = "reviewer";
+	} else if (pathLower.startsWith("/tagger")) {
+		baseRole = "tagger";
+	} else if (pathLower.startsWith("/admin")) {
+		baseRole = "admin";
+	} else if (currentUser?.role) {
+		const raw = String(currentUser.role).toLowerCase();
+		baseRole = ["admin", "superadmin"].includes(raw) ? "admin" : raw;
 	}
-	if (currentUser.role === "reviewer") {
+
+	let links = [];
+
+	if (baseRole === "reviewer") {
 		links = [
-			{
-				id: 1,
-				url: `/${currentUser.role}`,
-				text: "Dashboard",
-				icon: "activity",
-			},
-			{ id: 6, url: "report", text: "Report", icon: "report" },
-			{ id: 8, url: "feedback", text: "Feedback", icon: "clipboard" },
-			{ id: 9, url: "notifications", text: "Notifications", icon: "notification" },
+			{ id: 1, url: "/reviewer", text: "Dashboard", icon: "activity" },
+			{ id: 6, url: "/reviewer/report", text: "Report", icon: "report" },
+			{ id: 8, url: "/reviewer/feedback", text: "Feedback", icon: "clipboard" },
+			{ id: 9, url: "/reviewer/notifications", text: "Notifications", icon: "notification" },
+		];
+	} else if (baseRole === "tagger" || baseRole === "sampler") {
+		links = [
+			{ id: 1, url: "/tagger/models", text: "Dashboard", icon: "activity" },
+			{ id: 2, url: "/tagger/models", text: "Facility Sections", icon: "report" },
+			{ id: 6, url: "/tagger/report", text: "Report", icon: "report" },
+			{ id: 8, url: "/tagger/feedback", text: "Feedback", icon: "clipboard" },
+			{ id: 9, url: "/tagger/notifications", text: "Notifications", icon: "notification" },
+		];
+	} else {
+		// Admin / SuperAdmin
+		links = [
+			{ id: 1, url: "/admin", text: "Dashboard", icon: "activity" },
+			{ id: 2, url: "/admin/models", text: "Facility Sections", icon: "report" },
+			{ id: 3, url: "/admin/users", text: "Users", icon: "activity" },
+			{ id: 6, url: "/admin/report", text: "Report", icon: "report" },
+			{ id: 8, url: "/admin/feedback", text: "Feedback", icon: "clipboard" },
+			{ id: 9, url: "/admin/notifications", text: "Notifications", icon: "notification" },
+			{ id: 7, url: "/admin/trash", text: "Recycle Bin", icon: "settings" },
 		];
 	}
 
