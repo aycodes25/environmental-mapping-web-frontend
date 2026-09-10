@@ -166,6 +166,14 @@ const Notifications = () => {
 			navigate(`/${userRole}/view-incidents/${item.relatedId}`);
 		} else if (item.category === "Feedback") {
 			navigate(`/${userRole}/feedback`);
+		} else if (
+			item.category === "Users" ||
+			item.category === "User" ||
+			(item.title && item.title.toLowerCase().includes("user"))
+		) {
+			navigate(`/${userRole}/users`);
+		} else if (item.category === "Report") {
+			navigate(`/${userRole}/report`);
 		} else {
 			navigate(`/${userRole}/notifications`);
 		}
@@ -305,7 +313,7 @@ const Notifications = () => {
 
 								{/* Item Action Buttons */}
 								<div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-									{item.relatedId && (
+									{(item.relatedId || ["Users", "User", "Feedback", "Report"].includes(item.category) || (item.title && item.title.toLowerCase().includes("user"))) && (
 										<button
 											onClick={() => handleNavigateRelated(item)}
 											className="px-3 py-1.5 rounded-lg bg-purple-50 hover:bg-purple-100 text-xs font-semibold text-primary border border-purple-200 flex items-center gap-1.5 transition-all shadow-xs"

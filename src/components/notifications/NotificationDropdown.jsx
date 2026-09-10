@@ -75,14 +75,17 @@ const NotificationDropdown = ({
 			navigate(`/${safeRole}/view-incidents/${item.relatedId}`);
 		} else if (item.category === "Feedback") {
 			navigate(`/${safeRole}/feedback`);
+		} else if (
+			item.category === "Users" ||
+			item.category === "User" ||
+			(item.title && item.title.toLowerCase().includes("user"))
+		) {
+			navigate(`/${safeRole}/users`);
+		} else if (item.category === "Report") {
+			navigate(`/${safeRole}/report`);
 		} else {
 			navigate(`/${safeRole}/notifications`);
 		}
-	};
-
-	const handleViewAll = () => {
-		onClose();
-		navigate(`/${safeRole}/notifications`);
 	};
 
 	return (
