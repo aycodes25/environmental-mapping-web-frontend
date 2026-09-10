@@ -66,6 +66,11 @@ const NotificationDropdown = ({
 			: String(userRole).toLowerCase();
 	}
 
+	const handleViewAll = () => {
+		onClose();
+		navigate(`/${safeRole}/notifications`);
+	};
+
 	const handleNotificationClick = (item) => {
 		if (!item.isRead) {
 			onMarkAsRead(item._id);
@@ -80,7 +85,11 @@ const NotificationDropdown = ({
 			item.category === "User" ||
 			(item.title && item.title.toLowerCase().includes("user"))
 		) {
-			navigate(`/${safeRole}/users`);
+			if (safeRole === "admin") {
+				navigate(`/${safeRole}/users`);
+			} else {
+				navigate(`/${safeRole}/notifications`);
+			}
 		} else if (item.category === "Report") {
 			navigate(`/${safeRole}/report`);
 		} else {

@@ -11,6 +11,29 @@ import {
 } from "../../services/notificationService";
 import NotificationDropdown from "./NotificationDropdown";
 
+class NotificationErrorBoundary extends React.Component {
+	constructor(props) {
+		super(props);
+		this.state = { hasError: false };
+	}
+	static getDerivedStateFromError() {
+		return { hasError: true };
+	}
+	componentDidCatch(error) {
+		console.error("Notification dropdown error:", error);
+	}
+	render() {
+		if (this.state.hasError) {
+			return (
+				<div className="absolute right-0 mt-3 w-72 p-4 bg-white border border-gray-200 rounded-2xl shadow-xl text-center text-xs text-gray-500">
+					Unable to load notifications right now.
+				</div>
+			);
+		}
+		return this.props.children;
+	}
+}
+
 const NotificationBell = () => {
 	const [isOpen, setIsOpen] = useState(false);
 	const [unreadCount, setUnreadCount] = useState(0);
@@ -133,15 +156,17 @@ const NotificationBell = () => {
 			</button>
 
 			{isOpen && (
-				<NotificationDropdown
-					notifications={notifications}
-					loading={loading}
-					unreadCount={unreadCount}
-					onMarkAsRead={handleMarkAsRead}
-					onMarkAllAsRead={handleMarkAllAsRead}
-					onClose={() => setIsOpen(false)}
-					userRole={userRole}
-				/>
+				<NotificationErrorBoundary>
+					<NotificationDropdown
+						notifications={notifications}
+						loading={loading}
+						unreadCount={unreadCount}
+						onMarkAsRead={handleMarkAsRead}
+						onMarkAllAsRead={handleMarkAllAsRead}
+						onClose={() => setIsOpen(false)}
+						userRole={userRole}
+					/>
+				</NotificationErrorBoundary>
 			)}
 		</div>
 	);

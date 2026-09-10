@@ -171,7 +171,11 @@ const Notifications = () => {
 			item.category === "User" ||
 			(item.title && item.title.toLowerCase().includes("user"))
 		) {
-			navigate(`/${userRole}/users`);
+			if (userRole === "admin") {
+				navigate(`/${userRole}/users`);
+			} else {
+				navigate(`/${userRole}/notifications`);
+			}
 		} else if (item.category === "Report") {
 			navigate(`/${userRole}/report`);
 		} else {
